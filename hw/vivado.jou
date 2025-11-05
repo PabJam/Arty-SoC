@@ -1,0 +1,31 @@
+#-----------------------------------------------------------
+# Vivado v2025.1 (64-bit)
+# SW Build 6140274 on Thu May 22 00:12:29 MDT 2025
+# IP Build 6138677 on Thu May 22 03:10:11 MDT 2025
+# SharedData Build 6139179 on Tue May 20 17:58:58 MDT 2025
+# Start of session at: Thu Jul 24 15:11:28 2025
+# Process ID         : 25024
+# Current directory  : C:/Users/icatuna/AppData/Roaming/Xilinx/Vivado
+# Command line       : vivado.exe -gui_launcher_event rodinguilauncherevent36480
+# Log file           : C:/Users/icatuna/AppData/Roaming/Xilinx/Vivado/vivado.log
+# Journal file       : C:/Users/icatuna/AppData/Roaming/Xilinx/Vivado\vivado.jou
+# Running On         : IonutAvion-ro
+# Platform           : Windows Server 2016 or Windows 10
+# Operating System   : 19045
+# Processor Detail   : 12th Gen Intel(R) Core(TM) i7-12700H
+# CPU Frequency      : 2688 MHz
+# CPU Physical cores : 14
+# CPU Logical cores  : 20
+# Host memory        : 68388 MB
+# Swap memory        : 0 MB
+# Total Virtual      : 68388 MB
+# Available Virtual  : 40610 MB
+#-----------------------------------------------------------
+start_gui
+open_project E:/VivadoMigrations2025.1/Arty-S7/hw/proj/hw.xpr
+update_compile_order -fileset sources_1
+set_property flow {Vivado Synthesis 2025} [get_runs synth_1]
+set_property flow {Vivado Implementation 2025} [get_runs impl_1]
+launch_runs impl_1 -to_step write_bitstream -jobs 10
+wait_on_run impl_1
+archive_project E:/VivadoMigrations2025.1/Arty-S7/hw/hw.xpr.zip -temp_dir C:/Users/icatuna/AppData/Roaming/Xilinx/Vivado/.Xil/Vivado-25024-IonutAvion-ro -force -include_local_ip_cache -include_config_settings
