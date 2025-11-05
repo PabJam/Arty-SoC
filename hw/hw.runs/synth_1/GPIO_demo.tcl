@@ -4,7 +4,7 @@
 
 set TIME_start [clock seconds] 
 namespace eval ::optrace {
-  variable script "E:/VivadoMigrations2025.1/Arty-S7/hw/proj/hw.runs/synth_1/GPIO_demo.tcl"
+  variable script "D:/Projekte/Arty/hw/hw.runs/synth_1/GPIO_demo.tcl"
   variable category "vivado_synth"
 }
 
@@ -63,23 +63,23 @@ create_project -in_memory -part xc7s25csga324-1
 set_param project.singleFileAddWarning.threshold 0
 set_param project.compositeFile.enableAutoGeneration 0
 set_param synth.vivado.isSynthRun true
-set_property webtalk.parent_dir E:/VivadoMigrations2025.1/Arty-S7/hw/proj/hw.cache/wt [current_project]
-set_property parent.project_path E:/VivadoMigrations2025.1/Arty-S7/hw/proj/hw.xpr [current_project]
+set_property webtalk.parent_dir D:/Projekte/Arty/hw/hw.cache/wt [current_project]
+set_property parent.project_path D:/Projekte/Arty/hw/hw.xpr [current_project]
 set_property default_lib xil_defaultlib [current_project]
 set_property target_language VHDL [current_project]
-set_property board_part_repo_paths {C:/Users/icatuna/AppData/Roaming/Xilinx/Vivado/2024.1/xhub/board_store/xilinx_board_store} [current_project]
+set_property board_part_repo_paths {D:/Projekte/Arty/hw/hw.board} [current_project]
 set_property board_part digilentinc.com:arty-s7-25:part0:1.1 [current_project]
 set_property ip_repo_paths e:/VivadoMigrations2025.1/Arty-S7/hw/repo [current_project]
 update_ip_catalog
-set_property ip_output_repo e:/VivadoMigrations2025.1/Arty-S7/hw/proj/cache [current_project]
+set_property ip_output_repo d:/Projekte/Arty/hw/hw.cache/ip [current_project]
 set_property ip_cache_permissions {read write} [current_project]
 OPTRACE "Creating in-memory project" END { }
 OPTRACE "Adding files" START { }
 read_vhdl -library xil_defaultlib {
-  E:/VivadoMigrations2025.1/Arty-S7/hw/src/hdl/RGB_controller.vhd
-  E:/VivadoMigrations2025.1/Arty-S7/hw/src/hdl/UART_TX_CTRL.vhd
-  E:/VivadoMigrations2025.1/Arty-S7/hw/src/hdl/debouncer.vhd
-  E:/VivadoMigrations2025.1/Arty-S7/hw/src/hdl/GPIO_Demo.vhd
+  D:/Projekte/Arty/hw/hw.srcs/sources_1/imports/hdl/RGB_controller.vhd
+  D:/Projekte/Arty/hw/hw.srcs/sources_1/imports/hdl/UART_TX_CTRL.vhd
+  D:/Projekte/Arty/hw/hw.srcs/sources_1/imports/hdl/debouncer.vhd
+  D:/Projekte/Arty/hw/hw.srcs/sources_1/imports/hdl/GPIO_Demo.vhd
 }
 OPTRACE "Adding files" END { }
 # Mark all dcp files as not used in implementation to prevent them from being
@@ -90,10 +90,12 @@ OPTRACE "Adding files" END { }
 foreach dcp [get_files -quiet -all -filter file_type=="Design\ Checkpoint"] {
   set_property used_in_implementation false $dcp
 }
-read_xdc E:/VivadoMigrations2025.1/Arty-S7/hw/src/constraints/Arty-S7-25-Master.xdc
-set_property used_in_implementation false [get_files E:/VivadoMigrations2025.1/Arty-S7/hw/src/constraints/Arty-S7-25-Master.xdc]
+read_xdc D:/Projekte/Arty/hw/hw.srcs/constrs_1/imports/constraints/Arty-S7-25-Master.xdc
+set_property used_in_implementation false [get_files D:/Projekte/Arty/hw/hw.srcs/constrs_1/imports/constraints/Arty-S7-25-Master.xdc]
 
 set_param ips.enableIPCacheLiteLoad 1
+
+read_checkpoint -auto_incremental -incremental D:/Projekte/Arty/hw/hw.srcs/utils_1/imports/synth_1/GPIO_demo.dcp
 close [open __synthesis_is_running__ w]
 
 OPTRACE "synth_design" START { }

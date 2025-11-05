@@ -1,7 +1,7 @@
 -------------------------------------
 | Tool Version : Vivado v.2025.1
-| Date         : Thu Jul 24 15:15:37 2025
-| Host         : IonutAvion-ro
+| Date         : Wed Nov  5 16:16:01 2025
+| Host         : DESKTOP-E28LK6R
 | Design       : design_1
 | Device       : xc7s25-csga324-1--
 -------------------------------------

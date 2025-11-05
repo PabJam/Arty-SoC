@@ -17,29 +17,29 @@ namespace ComPortUI
     /// </summary>
     public partial class MainWindow : Window
     {
-        // Hard coded constants (for now)
-        const string portName = "COM7";
-        const int baudRate = 9600;
-        const Parity parity = Parity.None;
-        const int dataBits = 8;
-        const StopBits stopBits = StopBits.One;
-
-
-        private SerialPort serialPort;
+        SerialPort serialPort;
         public MainWindow()
         {
             InitializeComponent();
-            serialPort = new SerialPort(portName, baudRate, parity, dataBits, stopBits);
-            serialPort.DataReceived += new SerialDataReceivedEventHandler(SerialDataRecievedHandler);
+            serialPort = ReferenceManager.serialPort;
+            try
+            {
+                serialPort.Open();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error {ex.Message}");
+            }
+
         }
 
-        private static void SerialDataRecievedHandler(object sender, SerialDataReceivedEventArgs e)
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            SerialPort sp = (SerialPort)sender;
-
-            //Read all available data
-            string data = sp.ReadExisting();
-            //TODO write to text window
+            if (serialPort.IsOpen)
+            {
+                serialPort.Close();
+            }
         }
-    }
+
+    }   
 }

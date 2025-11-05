@@ -174,8 +174,8 @@ constant WELCOME_STR : CHAR_ARRAY(0 to 30) := (X"0A",  --\n
 															  X"20",  -- 
 															  X"20",  -- 
 															  X"0A",  --\n
-															  X"0A",  --\n
-															  X"0D"); --\r
+															  X"0D",  --\r
+															  X"0A"); --\n
 															  
 --Button press string definition.
 constant BTN_STR : CHAR_ARRAY(0 to 23) :=     (X"42",  --B
@@ -200,8 +200,8 @@ constant BTN_STR : CHAR_ARRAY(0 to 23) :=     (X"42",  --B
 															  X"65",  --e
 															  X"64",  --d
 															  X"21",  --!
-															  X"0A",  --\n
-															  X"0D"); --\r
+															  X"0D",  --\r
+															  X"0A"); --\n
 
 --This is used to determine when the 7-segment display should be
 --incremented

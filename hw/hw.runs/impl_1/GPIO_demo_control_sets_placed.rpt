@@ -1,8 +1,8 @@
 Copyright 1986-2022 Xilinx, Inc. All Rights Reserved. Copyright 2022-2025 Advanced Micro Devices, Inc. All Rights Reserved.
 ---------------------------------------------------------------------------------------------------------------------------------------------
 | Tool Version : Vivado v.2025.1 (win64) Build 6140274 Thu May 22 00:12:29 MDT 2025
-| Date         : Thu Jul 24 15:15:38 2025
-| Host         : IonutAvion-ro running 64-bit major release  (build 9200)
+| Date         : Wed Nov  5 16:16:02 2025
+| Host         : DESKTOP-E28LK6R running 64-bit major release  (build 9200)
 | Command      : report_control_sets -verbose -file GPIO_demo_control_sets_placed.rpt
 | Design       : GPIO_demo
 | Device       : xc7s25
@@ -61,7 +61,7 @@ Table of Contents
 | No           | No                    | No                     |              22 |           15 |
 | No           | No                    | Yes                    |               0 |            0 |
 | No           | Yes                   | No                     |             129 |           34 |
-| Yes          | No                    | No                     |              20 |            9 |
+| Yes          | No                    | No                     |              20 |           11 |
 | Yes          | No                    | Yes                    |               0 |            0 |
 | Yes          | Yes                   | No                     |              66 |           18 |
 +--------------+-----------------------+------------------------+-----------------+--------------+
@@ -74,16 +74,16 @@ Table of Contents
 |  Clock Signal  |          Enable Signal          |                Set/Reset Signal               | Slice Load Count | Bel Load Count | Bels / Slice |
 +----------------+---------------------------------+-----------------------------------------------+------------------+----------------+--------------+
 |  CLK_IBUF_BUFG | RGB_Core1/valcount[8]_i_1_n_0   | RGB_Core1/valcount                            |                1 |              3 |         3.00 |
-|  CLK_IBUF_BUFG |                                 | sendStr[4][0]_i_1_n_0                         |                1 |              5 |         5.00 |
+|  CLK_IBUF_BUFG |                                 | sendStr[17][0]_i_1_n_0                        |                2 |              5 |         2.50 |
 |  CLK_IBUF_BUFG | RGB_Core1/valcount[8]_i_1_n_0   |                                               |                2 |              6 |         3.00 |
-|  CLK_IBUF_BUFG | strIndex                        |                                               |                6 |              7 |         1.17 |
-|  CLK_IBUF_BUFG | uartSend                        |                                               |                1 |              7 |         7.00 |
-|  CLK_IBUF_BUFG |                                 | RGB_Core1/windowcount[7]_i_1_n_0              |                3 |              8 |         2.67 |
+|  CLK_IBUF_BUFG | strIndex                        |                                               |                5 |              7 |         1.40 |
+|  CLK_IBUF_BUFG | uartSend                        |                                               |                4 |              7 |         1.75 |
+|  CLK_IBUF_BUFG |                                 | RGB_Core1/windowcount[7]_i_1_n_0              |                2 |              8 |         4.00 |
 |  CLK_IBUF_BUFG |                                 | Inst_UART_TX_CTRL/bitTmr                      |                4 |             14 |         3.50 |
-|  CLK_IBUF_BUFG |                                 | Inst_btn_debounce/sig_cntrs_ary[3][0]_i_1_n_0 |                4 |             16 |         4.00 |
-|  CLK_IBUF_BUFG |                                 | Inst_btn_debounce/sig_cntrs_ary[1][0]_i_1_n_0 |                4 |             16 |         4.00 |
 |  CLK_IBUF_BUFG |                                 | Inst_btn_debounce/sig_cntrs_ary[0][0]_i_1_n_0 |                4 |             16 |         4.00 |
 |  CLK_IBUF_BUFG |                                 | Inst_btn_debounce/sig_cntrs_ary[2][0]_i_1_n_0 |                4 |             16 |         4.00 |
+|  CLK_IBUF_BUFG |                                 | Inst_btn_debounce/sig_cntrs_ary[3][0]_i_1_n_0 |                4 |             16 |         4.00 |
+|  CLK_IBUF_BUFG |                                 | Inst_btn_debounce/sig_cntrs_ary[1][0]_i_1_n_0 |                4 |             16 |         4.00 |
 |  CLK_IBUF_BUFG |                                 | reset_cntr0                                   |                5 |             18 |         3.60 |
 |  CLK_IBUF_BUFG |                                 | RGB_Core1/clear                               |                5 |             20 |         4.00 |
 |  CLK_IBUF_BUFG |                                 |                                               |               15 |             22 |         1.47 |
