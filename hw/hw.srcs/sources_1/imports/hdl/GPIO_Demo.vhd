@@ -50,31 +50,62 @@ use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.std_logic_unsigned.all;
 
 entity GPIO_demo is
-    Port ( SW 			: in  STD_LOGIC_VECTOR (3 downto 0);
-           BTN 			: in  STD_LOGIC_VECTOR (3 downto 0);
-           CLK      	: in  STD_LOGIC;
-           LED 			: out  STD_LOGIC_VECTOR (3 downto 0);
-           UART_TXD 	: out  STD_LOGIC;
-           led0_r		: out  STD_LOGIC;
-           led0_g       : out  STD_LOGIC;
-           led0_b       : out  STD_LOGIC;    
-           led1_r		: out  STD_LOGIC;
-           led1_g	    : out  STD_LOGIC;
-           led1_b	    : out  STD_LOGIC
-			  );
+    Port 
+	(
+		SW : in std_logic_vector (3 downto 0);
+		BTN : in  std_logic_vector (3 downto 0);
+		CLK : in  std_logic;
+		LED : out  std_logic_vector (3 downto 0);
+		o_Uart_TXD : out  std_logic;
+		i_Uart_RXD : in std_logic;
+		led0_r : out std_logic;
+		led0_g : out std_logic;
+		led0_b : out std_logic;    
+		led1_r : out std_logic;
+		led1_g : out std_logic;
+		led1_b : out std_logic
+	);
 end GPIO_demo;
 
 architecture Behavioral of GPIO_demo is
 
 
+component UART_RX_CTRL
+	generic (g_CLKS_PER_BIT : integer);
+	port
+	(
+		i_Clk : in std_logic;
+		i_RX_Serial : in std_logic;
+		o_RX_DV : out std_logic;
+		o_RX_Byte : out std_logic_vector(7 downto 0)
+	);
+end component;
 
 component UART_TX_CTRL
-Port(
-	SEND : in std_logic;
-	DATA : in std_logic_vector(7 downto 0);
-	CLK : in std_logic;          
-	READY : out std_logic;
-	UART_TX : out std_logic
+	generic (g_CLKS_PER_BIT : integer);
+	port
+	(
+		i_Clk       : in  std_logic;
+		i_TX_DV     : in  std_logic;
+		i_TX_Byte   : in  std_logic_vector(7 downto 0);
+		o_TX_Active : out std_logic;
+		o_TX_Serial : out std_logic;
+		o_TX_Done   : out std_logic
+	);
+end component;
+
+component Uart_Fifo
+	port
+	(
+		clk : in std_logic;
+		srst : in std_logic;
+		din : in std_logic_vector (7 downto 0);
+		wr_en : in std_logic;
+		rd_en : in std_logic;
+		dout : out std_logic_vector (7 downto 0);
+		full : out std_logic;
+		empty : out std_logic;
+		valid : out std_logic
 	);
 end component;
 
@@ -225,11 +256,21 @@ signal strIndex : natural;
 signal btnReg : std_logic_vector (3 downto 0) := "0000";
 signal btnDetect : std_logic;
 
---UART_TX_CTRL control signals
-signal uartRdy : std_logic;
-signal uartSend : std_logic := '0';
-signal uartData : std_logic_vector (7 downto 0):= "00000000";
-signal uartTX : std_logic;
+--UART signals
+signal uart_RX : std_logic;
+signal uart_TX : std_logic;
+signal uart_RX_DV : std_logic;
+signal uart_RX_Data : std_logic_vector(7 downto 0) := (others => '0');
+signal uart_TX_DV :  std_logic;
+signal uart_TX_Data : std_logic_vector(7 downto 0) := (others => '0');
+signal uart_TX_Active : std_logic;
+signal uart_TX_done : std_logic;
+signal uart_Fifo_empty : std_logic;
+signal uart_Fifo_rd_en : std_logic;
+signal uart_Fifo_valid : std_logic;
+
+--attribute mark_debug : string;
+--attribute mark_debug of uart_Data : signal is "true";
 
 --Current uart state signal
 signal uartState : UART_STATE_TYPE := RST_REG;
@@ -295,111 +336,58 @@ btnDetect <= '1' when ((btnReg(0)='0' and btnDeBnc(0)='1') or
 ----------------------------------------------------------
 ------              UART Control                   -------
 ----------------------------------------------------------
---Messages are sent on reset and when a button is pressed.
 
---This counter holds the UART state machine in reset for ~2 milliseconds. This
---will complete transmission of any byte that may have been initiated during 
---FPGA configuration due to the UART_TX line being pulled low, preventing a 
---frame shift error from occuring during the first message.
-process(CLK)
-begin
-  if (rising_edge(CLK)) then
-    if ((reset_cntr = RESET_CNTR_MAX) or (uartState /= RST_REG)) then
-      reset_cntr <= (others=>'0');
-    else
-      reset_cntr <= reset_cntr + 1;
-    end if;
-  end if;
-end process;
+Inst_UART_TX_CTRL: UART_TX_CTRL 
+generic map (g_CLKS_PER_BIT => 868)
+port map
+(
+	i_Clk => CLK,
+	i_TX_DV => uart_Fifo_rd_en,
+	i_TX_Byte(7 downto 0) => uart_TX_Data(7 downto 0),
+	o_TX_Active => uart_TX_Active,
+	o_TX_Serial => uart_TX,
+	o_TX_Done => open
+);
 
---Next Uart state logic (states described above)
-next_uartState_process : process (CLK)
-begin
-	if (rising_edge(CLK)) then
-			
-			case uartState is 
-			when RST_REG =>
-        if (reset_cntr = RESET_CNTR_MAX) then
-          uartState <= LD_INIT_STR;
-        end if;
-			when LD_INIT_STR =>
-				uartState <= SEND_CHAR;
-			when SEND_CHAR =>
-				uartState <= RDY_LOW;
-			when RDY_LOW =>
-				uartState <= WAIT_RDY;
-			when WAIT_RDY =>
-				if (uartRdy = '1') then
-					if (strEnd = strIndex) then
-						uartState <= WAIT_BTN;
-					else
-						uartState <= SEND_CHAR;
-					end if;
-				end if;
-			when WAIT_BTN =>
-				if (btnDetect = '1') then
-					uartState <= LD_BTN_STR;
-				end if;
-			when LD_BTN_STR =>
-				uartState <= SEND_CHAR;
-			when others=> --should never be reached
-				uartState <= RST_REG;
-			end case;
-		
-	end if;
-end process;
+-- Drive UART line high when transmitter is not active
+o_Uart_TXD <= uart_TX when uart_TX_Active = '1' else '1';
 
---Loads the sendStr and strEnd signals when a LD state is
---is reached.
-string_load_process : process (CLK)
-begin
-	if (rising_edge(CLK)) then
-		if (uartState = LD_INIT_STR) then
-			sendStr <= WELCOME_STR;
-			strEnd <= WELCOME_STR_LEN;
-		elsif (uartState = LD_BTN_STR) then
-			sendStr(0 to 23) <= BTN_STR;
-			strEnd <= BTN_STR_LEN;
-		end if;
-	end if;
-end process;
+Inst_UART_RX_CTRL: UART_RX_CTRL 
+generic map (g_CLKS_PER_BIT => 868)
+port map
+(
+	i_Clk => CLK,
+	i_RX_Serial => uart_RX,
+	o_RX_DV => uart_RX_DV,
+	o_RX_Byte => uart_RX_Data
+);
 
---Conrols the strIndex signal so that it contains the index
---of the next character that needs to be sent over uart
-char_count_process : process (CLK)
-begin
-	if (rising_edge(CLK)) then
-		if (uartState = LD_INIT_STR or uartState = LD_BTN_STR) then
-			strIndex <= 0;
-		elsif (uartState = SEND_CHAR) then
-			strIndex <= strIndex + 1;
-		end if;
-	end if;
-end process;
+uart_RX <= i_Uart_RXD;
 
---Controls the UART_TX_CTRL signals
-char_load_process : process (CLK)
-begin
-	if (rising_edge(CLK)) then
-		if (uartState = SEND_CHAR) then
-			uartSend <= '1';
-			uartData <= sendStr(strIndex);
-		else
-			uartSend <= '0';
-		end if;
-	end if;
-end process;
+Inst_UART_Fifo: Uart_Fifo
+port map
+(
+	clk => clk,
+    srst => btnDetect,
+    din(7 downto 0) => uart_RX_Data(7 downto 0),
+    wr_en => uart_RX_DV,
+    rd_en => uart_Fifo_rd_en,
+    dout => uart_TX_Data,
+    full => open,
+    empty => open,
+    valid => uart_Fifo_valid
+);
 
---Component used to send a byte of data over a UART line.
-Inst_UART_TX_CTRL: UART_TX_CTRL port map(
-		SEND => uartSend,
-		DATA => uartData,
-		CLK => CLK,
-		READY => uartRdy,
-		UART_TX => uartTX 
-	);
+uart_Fifo_rd_en <= '1' when uart_Fifo_valid = '1' and uart_TX_Active = '0' else '0'; 
 
-UART_TXD <= uartTX;
+--fifo_read_proc : process(CLK)
+--begin
+--	if rising_edge(CLK) then
+--		if (uart_Fifo_empty = '0' and uart_TX_Active = '0') then
+--			uart_Fifo_rd_en <= '1';
+--		end if;
+--	end if;
+--end process;
 
 ----------------------------------------------------------
 ------            RGB LED Control                  -------

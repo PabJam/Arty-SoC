@@ -1,7 +1,7 @@
 Copyright 1986-2022 Xilinx, Inc. All Rights Reserved. Copyright 2022-2025 Advanced Micro Devices, Inc. All Rights Reserved.
 ----------------------------------------------------------------------------------------------------------------------------------------------------------
 | Tool Version              : Vivado v.2025.1 (win64) Build 6140274 Thu May 22 00:12:29 MDT 2025
-| Date                      : Wed Nov  5 16:16:02 2025
+| Date                      : Thu Nov  6 12:59:19 2025
 | Host                      : DESKTOP-E28LK6R running 64-bit major release  (build 9200)
 | Command                   : report_io -file GPIO_demo_io_placed.rpt
 | Design                    : GPIO_demo
@@ -25,7 +25,7 @@ Table of Contents
 +---------------+
 | Total User IO |
 +---------------+
-|            20 |
+|            21 |
 +---------------+
 
 
@@ -298,7 +298,7 @@ Table of Contents
 | R9         |             | Dedicated  | TDI_0                        | Config        |             |       0 |            |      |                     |                      |         |            |           |          |          |                  |              |                   |              |
 | R10        |             |            | GND                          | GND           |             |         |            |      |                     |                      |     0.0 |            |           |          |          |                  |              |                   |              |
 | R11        |             | High Range | IO_L23P_T3_D19_14            | User IO       |             |      14 |            |      |                     |                      |         |            |           |          |          |                  |              |                   |              |
-| R12        | UART_TXD    | High Range | IO_25_14                     | OUTPUT        | LVCMOS33    |      14 |         12 | SLOW |                     |            FP_VTT_50 |         | FIXED      |           |          |          | NONE             |              |                   |              |
+| R12        | o_Uart_TXD  | High Range | IO_25_14                     | OUTPUT        | LVCMOS33    |      14 |         12 | SLOW |                     |            FP_VTT_50 |         | FIXED      |           |          |          | NONE             |              |                   |              |
 | R13        |             | High Range | IO_L19N_T3_D25_VREF_14       | User IO       |             |      14 |            |      |                     |                      |         |            |           |          |          |                  |              |                   |              |
 | R14        |             | High Range | IO_L13P_T2_MRCC_14           | User IO       |             |      14 |            |      |                     |                      |         |            |           |          |          |                  |              |                   |              |
 | R15        |             | High Range | IO_L17P_T2_D30_14            | User IO       |             |      14 |            |      |                     |                      |         |            |           |          |          |                  |              |                   |              |
@@ -352,7 +352,7 @@ Table of Contents
 | V9         |             | Dedicated  | CFGBVS_0                     | Config        |             |       0 |            |      |                     |                      |    3.30 |            |           |          |          |                  |              |                   |              |
 | V10        |             | Dedicated  | VCCO_0                       | VCCO          |             |       0 |            |      |                     |                      |    3.30 |            |           |          |          |                  |              |                   |              |
 | V11        |             |            | GND                          | GND           |             |         |            |      |                     |                      |     0.0 |            |           |          |          |                  |              |                   |              |
-| V12        |             | High Range | IO_L24N_T3_D16_14            | User IO       |             |      14 |            |      |                     |                      |         |            |           |          |          |                  |              |                   |              |
+| V12        | i_Uart_RXD  | High Range | IO_L24N_T3_D16_14            | INPUT         | LVCMOS33    |      14 |            |      |                     |                 NONE |         | FIXED      |           |          |          | NONE             |              |                   |              |
 | V13        |             | High Range | IO_L21N_T3_DQS_D22_14        | User IO       |             |      14 |            |      |                     |                      |         |            |           |          |          |                  |              |                   |              |
 | V14        |             | High Range | IO_L20P_T3_D24_14            | User IO       |             |      14 |            |      |                     |                      |         |            |           |          |          |                  |              |                   |              |
 | V15        |             | High Range | IO_L20N_T3_D23_14            | User IO       |             |      14 |            |      |                     |                      |         |            |           |          |          |                  |              |                   |              |

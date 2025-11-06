@@ -13,7 +13,7 @@ namespace ComPortUI
         public static SerialPort serialPort { get; }
 
         const string portName = "COM7";
-        const int baudRate = 9600;
+        const int baudRate = 115200;
         const Parity parity = Parity.None;
         const int dataBits = 8;
         const StopBits stopBits = StopBits.One;

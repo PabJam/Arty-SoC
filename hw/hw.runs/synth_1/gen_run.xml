@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<GenRun Id="synth_1" LaunchPart="xc7s25csga324-1" LaunchTime="1762355679" LaunchIncrCheckpoint="$PSRCDIR/utils_1/imports/synth_1/GPIO_demo.dcp">
+<GenRun Id="synth_1" LaunchPart="xc7s25csga324-1" LaunchTime="1762430293" LaunchIncrCheckpoint="$PSRCDIR/utils_1/imports/synth_1/GPIO_demo.dcp">
   <File Type="PA-TCL" Name="GPIO_demo.tcl"/>
   <File Type="REPORTS-TCL" Name="GPIO_demo_reports.tcl"/>
   <File Type="RDS-RDS" Name="GPIO_demo.vds"/>
@@ -15,6 +15,12 @@
       <FileInfo>
         <Attr Name="ImportPath" Val="E:/VivadoMigrations2025.1/Arty-S7/hw/src/hdl/RGB_controller.vhd"/>
         <Attr Name="ImportTime" Val="1753351783"/>
+        <Attr Name="UsedIn" Val="synthesis"/>
+        <Attr Name="UsedIn" Val="simulation"/>
+      </FileInfo>
+    </File>
+    <File Path="$PSRCDIR/sources_1/new/UART_RX_CTRL.vhd">
+      <FileInfo>
         <Attr Name="UsedIn" Val="synthesis"/>
         <Attr Name="UsedIn" Val="simulation"/>
       </FileInfo>
@@ -60,6 +66,13 @@
         <Attr Name="UsedIn" Val="implementation"/>
       </FileInfo>
     </File>
+    <File Path="$PSRCDIR/constrs_1/new/Arty-S7-25-Debug.xdc">
+      <FileInfo>
+        <Attr Name="UserDisabled" Val="1"/>
+        <Attr Name="UsedIn" Val="synthesis"/>
+        <Attr Name="UsedIn" Val="implementation"/>
+      </FileInfo>
+    </File>
     <Config>
       <Option Name="ConstrsType" Val="XDC"/>
     </Config>
@@ -82,4 +95,5 @@
     <StratHandle Name="Vivado Synthesis Defaults" Flow="Vivado Synthesis 2025"/>
     <Step Id="synth_design"/>
   </Strategy>
+  <BlockFileSet Type="BlockSrcs" Name="UART_Fifo"/>
 </GenRun>

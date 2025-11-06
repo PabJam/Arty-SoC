@@ -41,5 +41,25 @@ namespace ComPortUI
             }
         }
 
+        private void Input_TB_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                if (Keyboard.IsKeyDown(Key.LeftShift))
+                {
+                    Input_TB.AppendText("\r\n");
+                    Input_TB.CaretIndex = Input_TB.Text.Length;
+                    return;
+                }
+                
+                string message = Input_TB.Text;
+
+                Output_TB.Clear();
+                Input_TB.Clear();
+
+                serialPort.Write(message);
+
+            }
+        }
     }   
 }

@@ -1,157 +1,134 @@
-----------------------------------------------------------------------------
---	UART_TX_CTRL.vhd -- UART Data Transfer Component
-----------------------------------------------------------------------------
--- Author:  Sam Bobrowicz
---          Copyright 2011 Digilent, Inc.
-----------------------------------------------------------------------------
+-- This file contains the UART Transmitter.  This transmitter is able
+-- to transmit 8 bits of serial data, one start bit, one stop bit,
+-- and no parity bit.  When transmit is complete o_TX_Done will be
+-- driven high for one clock cycle.
 --
-----------------------------------------------------------------------------
---	This component may be used to transfer data over a UART device. It will
--- serialize a byte of data and transmit it over a TXD line. The serialized
--- data has the following characteristics:
---         *9600 Baud Rate
---         *8 data bits, LSB first
---         *1 stop bit
---         *no parity
---         				
--- Port Descriptions:
+-- Set Generic g_CLKS_PER_BIT as follows:
+-- g_CLKS_PER_BIT = (Frequency of i_Clk)/(Frequency of UART)
+-- Example: 100 MHz Clock, 115200 baud UART
+-- (100000000)/(115200) = 868
 --
---    SEND - Used to trigger a send operation. The upper layer logic should 
---           set this signal high for a single clock cycle to trigger a 
---           send. When this signal is set high DATA must be valid . Should 
---           not be asserted unless READY is high.
---    DATA - The parallel data to be sent. Must be valid the clock cycle
---           that SEND has gone high.
---    CLK  - A 100 MHz clock is expected
---   READY - This signal goes low once a send operation has begun and
---           remains low until it has completed and the module is ready to
---           send another byte.
--- UART_TX - This signal should be routed to the appropriate TX pin of the 
---           external UART device.
---   
-----------------------------------------------------------------------------
---
-----------------------------------------------------------------------------
--- Revision History:
---  08/08/2011(SamB): Created using Xilinx Tools 13.2
-----------------------------------------------------------------------------
-library IEEE;
-use IEEE.STD_LOGIC_1164.ALL;
-use IEEE.std_logic_unsigned.all;
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
 
 entity UART_TX_CTRL is
-    Port ( SEND : in  STD_LOGIC;
-           DATA : in  STD_LOGIC_VECTOR (7 downto 0);
-           CLK : in  STD_LOGIC;
-           READY : out  STD_LOGIC;
-           UART_TX : out  STD_LOGIC);
+	generic
+	(
+		g_CLKS_PER_BIT : integer := 868     -- Needs to be set correctly
+    );
+	port 
+	(
+		i_Clk       : in  std_logic;
+		i_TX_DV     : in  std_logic;
+		i_TX_Byte   : in  std_logic_vector(7 downto 0);
+		o_TX_Active : out std_logic;
+		o_TX_Serial : out std_logic;
+		o_TX_Done   : out std_logic
+    );
 end UART_TX_CTRL;
+
 
 architecture Behavioral of UART_TX_CTRL is
 
-type TX_STATE_TYPE is (RDY, LOAD_BIT, SEND_BIT);
-
-constant BIT_TMR_MAX : std_logic_vector(13 downto 0) := "10100010110000"; --10416 = (round(100MHz / 9600)) - 1
-constant BIT_INDEX_MAX : natural := 10;
-
---Counter that keeps track of the number of clock cycles the current bit has been held stable over the
---UART TX line. It is used to signal when the ne
-signal bitTmr : std_logic_vector(13 downto 0) := (others => '0');
-
---combinatorial logic that goes high when bitTmr has counted to the proper value to ensure
---a 9600 baud rate
-signal bitDone : std_logic;
-
---Contains the index of the next bit in txData that needs to be transferred 
-signal bitIndex : natural;
-
---a register that holds the current data being sent over the UART TX line
-signal txBit : std_logic := '1';
-
---A register that contains the whole data packet to be sent, including start and stop bits. 
-signal txData : std_logic_vector(9 downto 0);
-
-signal txState : TX_STATE_TYPE := RDY;
-
+	type t_SM_Main is (IDLE, TX_START_BIT, TX_DATA_BITS,
+						TX_STOP_BIT, CLEANUP);
+	signal r_SM_Main : t_SM_Main := IDLE;
+	
+	signal r_Clk_Count : integer range 0 to g_CLKS_PER_BIT-1 := 0;
+	signal r_Bit_Index : integer range 0 to 7 := 0;  -- 8 Bits Total
+	signal r_TX_Data   : std_logic_vector(7 downto 0) := (others => '0');
+	signal r_TX_Done   : std_logic := '0';
+  
 begin
 
---Next state logic
-next_txState_process : process (CLK)
-begin
-	if (rising_edge(CLK)) then
-		case txState is 
-		when RDY =>
-			if (SEND = '1') then
-				txState <= LOAD_BIT;
+  
+	p_UART_TX : process (i_Clk)
+	begin
+		if rising_edge(i_Clk) then
+			
+		r_TX_Done   <= '0';  -- Default assignment
+	
+		case r_SM_Main is
+	
+			when IDLE =>
+			o_TX_Active <= '0';
+			o_TX_Serial <= '1';         -- Drive Line High for Idle
+			r_Clk_Count <= 0;
+			r_Bit_Index <= 0;
+	
+			if i_TX_DV = '1' then
+				r_TX_Data <= i_TX_Byte;
+				o_TX_Active <= '1';
+				r_SM_Main <= TX_START_BIT;
+			else
+				r_SM_Main <= IDLE;
 			end if;
-		when LOAD_BIT =>
-			txState <= SEND_BIT;
-		when SEND_BIT =>
-			if (bitDone = '1') then
-				if (bitIndex = BIT_INDEX_MAX) then
-					txState <= RDY;
+	
+			
+			-- Send out Start Bit. Start bit = 0
+			when TX_START_BIT =>
+			o_TX_Serial <= '0';
+	
+			-- Wait g_CLKS_PER_BIT-1 clock cycles for start bit to finish
+			if r_Clk_Count < g_CLKS_PER_BIT-1 then
+				r_Clk_Count <= r_Clk_Count + 1;
+				r_SM_Main   <= TX_START_BIT;
+			else
+				r_Clk_Count <= 0;
+				r_SM_Main   <= TX_DATA_BITS;
+			end if;
+	
+			
+			-- Wait g_CLKS_PER_BIT-1 clock cycles for data bits to finish          
+			when TX_DATA_BITS =>
+			o_TX_Serial <= r_TX_Data(r_Bit_Index);
+			
+			if r_Clk_Count < g_CLKS_PER_BIT-1 then
+				r_Clk_Count <= r_Clk_Count + 1;
+				r_SM_Main   <= TX_DATA_BITS;
+			else
+				r_Clk_Count <= 0;
+				
+				-- Check if we have sent out all bits
+				if r_Bit_Index < 7 then
+				r_Bit_Index <= r_Bit_Index + 1;
+				r_SM_Main   <= TX_DATA_BITS;
 				else
-					txState <= LOAD_BIT;
+				r_Bit_Index <= 0;
+				r_SM_Main   <= TX_STOP_BIT;
 				end if;
 			end if;
-		when others=> --should never be reached
-			txState <= RDY;
-		end case;
-	end if;
-end process;
-
-bit_timing_process : process (CLK)
-begin
-	if (rising_edge(CLK)) then
-		if (txState = RDY) then
-			bitTmr <= (others => '0');
-		else
-			if (bitDone = '1') then
-				bitTmr <= (others => '0');
+	
+	
+			-- Send out Stop bit.  Stop bit = 1
+			when TX_STOP_BIT =>
+			o_TX_Serial <= '1';
+	
+			-- Wait g_CLKS_PER_BIT-1 clock cycles for Stop bit to finish
+			if r_Clk_Count < g_CLKS_PER_BIT-1 then
+				r_Clk_Count <= r_Clk_Count + 1;
+				r_SM_Main   <= TX_STOP_BIT;
 			else
-				bitTmr <= bitTmr + 1;
+				r_TX_Done   <= '1';
+				r_Clk_Count <= 0;
+				r_SM_Main   <= CLEANUP;
 			end if;
+	
+					
+			-- Stay here 1 clock
+			when CLEANUP =>
+			o_TX_Active <= '0';
+			r_SM_Main   <= IDLE;
+			
+				
+			when others =>
+			r_SM_Main <= IDLE;
+	
+		end case;
 		end if;
-	end if;
-end process;
-
-bitDone <= '1' when (bitTmr = BIT_TMR_MAX) else
-				'0';
-
-bit_counting_process : process (CLK)
-begin
-	if (rising_edge(CLK)) then
-		if (txState = RDY) then
-			bitIndex <= 0;
-		elsif (txState = LOAD_BIT) then
-			bitIndex <= bitIndex + 1;
-		end if;
-	end if;
-end process;
-
-tx_data_latch_process : process (CLK)
-begin
-	if (rising_edge(CLK)) then
-		if (SEND = '1') then
-			txData <= '1' & DATA & '0';
-		end if;
-	end if;
-end process;
-
-tx_bit_process : process (CLK)
-begin
-	if (rising_edge(CLK)) then
-		if (txState = RDY) then
-			txBit <= '1';
-		elsif (txState = LOAD_BIT) then
-			txBit <= txData(bitIndex);
-		end if;
-	end if;
-end process;
-
-UART_TX <= txBit;
-READY <= '1' when (txState = RDY) else
-			'0';
-
+	end process p_UART_TX;
+	
+	o_TX_Done <= r_TX_Done;
+  
 end Behavioral;
-

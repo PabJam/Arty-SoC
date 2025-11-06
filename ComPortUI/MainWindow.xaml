@@ -7,7 +7,38 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800" Closing="Window_Closing">
     <Grid>
-        <TextBox x:Name="Output_TB" HorizontalAlignment="Center" TextWrapping="Wrap" Text="" VerticalAlignment="Center" Width="780" Height="414"/>
+        <!-- Define two equal columns with a split in the middle -->
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
 
+        <!-- Input Section -->
+        <Label x:Name="Input_Label" 
+               Content="Input" 
+               Grid.Column="0"
+               HorizontalAlignment="Left" 
+               VerticalAlignment="Top"
+               Margin="10,0,0,0"/>
+        <TextBox x:Name="Input_TB" 
+                 Grid.Column="0"
+                 TextWrapping="Wrap" 
+                 Margin="10,26,10,0"
+                 VerticalAlignment="Stretch"
+                 KeyDown="Input_TB_KeyDown"/>
+
+        <!-- Output Section -->
+        <Label x:Name="Outpu_Label" 
+               Content="Output" 
+               Grid.Column="1"
+               HorizontalAlignment="Left" 
+               VerticalAlignment="Top"
+               Margin="10,0,0,0"/>
+        <TextBox x:Name="Output_TB" 
+                 Grid.Column="1"
+                 TextWrapping="Wrap" 
+                 Focusable="False"
+                 Margin="10,26,10,0"
+                 VerticalAlignment="Stretch"/>
     </Grid>
 </Window>
