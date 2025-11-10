@@ -3,12 +3,12 @@
 # SW Build 6140274 on Thu May 22 00:12:29 MDT 2025
 # IP Build 6138677 on Thu May 22 03:10:11 MDT 2025
 # SharedData Build 6139179 on Tue May 20 17:58:58 MDT 2025
-# Start of session at: Thu Nov  6 11:47:32 2025
-# Process ID         : 728
-# Current directory  : D:/Projekte/Arty/hw/hw.runs/impl_1
-# Command line       : vivado.exe -log GPIO_demo.vdi -applog -product Vivado -messageDb vivado.pb -mode batch -source GPIO_demo.tcl -notrace
-# Log file           : D:/Projekte/Arty/hw/hw.runs/impl_1/GPIO_demo.vdi
-# Journal file       : D:/Projekte/Arty/hw/hw.runs/impl_1\vivado.jou
+# Start of session at: Mon Nov 10 12:02:23 2025
+# Process ID         : 22928
+# Current directory  : D:/Projekte/Arty/hw/hw.runs/ProgRam_synth_1
+# Command line       : vivado.exe -log ProgRam.vds -product Vivado -mode batch -messageDb vivado.pb -notrace -source ProgRam.tcl
+# Log file           : D:/Projekte/Arty/hw/hw.runs/ProgRam_synth_1/ProgRam.vds
+# Journal file       : D:/Projekte/Arty/hw/hw.runs/ProgRam_synth_1\vivado.jou
 # Running On         : DESKTOP-E28LK6R
 # Platform           : Windows Server 2016 or Windows 10
 # Operating System   : 19045
@@ -19,6 +19,6 @@
 # Host memory        : 34257 MB
 # Swap memory        : 5100 MB
 # Total Virtual      : 39358 MB
-# Available Virtual  : 21916 MB
+# Available Virtual  : 24788 MB
 #-----------------------------------------------------------
-source GPIO_demo.tcl -notrace
+source ProgRam.tcl -notrace

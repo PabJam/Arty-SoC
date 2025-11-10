@@ -47,7 +47,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 --The IEEE.std_logic_unsigned contains definitions that allow 
 --std_logic_vector types to be used with the + operator to instantiate a 
 --counter.
-use IEEE.std_logic_unsigned.all;
+use ieee.numeric_std.all;
 
 entity GPIO_demo is
     Port 
@@ -106,6 +106,18 @@ component Uart_Fifo
 		full : out std_logic;
 		empty : out std_logic;
 		valid : out std_logic
+	);
+end component;
+
+component ProgRam
+	port 
+	(
+		clka : in STD_LOGIC;
+		rsta : in STD_LOGIC;
+		wea : in STD_LOGIC_VECTOR ( 3 downto 0 );
+		addra : in STD_LOGIC_VECTOR ( 31 downto 0 );
+		dina : in STD_LOGIC_VECTOR ( 31 downto 0 );
+		douta : out STD_LOGIC_VECTOR ( 31 downto 0 )
 	);
 end component;
 
@@ -269,6 +281,22 @@ signal uart_Fifo_empty : std_logic;
 signal uart_Fifo_rd_en : std_logic;
 signal uart_Fifo_valid : std_logic;
 
+--ProgRam signals
+type t_progRam_States is (progRam_Idle, progRam_Write, progRam_PreRead, ProgRam_Read);
+signal progRam_State : t_progRam_States := progRam_Idle;
+
+signal progRam_Addr : std_logic_vector(31 downto 0) := (others => '0');
+signal progRam_Wr_Cntr : unsigned(15 downto 0) := (others => '0');
+signal progRam_Rd_Cntr : unsigned(15 downto 0) := (others => '0');
+signal progRam_Wr_En : std_logic_vector(3 downto 0); -- can also write single bytes instead of full 32 bit
+signal progRam_Data_In : std_logic_vector(31 downto 0); 
+signal progRam_Data_Out : std_logic_vector(31 downto 0); 
+signal progRam_Rst : std_logic := '0';
+
+type t_byte_array_32 is array (0 to 3) of std_logic_vector(7 downto 0);
+signal progRam_Data_In_Bytes : t_byte_array_32;
+signal progRam_Data_Out_Bytes : t_byte_array_32;
+
 --attribute mark_debug : string;
 --attribute mark_debug of uart_Data : signal is "true";
 
@@ -322,8 +350,7 @@ begin
 	end if;
 end process;
 
---btnDetect goes high for a single clock cycle when a btn press is
---detected. This triggers a UART message to begin being sent.
+--btnDetect goes high for a single clock cycle when a btn press is detected
 btnDetect <= '1' when ((btnReg(0)='0' and btnDeBnc(0)='1') or
 								(btnReg(1)='0' and btnDeBnc(1)='1') or
 								(btnReg(2)='0' and btnDeBnc(2)='1') or
@@ -342,7 +369,7 @@ generic map (g_CLKS_PER_BIT => 868)
 port map
 (
 	i_Clk => CLK,
-	i_TX_DV => uart_Fifo_rd_en,
+	i_TX_DV => uart_TX_DV,
 	i_TX_Byte(7 downto 0) => uart_TX_Data(7 downto 0),
 	o_TX_Active => uart_TX_Active,
 	o_TX_Serial => uart_TX,
@@ -364,30 +391,102 @@ port map
 
 uart_RX <= i_Uart_RXD;
 
-Inst_UART_Fifo: Uart_Fifo
+--Inst_UART_Fifo: Uart_Fifo
+--port map
+--(
+--	clk => clk,
+--    srst => btnDetect,
+--    din(7 downto 0) => uart_RX_Data(7 downto 0),
+--    wr_en => uart_RX_DV,
+--    rd_en => uart_Fifo_rd_en,
+--    dout => uart_TX_Data,
+--    full => open,
+--    empty => open,
+--    valid => uart_Fifo_valid
+--);
+--
+--uart_Fifo_rd_en <= '1' when uart_Fifo_valid = '1' and uart_TX_Active = '0' else '0'; 
+
+inst_ProgRam: progRam
 port map
 (
-	clk => clk,
-    srst => btnDetect,
-    din(7 downto 0) => uart_RX_Data(7 downto 0),
-    wr_en => uart_RX_DV,
-    rd_en => uart_Fifo_rd_en,
-    dout => uart_TX_Data,
-    full => open,
-    empty => open,
-    valid => uart_Fifo_valid
+	clka => clk,
+	rsta => progRam_Rst,
+	wea => progRam_Wr_En,
+	addra => progRam_Addr,
+	dina => progRam_Data_In,
+	douta => progRam_Data_Out
 );
 
-uart_Fifo_rd_en <= '1' when uart_Fifo_valid = '1' and uart_TX_Active = '0' else '0'; 
+Prog_Ram_Proc : process(CLK)
+begin
+	if rising_edge(CLK) then
+	
+		progRam_Wr_En <= (others => '0'); -- default assignment
+		uart_TX_DV <= '0';
+		case progRam_State is
+			
+			when progRam_Idle =>
+				
+			
+				if uart_RX_DV = '1' then
+					progRam_State <= progRam_Write;
+				elsif btnReg(0)='0' and btnDeBnc(0)='1' and progRam_Wr_Cntr /= 0 then -- button 0 is pressed 
+					progRam_State <= progRam_PreRead;
+					progRam_Wr_Cntr <= progRam_Wr_Cntr - 1;
+					progRam_Rd_Cntr <= (others => '0');
+				else
+					progRam_State <= progRam_Idle;
+				end if;
+				
+			when progRam_Write =>
+				if progRam_Wr_Cntr < progRam_Wr_Cntr'high then
+					progRam_Wr_En(to_integer(progRam_Wr_Cntr(1 downto 0))) <= '1';
+					progRam_Data_In_Bytes(to_integer(progRam_Wr_Cntr(1 downto 0)))(7 downto 0) <= uart_RX_Data(7 downto 0);
+					
+					progRam_Addr(13 downto 0) <= std_logic_vector(progRam_Wr_Cntr(15 downto 2));
+					progRam_Wr_Cntr <= progRam_Wr_Cntr + 1;
+				end if;
+				
+				progRam_State <= progRam_Idle;
+			
+			-- Always takes a clk cycle to read data even if address didn't change
+			-- could be improved to read all 4 bytes in read and only change state when addres changes
+			when progRam_PreRead => 
+				progRam_Addr(13 downto 0) <= std_logic_vector(progRam_Rd_Cntr(15 downto 2));
+				progRam_State <= progRam_Read;
+				
+			when progRam_Read =>
+				if uart_TX_Active = '0' then
+					uart_TX_DV <= '1';
+					uart_TX_Data(7 downto 0) <= progRam_Data_Out_Bytes(to_integer(progRam_Rd_Cntr(1 downto 0)))(7 downto 0);
+					if (progRam_Wr_Cntr /= x"0000") then
+						progRam_Rd_Cntr <= progRam_Rd_Cntr + 1;
+						progRam_Wr_Cntr <= progRam_Wr_Cntr - 1;
+						progRam_State <= progRam_PreRead;
+					else
+						progRam_State <= progRam_Idle;
+					end if;
+				else
+					progRam_State <= ProgRam_Read;
+				end if;
+				
+			when others => -- should not be reached
+				progRam_State <= progRam_Idle;
+			
+		end case;
+	end if;
+end process;
 
---fifo_read_proc : process(CLK)
---begin
---	if rising_edge(CLK) then
---		if (uart_Fifo_empty = '0' and uart_TX_Active = '0') then
---			uart_Fifo_rd_en <= '1';
---		end if;
---	end if;
---end process;
+progRam_Data_In(7 downto 0) <= progRam_Data_In_Bytes(0)(7 downto 0);
+progRam_Data_In(15 downto 8) <= progRam_Data_In_Bytes(1)(7 downto 0);
+progRam_Data_In(23 downto 16) <= progRam_Data_In_Bytes(2)(7 downto 0);
+progRam_Data_In(31 downto 24) <= progRam_Data_In_Bytes(3)(7 downto 0);
+
+progRam_Data_Out_Bytes(0)(7 downto 0) <= progRam_Data_Out(7 downto 0);
+progRam_Data_Out_Bytes(1)(7 downto 0) <= progRam_Data_Out(15 downto 8);
+progRam_Data_Out_Bytes(2)(7 downto 0) <= progRam_Data_Out(23 downto 16);
+progRam_Data_Out_Bytes(3)(7 downto 0) <= progRam_Data_Out(31 downto 24);
 
 ----------------------------------------------------------
 ------            RGB LED Control                  -------
