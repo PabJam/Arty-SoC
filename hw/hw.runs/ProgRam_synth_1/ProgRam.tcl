@@ -56,7 +56,10 @@ if {$::dispatch::connected} {
 }
 
 OPTRACE "ProgRam_synth_1" START { ROLLUP_AUTO }
+set_param tcl.collectionResultDisplayLimit 0
+set_param chipscope.maxJobs 6
 set_param general.usePosixSpawnForFork 1
+set_param xicom.use_bs_reader 1
 set_param project.vivado.isBlockSynthRun true
 set_msg_config -msgmgr_mode ooc_run
 OPTRACE "Creating in-memory project" START { }
@@ -68,7 +71,7 @@ set_param synth.vivado.isSynthRun true
 set_msg_config -source 4 -id {IP_Flow 19-2162} -severity warning -new_severity info
 set_property webtalk.parent_dir D:/Projekte/Arty/hw/hw.cache/wt [current_project]
 set_property parent.project_path D:/Projekte/Arty/hw/hw.xpr [current_project]
-set_property XPM_LIBRARIES {XPM_CDC XPM_MEMORY} [current_project]
+set_property XPM_LIBRARIES XPM_MEMORY [current_project]
 set_property default_lib xil_defaultlib [current_project]
 set_property target_language VHDL [current_project]
 set_property board_part_repo_paths {D:/Projekte/Arty/hw/hw.board} [current_project]
@@ -79,7 +82,7 @@ set_property ip_output_repo d:/Projekte/Arty/hw/hw.cache/ip [current_project]
 set_property ip_cache_permissions {read write} [current_project]
 OPTRACE "Creating in-memory project" END { }
 OPTRACE "Adding files" START { }
-read_ip -quiet d:/Projekte/Arty/hw/hw.srcs/sources_1/ip/ProgRam/ProgRam.xci
+read_ip -quiet D:/Projekte/Arty/hw/hw.srcs/sources_1/ip/ProgRam/ProgRam.xci
 set_property used_in_implementation false [get_files -all d:/Projekte/Arty/hw/hw.gen/sources_1/ip/ProgRam/ProgRam_ooc.xdc]
 
 OPTRACE "Adding files" END { }

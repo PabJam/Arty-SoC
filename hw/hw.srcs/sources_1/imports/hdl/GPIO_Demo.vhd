@@ -112,12 +112,11 @@ end component;
 component ProgRam
 	port 
 	(
-		clka : in STD_LOGIC;
-		rsta : in STD_LOGIC;
-		wea : in STD_LOGIC_VECTOR ( 3 downto 0 );
-		addra : in STD_LOGIC_VECTOR ( 31 downto 0 );
-		dina : in STD_LOGIC_VECTOR ( 31 downto 0 );
-		douta : out STD_LOGIC_VECTOR ( 31 downto 0 )
+		clka : in std_logic;
+		wea : in std_logic_vector ( 3 downto 0 );
+		addra : in std_logic_vector ( 31 downto 0 );
+		dina : in std_logic_vector ( 31 downto 0 );
+		douta : out std_logic_vector ( 31 downto 0 )
 	);
 end component;
 
@@ -282,7 +281,7 @@ signal uart_Fifo_rd_en : std_logic;
 signal uart_Fifo_valid : std_logic;
 
 --ProgRam signals
-type t_progRam_States is (progRam_Idle, progRam_Write, progRam_PreRead, ProgRam_Read);
+type t_progRam_States is (progRam_Idle, progRam_Write, progRam_PreRead, progRam_ReadWait, ProgRam_Read);
 signal progRam_State : t_progRam_States := progRam_Idle;
 
 signal progRam_Addr : std_logic_vector(31 downto 0) := (others => '0');
@@ -291,14 +290,19 @@ signal progRam_Rd_Cntr : unsigned(15 downto 0) := (others => '0');
 signal progRam_Wr_En : std_logic_vector(3 downto 0); -- can also write single bytes instead of full 32 bit
 signal progRam_Data_In : std_logic_vector(31 downto 0); 
 signal progRam_Data_Out : std_logic_vector(31 downto 0); 
-signal progRam_Rst : std_logic := '0';
 
 type t_byte_array_32 is array (0 to 3) of std_logic_vector(7 downto 0);
 signal progRam_Data_In_Bytes : t_byte_array_32;
 signal progRam_Data_Out_Bytes : t_byte_array_32;
 
---attribute mark_debug : string;
---attribute mark_debug of uart_Data : signal is "true";
+attribute mark_debug : string;
+attribute mark_debug of progRam_Data_In : signal is "true";
+attribute mark_debug of progRam_Addr : signal is "true";
+attribute mark_debug of progRam_Wr_En : signal is "true";
+attribute mark_debug of progRam_Wr_Cntr : signal is "true";
+attribute mark_debug of progRam_Data_Out : signal is "true";
+attribute mark_debug of progRam_Rd_Cntr : signal is "true";
+attribute mark_debug of progRam_State : signal is "true";
 
 --Current uart state signal
 signal uartState : UART_STATE_TYPE := RST_REG;
@@ -411,7 +415,6 @@ inst_ProgRam: progRam
 port map
 (
 	clka => clk,
-	rsta => progRam_Rst,
 	wea => progRam_Wr_En,
 	addra => progRam_Addr,
 	dina => progRam_Data_In,
@@ -427,8 +430,6 @@ begin
 		case progRam_State is
 			
 			when progRam_Idle =>
-				
-			
 				if uart_RX_DV = '1' then
 					progRam_State <= progRam_Write;
 				elsif btnReg(0)='0' and btnDeBnc(0)='1' and progRam_Wr_Cntr /= 0 then -- button 0 is pressed 
@@ -440,10 +441,9 @@ begin
 				end if;
 				
 			when progRam_Write =>
-				if progRam_Wr_Cntr < progRam_Wr_Cntr'high then
+				if progRam_Wr_Cntr < x"FFFF" then
 					progRam_Wr_En(to_integer(progRam_Wr_Cntr(1 downto 0))) <= '1';
 					progRam_Data_In_Bytes(to_integer(progRam_Wr_Cntr(1 downto 0)))(7 downto 0) <= uart_RX_Data(7 downto 0);
-					
 					progRam_Addr(13 downto 0) <= std_logic_vector(progRam_Wr_Cntr(15 downto 2));
 					progRam_Wr_Cntr <= progRam_Wr_Cntr + 1;
 				end if;
@@ -454,8 +454,11 @@ begin
 			-- could be improved to read all 4 bytes in read and only change state when addres changes
 			when progRam_PreRead => 
 				progRam_Addr(13 downto 0) <= std_logic_vector(progRam_Rd_Cntr(15 downto 2));
-				progRam_State <= progRam_Read;
+				progRam_State <= progRam_ReadWait;
 				
+			when progRam_ReadWait =>
+				progRam_State <= progRam_Read;
+			
 			when progRam_Read =>
 				if uart_TX_Active = '0' then
 					uart_TX_DV <= '1';

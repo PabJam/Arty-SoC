@@ -55,7 +55,6 @@
 (* DowngradeIPIdentifiedWarnings = "yes" *)
 module ProgRam (
   clka,
-  rsta,
   wea,
   addra,
   dina,
@@ -66,8 +65,6 @@ module ProgRam (
 (* X_INTERFACE_MODE = "slave" *)
 (* X_INTERFACE_PARAMETER = "XIL_INTERFACENAME BRAM_PORTA, MEM_ADDRESS_MODE BYTE_ADDRESS, MEM_SIZE 8192, MEM_WIDTH 32, MEM_ECC NONE, MASTER_TYPE OTHER, READ_LATENCY 1" *)
 input wire clka;
-(* X_INTERFACE_INFO = "xilinx.com:interface:bram:1.0 BRAM_PORTA RST" *)
-input wire rsta;
 (* X_INTERFACE_INFO = "xilinx.com:interface:bram:1.0 BRAM_PORTA WE" *)
 input wire [3 : 0] wea;
 (* X_INTERFACE_INFO = "xilinx.com:interface:bram:1.0 BRAM_PORTA ADDR" *)
@@ -96,9 +93,9 @@ output wire [31 : 0] douta;
     .C_LOAD_INIT_FILE(0),
     .C_INIT_FILE_NAME("no_coe_file_loaded"),
     .C_INIT_FILE("ProgRam.mem"),
-    .C_USE_DEFAULT_DATA(0),
-    .C_DEFAULT_DATA("0"),
-    .C_HAS_RSTA(1),
+    .C_USE_DEFAULT_DATA(1),
+    .C_DEFAULT_DATA("F"),
+    .C_HAS_RSTA(0),
     .C_RST_PRIORITY_A("CE"),
     .C_RSTRAM_A(0),
     .C_INITA_VAL("0"),
@@ -155,7 +152,7 @@ output wire [31 : 0] douta;
     .C_EST_POWER_SUMMARY("Estimated Power for IP     :     10.194 mW")
   ) inst (
     .clka(clka),
-    .rsta(rsta),
+    .rsta(1'D0),
     .ena(1'D0),
     .regcea(1'D1),
     .wea(wea),

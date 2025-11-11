@@ -207,3 +207,5 @@ set_property CONFIG_MODE SPIx4 [current_design]
 ## this property must be set even if SW3 is not used in the design.
 set_property INTERNAL_VREF 0.675 [get_iobanks 34]
 
+
+

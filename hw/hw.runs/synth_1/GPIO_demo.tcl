@@ -56,8 +56,10 @@ if {$::dispatch::connected} {
 }
 
 OPTRACE "synth_1" START { ROLLUP_AUTO }
+set_param tcl.collectionResultDisplayLimit 0
 set_param chipscope.maxJobs 6
 set_param general.usePosixSpawnForFork 1
+set_param xicom.use_bs_reader 1
 OPTRACE "Creating in-memory project" START { }
 create_project -in_memory -part xc7s25csga324-1
 
@@ -85,7 +87,7 @@ read_vhdl -library xil_defaultlib {
   D:/Projekte/Arty/hw/hw.srcs/sources_1/imports/hdl/debouncer.vhd
   D:/Projekte/Arty/hw/hw.srcs/sources_1/imports/hdl/GPIO_Demo.vhd
 }
-read_ip -quiet d:/Projekte/Arty/hw/hw.srcs/sources_1/ip/ProgRam/ProgRam.xci
+read_ip -quiet D:/Projekte/Arty/hw/hw.srcs/sources_1/ip/ProgRam/ProgRam.xci
 set_property used_in_implementation false [get_files -all d:/Projekte/Arty/hw/hw.gen/sources_1/ip/ProgRam/ProgRam_ooc.xdc]
 
 OPTRACE "Adding files" END { }
@@ -99,6 +101,9 @@ foreach dcp [get_files -quiet -all -filter file_type=="Design\ Checkpoint"] {
 }
 read_xdc D:/Projekte/Arty/hw/hw.srcs/constrs_1/imports/constraints/Arty-S7-25-Master.xdc
 set_property used_in_implementation false [get_files D:/Projekte/Arty/hw/hw.srcs/constrs_1/imports/constraints/Arty-S7-25-Master.xdc]
+
+read_xdc D:/Projekte/Arty/hw/hw.srcs/constrs_1/new/Arty-S7-25-Debug.xdc
+set_property used_in_implementation false [get_files D:/Projekte/Arty/hw/hw.srcs/constrs_1/new/Arty-S7-25-Debug.xdc]
 
 set_param ips.enableIPCacheLiteLoad 1
 

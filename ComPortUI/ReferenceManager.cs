@@ -31,11 +31,16 @@ namespace ComPortUI
 
             //Read all available data
             string data = sp.ReadExisting();
-         
+            //byte[] bytes = Encoding.ASCII.GetBytes(data);
 
             mainWindow.Dispatcher.Invoke(() =>
             {
+                //for (int i = 0; i < bytes.Length; i++)
+                //{
+                //    mainWindow.Output_TB.AppendText(bytes[i].ToString("X") + " "); 
+                //}
                 mainWindow.Output_TB.AppendText(data);
+
             });
         }
 
