@@ -1,0 +1,2 @@
+DataRam.v,verilog,xil_defaultlib,../../../../hw.gen/sources_1/ip/DataRam/sim/DataRam.v,incdir="C:/Xilinx/2025.1/Vivado/data/rsb/busdef"
+glbl.v,Verilog,xil_defaultlib,glbl.v

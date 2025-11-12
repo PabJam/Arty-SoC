@@ -70,6 +70,22 @@ end GPIO_demo;
 architecture Behavioral of GPIO_demo is
 
 
+component LogicUnit
+	port 
+	(
+		i_Clk : in std_logic;
+		i_Sync_nRst : in std_logic;
+		o_PM_Addr : out std_logic_vector(13 downto 0);
+		i_PM_Data : in std_logic_vector(31 downto 0);
+		i_PM_DV : in std_logic;
+		o_DM_Addr : out std_logic_vector(31 downto 0);
+		o_DM_Data : out std_logic_vector(31 downto 0);
+		o_DM_Wr_En : out std_logic_vector(3 downto 0);
+		i_DM_Data : in std_logic_vector(31 downto 0);
+		i_DM_DV : in std_logic;
+	);
+end component;
+
 component UART_RX_CTRL
 	generic (g_CLKS_PER_BIT : integer);
 	port
@@ -94,23 +110,19 @@ component UART_TX_CTRL
 	);
 end component;
 
-component Uart_Fifo
-	port
+component ProgRam
+	port 
 	(
-		clk : in std_logic;
-		srst : in std_logic;
-		din : in std_logic_vector (7 downto 0);
-		wr_en : in std_logic;
-		rd_en : in std_logic;
-		dout : out std_logic_vector (7 downto 0);
-		full : out std_logic;
-		empty : out std_logic;
-		valid : out std_logic
+		clka : in std_logic;
+		wea : in std_logic_vector ( 3 downto 0 );
+		addra : in std_logic_vector ( 13 downto 0 );
+		dina : in std_logic_vector ( 31 downto 0 );
+		douta : out std_logic_vector ( 31 downto 0 )
 	);
 end component;
 
-component ProgRam
-	port 
+component DataRam
+	port
 	(
 		clka : in std_logic;
 		wea : in std_logic_vector ( 3 downto 0 );
