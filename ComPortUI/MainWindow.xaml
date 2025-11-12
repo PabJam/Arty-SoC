@@ -37,7 +37,7 @@
         <TextBox x:Name="Output_TB" 
                  Grid.Column="1"
                  TextWrapping="Wrap" 
-                 Focusable="False"
+                 Focusable="True"
                  Margin="10,26,10,0"
                  VerticalAlignment="Stretch"/>
     </Grid>

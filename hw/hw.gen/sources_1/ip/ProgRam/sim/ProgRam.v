@@ -68,7 +68,7 @@ input wire clka;
 (* X_INTERFACE_INFO = "xilinx.com:interface:bram:1.0 BRAM_PORTA WE" *)
 input wire [3 : 0] wea;
 (* X_INTERFACE_INFO = "xilinx.com:interface:bram:1.0 BRAM_PORTA ADDR" *)
-input wire [31 : 0] addra;
+input wire [13 : 0] addra;
 (* X_INTERFACE_INFO = "xilinx.com:interface:bram:1.0 BRAM_PORTA DIN" *)
 input wire [31 : 0] dina;
 (* X_INTERFACE_INFO = "xilinx.com:interface:bram:1.0 BRAM_PORTA DOUT" *)
@@ -82,7 +82,7 @@ output wire [31 : 0] douta;
     .C_AXI_TYPE(1),
     .C_AXI_SLAVE_TYPE(0),
     .C_USE_BRAM_BLOCK(0),
-    .C_ENABLE_32BIT_ADDRESS(1),
+    .C_ENABLE_32BIT_ADDRESS(0),
     .C_CTRL_ECC_ALGO("NONE"),
     .C_HAS_AXI_ID(0),
     .C_AXI_ID_WIDTH(4),
@@ -93,8 +93,8 @@ output wire [31 : 0] douta;
     .C_LOAD_INIT_FILE(0),
     .C_INIT_FILE_NAME("no_coe_file_loaded"),
     .C_INIT_FILE("ProgRam.mem"),
-    .C_USE_DEFAULT_DATA(1),
-    .C_DEFAULT_DATA("F"),
+    .C_USE_DEFAULT_DATA(0),
+    .C_DEFAULT_DATA("0"),
     .C_HAS_RSTA(0),
     .C_RST_PRIORITY_A("CE"),
     .C_RSTRAM_A(0),
@@ -108,7 +108,7 @@ output wire [31 : 0] douta;
     .C_READ_WIDTH_A(32),
     .C_WRITE_DEPTH_A(16384),
     .C_READ_DEPTH_A(16384),
-    .C_ADDRA_WIDTH(32),
+    .C_ADDRA_WIDTH(14),
     .C_HAS_RSTB(0),
     .C_RST_PRIORITY_B("CE"),
     .C_RSTRAM_B(0),
@@ -122,7 +122,7 @@ output wire [31 : 0] douta;
     .C_READ_WIDTH_B(32),
     .C_WRITE_DEPTH_B(16384),
     .C_READ_DEPTH_B(16384),
-    .C_ADDRB_WIDTH(32),
+    .C_ADDRB_WIDTH(14),
     .C_HAS_MEM_OUTPUT_REGS_A(0),
     .C_HAS_MEM_OUTPUT_REGS_B(0),
     .C_HAS_MUX_OUTPUT_REGS_A(0),
@@ -136,7 +136,7 @@ output wire [31 : 0] douta;
     .C_READ_LATENCY_A(1),
     .C_READ_LATENCY_B(1),
     .C_HAS_INJECTERR(0),
-    .C_SIM_COLLISION_CHECK("ALL"),
+    .C_SIM_COLLISION_CHECK("NONE"),
     .C_COMMON_CLK(0),
     .C_DISABLE_WARN_BHV_COLL(0),
     .C_EN_SLEEP_PIN(0),
@@ -164,7 +164,7 @@ output wire [31 : 0] douta;
     .enb(1'D0),
     .regceb(1'D1),
     .web(4'B0),
-    .addrb(32'B0),
+    .addrb(14'B0),
     .dinb(32'B0),
     .doutb(),
     .injectsbiterr(1'D0),
