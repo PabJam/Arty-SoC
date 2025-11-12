@@ -19,26 +19,25 @@
                Grid.Column="0"
                HorizontalAlignment="Left" 
                VerticalAlignment="Top"
-               Margin="10,0,0,0"/>
+               Margin="10,43,0,0" RenderTransformOrigin="0.598,1.632" FontSize="18"/>
         <TextBox x:Name="Input_TB" 
                  Grid.Column="0"
                  TextWrapping="Wrap" 
-                 Margin="10,26,10,0"
-                 VerticalAlignment="Stretch"
-                 KeyDown="Input_TB_KeyDown"/>
-
+                 Margin="10,77,10,0"
+                 KeyDown="Input_TB_KeyDown" FontSize="18"/>
+        <Button x:Name="LoadFileButton" Grid.Column="0" Content="Load File" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,10,0,0" FontSize="18" Click="LoadFileButton_Click"/>
         <!-- Output Section -->
         <Label x:Name="Outpu_Label" 
                Content="Output" 
                Grid.Column="1"
                HorizontalAlignment="Left" 
                VerticalAlignment="Top"
-               Margin="10,0,0,0"/>
+               Margin="10,43,0,0" RenderTransformOrigin="0.554,0.175" FontSize="18"/>
         <TextBox x:Name="Output_TB" 
                  Grid.Column="1"
                  TextWrapping="Wrap" 
                  Focusable="True"
-                 Margin="10,26,10,0"
-                 VerticalAlignment="Stretch"/>
+                 Margin="10,77,10,0" FontSize="18"/>
+
     </Grid>
 </Window>

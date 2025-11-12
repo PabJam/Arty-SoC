@@ -9,6 +9,8 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.IO.Ports;
+using Microsoft.Win32;
+using System.IO;
 
 //012356789aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZ
 
@@ -62,6 +64,25 @@ namespace ComPortUI
                 serialPort.Write(message);
 
             }
+        }
+
+        private void LoadFileButton_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog ofd = new OpenFileDialog();
+            bool? result = ofd.ShowDialog();
+            if (result == null || result == false) 
+            {
+                return;
+            }
+            string path = ofd.FileName;
+            byte[] fileBytes = File.ReadAllBytes(path);
+            if (fileBytes.Length >= 1 << 16)
+            {
+                MessageBox.Show("File could not be loadet because it exceeded the Program memory of 65.536 bytes", "File too large", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            serialPort.Write(fileBytes, 0, fileBytes.Length);
         }
     }   
 }
