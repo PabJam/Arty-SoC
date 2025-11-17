@@ -42,6 +42,7 @@ entity LogicUnit is
 		o_DM_Addr : out std_logic_vector(31 downto 0);
 		o_DM_Data : out std_logic_vector(31 downto 0);
 		o_DM_Wr_En : out std_logic_vector(3 downto 0);
+		o_DM_DV : out std_logic;
 		i_DM_Data : in std_logic_vector(31 downto 0);
 		i_DM_DV : in std_logic;
 	);
@@ -72,6 +73,14 @@ signal registers : t_reg_array;
 
 type t_fetch_states is ( fetch_state_idle, fetch_state_init, fetch_state_next, fetch_state_jump);
 signal fetch_state : t_fetch_states;
+
+type t_byte_array_32 is array (0 to 3) of std_logic_vector(7 downto 0);
+type t_2byte_array_32 is array (0 to 1) of std_logic_vector(15 downto 0);
+signal dm_write_data_bytes : t_byte_array_32;
+signal dm_write_data_2bytes : t_2byte_array_32;
+signal dm_read_data_bytes : t_byte_array_32;
+signal dm_read_data_2bytes : t_2byte_array_32;
+signal dm_addr : std_logic_vector(31 downto 0);
 
 signal pc : unsigned(31 downto 0);
 signal pc_p4 : unsigned(31 downto 0);
@@ -112,6 +121,24 @@ port map
 	S => result_sub
 );
 
+o_DM_Data(7 downto 0) <= dm_write_data_bytes(0); 
+o_DM_Data(15 downto 8) <= dm_write_data_bytes(1); 
+o_DM_Data(23 downto 16) <= dm_write_data_bytes(2); 
+o_DM_Data(31 downto 24) <= dm_write_data_bytes(3);
+
+o_DM_Data(15 downto 0) <= dm_write_data_2bytes(0);
+o_DM_Data(31 downto 16) <= dm_write_data_2bytes(1);
+
+dm_read_data_bytes(0) <= i_DM_Data(7 downto 0);
+dm_read_data_bytes(1) <= i_DM_Data(15 downto 8);
+dm_read_data_bytes(2) <= i_DM_Data(23 downto 16);
+dm_read_data_bytes(3) <= i_DM_Data(31 downto 24);
+ 
+dm_read_data_2bytes(0) <= i_DM_Data(15 downto 0);
+dm_read_data_2bytes(1) <= i_DM_Data(31 downto 16);
+
+o_DM_Addr <= dm_addr;
+
 Instruction_Fetch : process(i_Clk)
 begin
 	if rising_edge(i_Clk) then
@@ -127,7 +154,7 @@ begin
 				when fetch_state_init =>
 					fetch_state <= fetch_state_init;
 					o_PM_Addr <= pc_p8(15 downto 2);
-					if (i_DM_DV = '1') then
+					if (i_PM_DV = '1') then
 						instruction_p8 <= i_PM_Data;
 						if (pc_p8 = x"0008") then
 							fetch_state <= fetch_state_idle;
@@ -167,12 +194,16 @@ end process;
 
 
 process(i_Clk)
+	variable v_dm_addr : std_logic_vector(31 downto 0);
 begin
 	if rising_edge(i_Clk) then
+		o_DM_DV <= '0';
+		o_DM_Wr_En <= (others => '0');
+		instruction_new <= '0';
+		instruction_done <= '0';
+		instruction_jump <= '0';
+		
 		if (instruction_valid = '1') then
-			instruction_new <= '0';
-			instruction_done <= '0';
-			instruction_jump <= '0';
 			
 			case instruction(6 downto 0) is --opcode
 				
@@ -200,44 +231,44 @@ begin
 					instruction_done <= '1';
 				
 				when "1100011" => -- B-type
-					case instruction(14 downto 12) is
+					case instruction(14 downto 12) is -- funct3
 						
-						when "000" =>
+						when "000" => -- beq
 							if registers(to_integer(instruction(19 downto 15))) = registers(to_integer(instruction(24 downto 20))) then
 								pc <= pc + resize(signed(instruction(31) & instruction(7) & instruction(30 downto 25) & instruction(11 downto 8) & '0'), pc'length);
 								instruction_jump <= '1';
 							end if;
 							instruction_done <= '1';
 								
-						when "001" =>
+						when "001" => -- bne
 							if registers(to_integer(instruction(19 downto 15))) /= registers(to_integer(instruction(24 downto 20))) then
 								pc <= pc + resize(signed(instruction(31) & instruction(7) & instruction(30 downto 25) & instruction(11 downto 8) & '0'), pc'length);
 								instruction_jump <= '1';
 							end if;
 							instruction_done <= '1';
 						
-						when "100" =>
+						when "100" => -- blt
 							if signed(registers(to_integer(instruction(19 downto 15)))) < signed(registers(to_integer(instruction(24 downto 20)))) then
 								pc <= pc + resize(signed(instruction(31) & instruction(7) & instruction(30 downto 25) & instruction(11 downto 8) & '0'), pc'length);
 								instruction_jump <= '1';
 							end if;
 							instruction_done <= '1';
 						
-						when "101" =>
+						when "101" => -- bge
 							if signed(registers(to_integer(instruction(19 downto 15)))) >= signed(registers(to_integer(instruction(24 downto 20)))) then
 								pc <= pc + resize(signed(instruction(31) & instruction(7) & instruction(30 downto 25) & instruction(11 downto 8) & '0'), pc'length);
 								instruction_jump <= '1';
 							end if;
 							instruction_done <= '1';
 							
-						when "110" =>
+						when "110" => -- bltu
 							if unsigned(registers(to_integer(instruction(19 downto 15)))) < unsigned(registers(to_integer(instruction(24 downto 20)))) then
 								pc <= pc + resize(signed(instruction(31) & instruction(7) & instruction(30 downto 25) & instruction(11 downto 8) & '0'), pc'length);
 								instruction_jump <= '1';
 							end if;
 							instruction_done <= '1';
 						
-						when "111" =>
+						when "111" => -- bgeu
 							if unsigned(registers(to_integer(instruction(19 downto 15)))) >= unsigned(registers(to_integer(instruction(24 downto 20)))) then
 								pc <= pc + resize(signed(instruction(31) & instruction(7) & instruction(30 downto 25) & instruction(11 downto 8) & '0'), pc'length);
 								instruction_jump <= '1';
@@ -250,6 +281,153 @@ begin
 							
 					end case;
 				
+				--TODO important in memory access all writes must have completed bevore a read access can occur
+				when "0000011" -- I-type
+					case instruction(14 downto 12) is -- funct3
+						when "000" => -- lb
+							if instruction_new = '1' then
+								dm_addr <= std_logic_vector(signed(registers(to_integer(instruction(19 downto 15)))) + resize(signed(instruction(31 downto 20)), dm_addr'length));
+								o_DM_DV <= '1';
+							elsif i_DM_DV = '1' then
+								registers(to_integer(instruction(11 downto 7))) <= resize(signed(dm_read_data_bytes(to_integer(dm_addr(1 downto 0)))), registers(0)'length);
+								instruction_done <= '1';
+							else
+								null; -- wait until load complete
+							end if;
+						
+						when "001" => -- lh
+							if instruction_new = '1' then
+								dm_addr <= std_logic_vector(signed(registers(to_integer(instruction(19 downto 15)))) + resize(signed(instruction(31 downto 20)), dm_addr'length));
+								o_DM_DV <= '1';
+							elsif i_DM_DV = '1' then
+								registers(to_integer(instruction(11 downto 7))) <= resize(signed(dm_read_data_2bytes(to_integer(dm_addr(1)))), registers(0)'length);
+								instruction_done <= '1';
+							else
+								null; -- wait until load complete
+							end if;
+							
+						when "010" => -- lw
+							if instruction_new = '1' then
+								dm_addr <= std_logic_vector(signed(registers(to_integer(instruction(19 downto 15)))) + resize(signed(instruction(31 downto 20)), dm_addr'length));
+								o_DM_DV <= '1';
+							elsif i_DM_DV = '1' then
+								registers(to_integer(instruction(11 downto 7))) <= unsigned(i_DM_Data);
+								instruction_done <= '1';
+							else
+								null; -- wait until load complete
+							end if;
+						
+						when "100" => -- lbu
+							if instruction_new = '1' then
+								dm_addr <= std_logic_vector(signed(registers(to_integer(instruction(19 downto 15)))) + resize(signed(instruction(31 downto 20)), dm_addr'length));
+								o_DM_DV <= '1';
+							elsif i_DM_DV = '1' then
+								registers(to_integer(instruction(11 downto 7))) <= resize(unsigned(dm_read_data_bytes(to_integer(dm_addr(1 downto 0)))), registers(0)'length);
+								instruction_done <= '1';
+							else
+								null; -- wait until load complete
+							end if;
+						
+						when "101" => -- lhu
+							if instruction_new = '1' then
+								dm_addr <= std_logic_vector(signed(registers(to_integer(instruction(19 downto 15)))) + resize(signed(instruction(31 downto 20)), dm_addr'length));
+								o_DM_DV <= '1';
+							elsif i_DM_DV = '1' then
+								registers(to_integer(instruction(11 downto 7))) <= resize(unsigned(dm_read_data_2bytes(to_integer(dm_addr(1)))), registers(0)'length);
+								instruction_done <= '1';
+							else
+								null; -- wait until load complete
+							end if;
+						
+						when others =>
+							null;
+							instruction_done <= '1';
+				
+				when "0100011" => -- S-type
+					case instruction(14 downto 12) is -- funct3
+						
+						when "000" => -- sb
+							v_dm_addr <= std_logic_vector(signed(registers(to_integer(instruction(19 downto 15)))) + resize(signed(instruction(31 downto 25) & instruction(11 downto 7)), dm_addr'length));
+							dm_addr <= v_dm_addr;
+							dm_write_data_bytes(to_integer(v_dm_addr(1 downto 0)))(7 downto 0) <= registers(to_integer(instruction(24 downto 20)))(7 downto 0);  
+							o_DM_Wr_En(to_integer(v_dm_addr(1 downto 0))) <= '1';
+							o_DM_DV <= '1';	
+							instruction_done <= '1';
+							
+						when "001" => -- sh
+							v_dm_addr <= std_logic_vector(signed(registers(to_integer(instruction(19 downto 15)))) + resize(signed(instruction(31 downto 25) & instruction(11 downto 7)), dm_addr'length));
+							dm_addr <= v_dm_addr;
+							dm_write_data_2bytes(to_integer(v_dm_addr(1)))(15 downto 0) <= registers(to_integer(instruction(24 downto 20)))(15 downto 0);  
+							if (v_dm_addr(1) = '1') then
+								o_DM_Wr_En <= "1100";
+							else
+								o_DM_Wr_En <= "0011";
+							end if;
+							o_DM_DV <= '1';	
+							instruction_done <= '1';
+							
+						when "010" => -- sw
+							dm_addr <= std_logic_vector(signed(registers(to_integer(instruction(19 downto 15)))) + resize(signed(instruction(31 downto 25) & instruction(11 downto 7)), dm_addr'length));
+							o_DM_Data <= registers(to_integer(instruction(24 downto 20)))(31 downto 0);  
+							o_DM_Wr_En(3 downto 0) <= "1111";
+							o_DM_DV <= '1';	
+							instruction_done <= '1';
+						
+						when others =>
+							null;
+							instruction_done <= '1';
+				
+				when "0010011" => -- I-type
+					case instruction(14 downto 12) is -- funct3
+						
+						when "000" => -- addi
+							registers(to_integer(instruction(11 downto 7))) <= signed(registers(to_integer(instruction(19 downto 15)))) + signed(instruction(31 downto 20));
+							instruction_done <= '1';
+							
+						when "010" => -- slti
+							registers(to_integer(instruction(11 downto 7)))(31 downto 0) <= (others => '0');
+							if signed(registers(to_integer(instruction(19 downto 15)))) < signed(instruction(31 downto 20)) then
+								registers(to_integer(instruction(11 downto 7)))(0) <= '1'; 
+							end if;
+							instruction_done <= '1';
+							
+						when "011" => -- sltiu
+							registers(to_integer(instruction(11 downto 7)))(31 downto 0) <= (others => '0');
+							if registers(to_integer(instruction(19 downto 15))) < instruction(31 downto 20) then
+								registers(to_integer(instruction(11 downto 7)))(0) <= '1'; 
+							end if;
+							instruction_done <= '1';
+							
+						when "100" => -- xori
+							registers(to_integer(instruction(11 downto 7))) <= signed(registers(to_integer(instruction(19 downto 15)))) xor resize(signed(instruction(31 downto 20)), registers(0)'length);
+							instruction_done <= '1';
+						
+						when "110" => --ori
+							registers(to_integer(instruction(11 downto 7))) <= signed(registers(to_integer(instruction(19 downto 15)))) or resize(signed(instruction(31 downto 20)), registers(0)'length);
+							instruction_done <= '1';
+						
+						when "111" => --andi
+							registers(to_integer(instruction(11 downto 7))) <= signed(registers(to_integer(instruction(19 downto 15)))) and resize(signed(instruction(31 downto 20)), registers(0)'length);
+							instruction_done <= '1';
+						
+						when "001" => --slli
+							registers(to_integer(instruction(11 downto 7)))(31 downto 0) <= shift_left(registers(to_integer(instruction(19 downto 15))), to_integer(instruction(24 downto 20));
+							instruction_done <= '1';
+						
+						when "101" => --srli/srai
+							if instruction(30) = '0' then -- srli
+								registers(to_integer(instruction(11 downto 7)))(31 downto 0) <= shift_right(registers(to_integer(instruction(19 downto 15))), to_integer(instruction(24 downto 20)));	
+							else	-- srai
+								registers(to_integer(instruction(11 downto 7)))(31 downto 0) <= shift_right(signed(registers(to_integer(instruction(19 downto 15)))), to_integer(instruction(24 downto 20)));
+							end if;			
+							instruction_done <= '1';
+							
+						when others =>
+							null;
+							instruction_done <= '1';
+					
+					end case;
+						
 				when "0110011" => -- R-type
 					case instruction(14 downto 12) is -- funct3
 						
@@ -316,55 +494,7 @@ begin
 						
 					end case;
 				
-				when "0010011" => -- I-type
-					case instruction(14 downto 12) is -- funct3
-						
-						when "000" => -- addi
-							registers(to_integer(instruction(11 downto 7))) <= signed(registers(to_integer(instruction(19 downto 15)))) + signed(instruction(31 downto 20));
-							instruction_done <= '1';
-							
-						when "010" => -- slti
-							registers(to_integer(instruction(11 downto 7)))(31 downto 0) <= (others => '0');
-							if signed(registers(to_integer(instruction(19 downto 15)))) < signed(instruction(31 downto 20)) then
-								registers(to_integer(instruction(11 downto 7)))(0) <= '1'; 
-							end if;
-							instruction_done <= '1';
-							
-						when "011" => -- sltiu
-							registers(to_integer(instruction(11 downto 7)))(31 downto 0) <= (others => '0');
-							if registers(to_integer(instruction(19 downto 15))) < instruction(31 downto 20) then
-								registers(to_integer(instruction(11 downto 7)))(0) <= '1'; 
-							end if;
-							instruction_done <= '1';
-							
-						when "100" => -- xori
-							registers(to_integer(instruction(11 downto 7))) <= signed(registers(to_integer(instruction(19 downto 15)))) xor resize(signed(instruction(31 downto 20)), registers(0)'length);
-							instruction_done <= '1';
-						
-						when "110" => --ori
-							registers(to_integer(instruction(11 downto 7))) <= signed(registers(to_integer(instruction(19 downto 15)))) or resize(signed(instruction(31 downto 20)), registers(0)'length);
-							instruction_done <= '1';
-						
-						when "111" => --andi
-							registers(to_integer(instruction(11 downto 7))) <= signed(registers(to_integer(instruction(19 downto 15)))) and resize(signed(instruction(31 downto 20)), registers(0)'length);
-							instruction_done <= '1';
-						
-						when "001" => --slli
-							registers(to_integer(instruction(11 downto 7)))(31 downto 0) <= shift_left(registers(to_integer(instruction(19 downto 15))), to_integer(instruction(24 downto 20));
-							instruction_done <= '1';
-						
-						when "101" => --srli/srai
-							if instruction(30) = '0' then -- srli
-								registers(to_integer(instruction(11 downto 7)))(31 downto 0) <= shift_right(registers(to_integer(instruction(19 downto 15))), to_integer(instruction(24 downto 20)));	
-							else	-- srai
-								registers(to_integer(instruction(11 downto 7)))(31 downto 0) <= shift_right(signed(registers(to_integer(instruction(19 downto 15)))), to_integer(instruction(24 downto 20)));
-							end if;			
-							instruction_done <= '1';
-							
-						when others =>
-							null;
-							instruction_done <= '1';
-						
+				
 				
 				when others => 
 					null;
