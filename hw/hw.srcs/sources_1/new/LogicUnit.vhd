@@ -73,10 +73,10 @@ signal registers : t_reg_array;
 type t_fetch_states is ( fetch_state_idle, fetch_state_init, fetch_state_next, fetch_state_jump);
 signal fetch_state : t_fetch_states;
 
-signal pc : unsigned(15 downto 0);
-signal pc_p4 : unsigned(15 downto 0);
-signal pc_p8 : unsigned(15 downto 0);
-signal pc_p8_latch : unsigned(15 downto 0);
+signal pc : unsigned(31 downto 0);
+signal pc_p4 : unsigned(31 downto 0);
+signal pc_p8 : unsigned(31 downto 0);
+signal pc_p8_latch : unsigned(31 downto 0);
 signal instruction : unsigned(31 downto 0);
 signal instruction_p4 : unsigned(31 downto 0);
 signal instruction_p8 : unsigned(31 downto 0);
@@ -172,8 +172,83 @@ begin
 		if (instruction_valid = '1') then
 			instruction_new <= '0';
 			instruction_done <= '0';
+			instruction_jump <= '0';
 			
 			case instruction(6 downto 0) is --opcode
+				
+				when "0110111" => -- lui
+					registers(to_integer(instruction(11 downto 7))) <= instruction(31 downto 12) & "000000000000";
+					instruction_done <= '1';
+				
+				when "0010111" => -- auipc
+					registers(to_integer(instruction(11 downto 7))) <= pc + instruction(31 downto 12) & "000000000000";
+					instruction_done <= '1';
+				
+				when "1101111" => -- jal
+					registers(to_integer(instruction(11 downto 7))) <= pc_p4;
+					pc <= pc + resize(signed(instruction(31) & instruction(19 downto 12) & instruction(20) & instruction(30 downto 21) & '0'), pc'length);
+					
+					instruction_jump <= '1';
+					instruction_done <= '1';
+				
+				when "1100111" => -- jalr
+					registers(to_integer(instruction(11 downto 7))) <= pc_p4;
+					pc <= signed(registers(to_integer(instruction(19 downto 15)))) + resize(signed(instruction(31 downto 20)), pc'length);
+					-- pc(0) has to be 0
+					pc(0) <= '0';
+					instruction_jump <= '1';
+					instruction_done <= '1';
+				
+				when "1100011" => -- B-type
+					case instruction(14 downto 12) is
+						
+						when "000" =>
+							if registers(to_integer(instruction(19 downto 15))) = registers(to_integer(instruction(24 downto 20))) then
+								pc <= pc + resize(signed(instruction(31) & instruction(7) & instruction(30 downto 25) & instruction(11 downto 8) & '0'), pc'length);
+								instruction_jump <= '1';
+							end if;
+							instruction_done <= '1';
+								
+						when "001" =>
+							if registers(to_integer(instruction(19 downto 15))) /= registers(to_integer(instruction(24 downto 20))) then
+								pc <= pc + resize(signed(instruction(31) & instruction(7) & instruction(30 downto 25) & instruction(11 downto 8) & '0'), pc'length);
+								instruction_jump <= '1';
+							end if;
+							instruction_done <= '1';
+						
+						when "100" =>
+							if signed(registers(to_integer(instruction(19 downto 15)))) < signed(registers(to_integer(instruction(24 downto 20)))) then
+								pc <= pc + resize(signed(instruction(31) & instruction(7) & instruction(30 downto 25) & instruction(11 downto 8) & '0'), pc'length);
+								instruction_jump <= '1';
+							end if;
+							instruction_done <= '1';
+						
+						when "101" =>
+							if signed(registers(to_integer(instruction(19 downto 15)))) >= signed(registers(to_integer(instruction(24 downto 20)))) then
+								pc <= pc + resize(signed(instruction(31) & instruction(7) & instruction(30 downto 25) & instruction(11 downto 8) & '0'), pc'length);
+								instruction_jump <= '1';
+							end if;
+							instruction_done <= '1';
+							
+						when "110" =>
+							if unsigned(registers(to_integer(instruction(19 downto 15)))) < unsigned(registers(to_integer(instruction(24 downto 20)))) then
+								pc <= pc + resize(signed(instruction(31) & instruction(7) & instruction(30 downto 25) & instruction(11 downto 8) & '0'), pc'length);
+								instruction_jump <= '1';
+							end if;
+							instruction_done <= '1';
+						
+						when "111" =>
+							if unsigned(registers(to_integer(instruction(19 downto 15)))) >= unsigned(registers(to_integer(instruction(24 downto 20)))) then
+								pc <= pc + resize(signed(instruction(31) & instruction(7) & instruction(30 downto 25) & instruction(11 downto 8) & '0'), pc'length);
+								instruction_jump <= '1';
+							end if;
+							instruction_done <= '1';
+						
+						when others =>
+							null;
+							instruction_done <= '1';
+							
+					end case;
 				
 				when "0110011" => -- R-type
 					case instruction(14 downto 12) is -- funct3
@@ -222,12 +297,11 @@ begin
 						when "101" => -- srl/sra
 							if instruction(30) = '0' then -- srl
 								registers(to_integer(instruction(11 downto 7)))(31 downto 0) <= shift_right(registers(to_integer(instruction(19 downto 15))), to_integer(registers(to_integer(instruction(24 downto 20)))(4 downto 0)));
-								instruction_done <= '1';
 							else	-- sra
-								registers(to_integer(instruction(11 downto 7)))(31 downto 0) <= shift_right(signed(registers(to_integer(instruction(19 downto 15)))), to_integer(registers(to_integer(instruction(24 downto 20)))(4 downto 0)));
-								instruction_done <= '1';
+								registers(to_integer(instruction(11 downto 7)))(31 downto 0) <= shift_right(signed(registers(to_integer(instruction(19 downto 15)))), to_integer(registers(to_integer(instruction(24 downto 20)))(4 downto 0)));	
 							end if;
-						
+							instruction_done <= '1';
+							
 						when "110" => -- or
 							registers(to_integer(instruction(11 downto 7))) <= registers(to_integer(instruction(19 downto 15))) or registers(to_integer(instruction(24 downto 20)));
 							instruction_done <= '1';
@@ -275,6 +349,18 @@ begin
 							registers(to_integer(instruction(11 downto 7))) <= signed(registers(to_integer(instruction(19 downto 15)))) and resize(signed(instruction(31 downto 20)), registers(0)'length);
 							instruction_done <= '1';
 						
+						when "001" => --slli
+							registers(to_integer(instruction(11 downto 7)))(31 downto 0) <= shift_left(registers(to_integer(instruction(19 downto 15))), to_integer(instruction(24 downto 20));
+							instruction_done <= '1';
+						
+						when "101" => --srli/srai
+							if instruction(30) = '0' then -- srli
+								registers(to_integer(instruction(11 downto 7)))(31 downto 0) <= shift_right(registers(to_integer(instruction(19 downto 15))), to_integer(instruction(24 downto 20)));	
+							else	-- srai
+								registers(to_integer(instruction(11 downto 7)))(31 downto 0) <= shift_right(signed(registers(to_integer(instruction(19 downto 15)))), to_integer(instruction(24 downto 20)));
+							end if;			
+							instruction_done <= '1';
+							
 						when others =>
 							null;
 							instruction_done <= '1';
