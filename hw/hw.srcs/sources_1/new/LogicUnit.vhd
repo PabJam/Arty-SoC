@@ -67,7 +67,7 @@ component Sub
 	)
 end component;
 
-type t_reg_array is array (0 to 31 ) of std_logic_vector(31 downto 0);
+type t_reg_array is array (0 to 31) of unsigned(31 downto 0);
 signal registers : t_reg_array;
 
 type t_fetch_states is ( fetch_state_idle, fetch_state_init, fetch_state_next, fetch_state_jump);
@@ -77,13 +77,14 @@ signal pc : unsigned(15 downto 0);
 signal pc_p4 : unsigned(15 downto 0);
 signal pc_p8 : unsigned(15 downto 0);
 signal pc_p8_latch : unsigned(15 downto 0);
-signal instruction : std_logic_vector(31 downto 0);
-signal instruction_p4 : std_logic_vector(31 downto 0);
-signal instruction_p8 : std_logic_vector(31 downto 0);
-signal instruction_p8_latch : std_logic_vector(31 downto 0);
-signal instruction_done : std_logic;
+signal instruction : unsigned(31 downto 0);
+signal instruction_p4 : unsigned(31 downto 0);
+signal instruction_p8 : unsigned(31 downto 0);
+signal instruction_p8_latch : unsigned(31 downto 0);
+signal instruction_done : std_logic := '0';
 signal instruction_valid : std_logic := '0';
 signal instruction_jump : std_logic := '0';
+signal instruction_new : std_logic := '0';
 
 signal a_add : std_logic_vector(31 downto 0);
 signal b_add : std_logic_vector(31 downto 0);
@@ -95,8 +96,21 @@ signal result_sub : std_logic_vector(31 downto 0);
 
 begin
 
-instruction(31 downto 0) <= instruction_p4(31 downto 0) when instruction_done = '1' and instruction_jump = '0';  
+inst_add: Add
+port map
+(
+	A => a_add,
+	B => b_add,
+	S => result_add
+);
 
+inst_sub: Sub
+port map
+(
+	A => a_sub,
+	B => b_sub,
+	S => result_sub
+);
 
 Instruction_Fetch : process(i_Clk)
 begin
@@ -112,7 +126,7 @@ begin
 				
 				when fetch_state_init =>
 					fetch_state <= fetch_state_init;
-					o_PM_Addr <= pc_p8;
+					o_PM_Addr <= pc_p8(15 downto 2);
 					if (i_DM_DV = '1') then
 						instruction_p8 <= i_PM_Data;
 						if (pc_p8 = x"0008") then
@@ -123,6 +137,9 @@ begin
 					end if;
 				
 				when fetch_state_idle =>
+					fetch_state <= fetch_state_idle;
+					if (instruction_done = '1' and instruction_jump)
+					
 				when fetch_state_next =>
 				when fetch_state_jump =>
 				
@@ -146,7 +163,130 @@ begin
 		pc_p8_latch <= pc_p8;
 		instruction_p8_latch <= instruction_p8;
 	end if;
+end process;
 
+
+process(i_Clk)
+begin
+	if rising_edge(i_Clk) then
+		if (instruction_valid = '1') then
+			instruction_new <= '0';
+			instruction_done <= '0';
+			
+			case instruction(6 downto 0) is --opcode
+				
+				when "0110011" => -- R-type
+					case instruction(14 downto 12) is -- funct3
+						
+						when "000" => -- add/sub
+							if instruction(30) = '0' then --add
+								if (instruction_new = '1') then
+									a_add <= std_logic_vector(registers(to_integer(instruction(19 downto 15))));
+									b_add <= std_logic_vector(registers(to_integer(instruction(24 downto 20))));
+								else
+									registers(to_integer(instruction(11 downto 7))) <= unsigned(result_add);
+									instruction_done <= '1';
+								end if;
+							else -- sub
+								if (instruction_new = '1') then
+									a_sub <= std_logic_vector(registers(to_integer(instruction(19 downto 15))));
+									b_sub <= std_logic_vector(registers(to_integer(instruction(24 downto 20))));
+								else
+									registers(to_integer(instruction(11 downto 7))) <= unsigned(result_sub);
+									instruction_done <= '1';
+								end if;
+							end if;
+							
+						when "001" => -- sll
+							registers(to_integer(instruction(11 downto 7)))(31 downto 0) <= shift_left(registers(to_integer(instruction(19 downto 15))), to_integer(registers(to_integer(instruction(24 downto 20)))(4 downto 0)));
+							instruction_done <= '1';
+						
+						when "010" => -- slt
+							registers(to_integer(instruction(11 downto 7)))(31 downto 0) <= (others => '0');
+							if signed(registers(to_integer(instruction(19 downto 15)))) < signed(registers(to_integer(instruction(24 downto 20)))) then
+								registers(to_integer(instruction(11 downto 7)))(0) <= '1'; 
+							end if;
+							instruction_done <= '1';
+							
+						when "011" => -- sltu
+							registers(to_integer(instruction(11 downto 7)))(31 downto 0) <= (others => '0');
+							if unsigned(registers(to_integer(instruction(19 downto 15)))) < unsigned(registers(to_integer(instruction(24 downto 20)))) then
+								registers(to_integer(instruction(11 downto 7)))(0) <= '1'; 
+							end if;
+							instruction_done <= '1';
+							
+						when "100" => -- xor
+							registers(to_integer(instruction(11 downto 7))) <= registers(to_integer(instruction(19 downto 15))) xor registers(to_integer(instruction(24 downto 20)));
+							instruction_done <= '1';
+							
+						when "101" => -- srl/sra
+							if instruction(30) = '0' then -- srl
+								registers(to_integer(instruction(11 downto 7)))(31 downto 0) <= shift_right(registers(to_integer(instruction(19 downto 15))), to_integer(registers(to_integer(instruction(24 downto 20)))(4 downto 0)));
+								instruction_done <= '1';
+							else	-- sra
+								registers(to_integer(instruction(11 downto 7)))(31 downto 0) <= shift_right(signed(registers(to_integer(instruction(19 downto 15)))), to_integer(registers(to_integer(instruction(24 downto 20)))(4 downto 0)));
+								instruction_done <= '1';
+							end if;
+						
+						when "110" => -- or
+							registers(to_integer(instruction(11 downto 7))) <= registers(to_integer(instruction(19 downto 15))) or registers(to_integer(instruction(24 downto 20)));
+							instruction_done <= '1';
+							
+						when "111" => -- and
+							registers(to_integer(instruction(11 downto 7))) <= registers(to_integer(instruction(19 downto 15))) and registers(to_integer(instruction(24 downto 20)));
+							instruction_done <= '1';
+							
+						when others => 
+							null;
+							instruction_done <= '1';
+						
+					end case;
+				
+				when "0010011" => -- I-type
+					case instruction(14 downto 12) is -- funct3
+						
+						when "000" => -- addi
+							registers(to_integer(instruction(11 downto 7))) <= signed(registers(to_integer(instruction(19 downto 15)))) + signed(instruction(31 downto 20));
+							instruction_done <= '1';
+							
+						when "010" => -- slti
+							registers(to_integer(instruction(11 downto 7)))(31 downto 0) <= (others => '0');
+							if signed(registers(to_integer(instruction(19 downto 15)))) < signed(instruction(31 downto 20)) then
+								registers(to_integer(instruction(11 downto 7)))(0) <= '1'; 
+							end if;
+							instruction_done <= '1';
+							
+						when "011" => -- sltiu
+							registers(to_integer(instruction(11 downto 7)))(31 downto 0) <= (others => '0');
+							if registers(to_integer(instruction(19 downto 15))) < instruction(31 downto 20) then
+								registers(to_integer(instruction(11 downto 7)))(0) <= '1'; 
+							end if;
+							instruction_done <= '1';
+							
+						when "100" => -- xori
+							registers(to_integer(instruction(11 downto 7))) <= signed(registers(to_integer(instruction(19 downto 15)))) xor resize(signed(instruction(31 downto 20)), registers(0)'length);
+							instruction_done <= '1';
+						
+						when "110" => --ori
+							registers(to_integer(instruction(11 downto 7))) <= signed(registers(to_integer(instruction(19 downto 15)))) or resize(signed(instruction(31 downto 20)), registers(0)'length);
+							instruction_done <= '1';
+						
+						when "111" => --andi
+							registers(to_integer(instruction(11 downto 7))) <= signed(registers(to_integer(instruction(19 downto 15)))) and resize(signed(instruction(31 downto 20)), registers(0)'length);
+							instruction_done <= '1';
+						
+						when others =>
+							null;
+							instruction_done <= '1';
+						
+				
+				when others => 
+					null;
+					instruction_done <= '1';
+			end case;
+		end if;
+	end if;
+end process;
 registers(0) <= (others => '0');
 
 end Behavioral;
