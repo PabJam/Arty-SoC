@@ -36,8 +36,10 @@ entity LogicUnit is
 	(
 		i_Clk : in std_logic;
 		i_Sync_nRst : in std_logic;
-		o_PM_Addr : out std_logic_vector(13 downto 0);
-		i_PM_Data : in std_logic_vector(31 downto 0);
+		i_Give_Ctrl_Logic_Unit : in std_logic;
+		o_Accept_Ctrl_Logic_Unit : out std_logic;
+		o_PM_Addr : out std_logic_vector(12 downto 0);
+		i_PM_Data : in std_logic_vector(63 downto 0);
 		i_PM_DV : in std_logic;
 		o_DM_Addr : out std_logic_vector(31 downto 0);
 		o_DM_Data : out std_logic_vector(31 downto 0);
@@ -68,10 +70,12 @@ component Sub
 	)
 end component;
 
+signal ctrl_logic_unit : std_logic := '0';
+
 type t_reg_array is array (0 to 31) of unsigned(31 downto 0);
 signal registers : t_reg_array;
 
-type t_fetch_states is (fetch_state_idle, fetch_state_p4, fetch_state_p8);
+type t_fetch_states is (fetch_state_idle, fetch_state_next, fetch_state_next_2);
 signal fetch_state : t_fetch_states;
 
 type t_byte_array_32 is array (0 to 3) of std_logic_vector(7 downto 0);
@@ -82,17 +86,21 @@ signal dm_read_data_bytes : t_byte_array_32;
 signal dm_read_data_2bytes : t_2byte_array_32;
 signal dm_addr : std_logic_vector(31 downto 0);
 
-signal pc : unsigned(31 downto 0);
+type t_pm_fetch_array is (0 to 3) of unsigned(31 downto 0);
+type t_2_u32 is (0 to 1) of unsigned(31 downto 0);
+
+signal pc : t_2_u32;
 signal jmp_addr : unsigned(31 downto 0);
-signal pc_p4 : unsigned(31 downto 0);
-signal pc_p8 : unsigned(31 downto 0);
-signal instruction : unsigned(31 downto 0);
-signal instruction_p4 : unsigned(31 downto 0);
-signal instruction_p8 : unsigned(31 downto 0);
+signal pc_fetch : t_pm_fetch_array;
+signal instruction : t_2_u32;
+signal instruction_fetch : t_pm_fetch_array;
 signal instruction_jump : std_logic := '0';
 signal instruction_ready : std_logic := '0';
+signal instruction_loaded : std_logic := '0';
 signal instruction_p4_ready : std_logic := '0';
-signal wait_instruction_ready : std_logic := '0';
+signal wait_instruction_ready : std_logic := '1';
+signal instruction_upper : unsigned(0 downto 0) := '0';
+signal instruction_upper_latch : unsigned(0 downto 0) := '0';
 signal v_instruction_valid : std_logic := '0';
 signal v_instruction_new : std_logic := '0';
 
@@ -105,6 +113,8 @@ signal result_sub : std_logic_vector(31 downto 0);
 
 
 begin
+
+
 
 inst_add: Add
 port map
@@ -140,34 +150,49 @@ dm_read_data_2bytes(1) <= i_DM_Data(31 downto 16);
 
 o_DM_Addr <= dm_addr;
 
-Instruction_Fetch : process(i_Clk)
+Instruction_Fetch_Proc : process(i_Clk)
 begin
 	if rising_edge(i_Clk) then
-		if (i_Sync_nRst => '0') then
-			pc_p4 <= (others => '0');
+		if (i_Sync_nRst = '0') then
+			pc_fetch(0) <= (others => '0') & "0000";
+			pc_fetch(1) <= (others => '0') & "0100";
+			pc_fetch(2) <= (others => '0') & "1000";
+			pc_fetch(3) <= (others => '0') & "1100";
 			pc <= (others => '0');
 			o_PM_Addr <= (others => '0');
-			fetch_state <= fetch_state_p4;
-			
+			fetch_state <= fetch_state_next;
 		else
 			if (instruction_jump = '1') then
-				o_PM_Addr <= jmp_addr(15 downto 2);
-				pc_p4 <= jmp_addr;
-				fetch_state <= fetch_state_p4;
+				o_PM_Addr <= jmp_addr(15 downto 3); -- jmp_addr(2) decides if lower or upper 32bit 
+				pc_fetch(0) <= jmp_addr(31 downto 3) & '0' & jmp_addr(1 downto 0);
+				pc_fetch(1) <= jmp_addr(31 downto 3) & '1' & jmp_addr(1 downto 0);
+				fetch_state <= fetch_state_next;
+				instruction_ready <= '0';
 			else
 				case fetch_state is 
-					when fetch_state_p4 =>
-						fetch_state <= fetch_state_p4;
-						o_PM_Addr <= pc_p4(15 downto 2);
+					when fetch_state_next =>
+						instruction_ready <= '0';
+						fetch_state <= fetch_state_next
+						o_PM_Addr <= pc_fetch(0)(15 downto 3);
 						if (i_PM_DV = '1') then
-							instruction <= i_PM_Data;
-							pc_p4 <= pc_p4 + 4;
-							pc <= pc_p4;
-							if (wait_instruction_ready = '1') then
+							instruction_fetch(0) <= i_PM_Data(31 downto 0);
+							instruction_fetch(1) <= i_PM_Data(63 downto 32);
+							pc(0) <= pc_fetch(0);
+							pc(1) <= pc_fetch(1);
+							instruction_ready <= '1';
+							if (instruction_upper = '0') then
+								fetch_state <= fetch_state_next_2;
+								pc_fetch(2) <= pc_fetch(0) + 4;
+								pc_fetch(3) <= pc_fetch(1) + 4;
+								o_PM_Addr <= pc_fetch(0) + 4
 							else
+								fetch_state <= fetch_state_next;
+								pc_fetch(0) <= pc_fetch(0) + 4;
+								pc_fetch(1) <= pc_fetch(1) + 4;
+							end if;
 						end if;
 					
-					when fetch_state_p8 =>
+					when fetch_state_next_2 =>
 						
 					
 					when fetch_state_idle =>
@@ -198,13 +223,24 @@ begin
 		instruction_jump <= '0';
 		v_instruction_done <= '0';
 		v_instruction_jump <= '0';
+		instruction_upper_latch <= instruction_upper;
+		 
 		
 		if instruction_ready = '1' and wait_instruction_ready = '1' and instruction_jump = '0' then
-			v_instruction <= instruction;
-			v_pc <= pc;
+			v_instruction <= instruction(to_integer(instruction_upper));
+			v_pc <= pc(to_integer(instruction_upper));
+			instruction_upper <= not instruction_upper;
 			v_instruction_valid <= '1';
 			v_instruction_new <= '1';
 			wait_instruction_ready <= '0';
+		elsif instruction_jump = '1' then
+			instruction_upper <= jmp_addr(2);
+		end if;
+		
+		if (i_Sync_nRst = '0') then
+			v_instruction_valid <= '0';
+			instruction_upper <= '0';
+			wait_instruction_ready <= '1';
 		end if;
 		
 		if (v_instruction_valid = '1') then
@@ -498,8 +534,14 @@ begin
 						
 					end case;
 				
-				
-				
+				when "1110011" => -- I-type
+					if v_instruction = "00000000000100000000000001110011" then -- ebreak;
+						ctrl_logic_unit <= '0';
+						v_instruction_done <= '1';
+					else
+						null;
+						v_instruction_done <= '1';
+					end if
 				when others => 
 					null;
 					v_instruction_done <= '1';

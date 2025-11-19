@@ -114,10 +114,10 @@ component ProgRam
 	port 
 	(
 		clka : in std_logic;
-		wea : in std_logic_vector ( 3 downto 0 );
-		addra : in std_logic_vector ( 13 downto 0 );
-		dina : in std_logic_vector ( 31 downto 0 );
-		douta : out std_logic_vector ( 31 downto 0 )
+		wea : in std_logic_vector ( 7 downto 0 );
+		addra : in std_logic_vector ( 12 downto 0 );
+		dina : in std_logic_vector ( 63 downto 0 );
+		douta : out std_logic_vector ( 63 downto 0 )
 	);
 end component;
 
