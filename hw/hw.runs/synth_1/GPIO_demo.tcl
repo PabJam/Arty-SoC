@@ -56,10 +56,7 @@ if {$::dispatch::connected} {
 }
 
 OPTRACE "synth_1" START { ROLLUP_AUTO }
-set_param tcl.collectionResultDisplayLimit 0
-set_param chipscope.maxJobs 6
 set_param general.usePosixSpawnForFork 1
-set_param xicom.use_bs_reader 1
 OPTRACE "Creating in-memory project" START { }
 create_project -in_memory -part xc7s25csga324-1
 
@@ -81,6 +78,7 @@ set_property ip_cache_permissions {read write} [current_project]
 OPTRACE "Creating in-memory project" END { }
 OPTRACE "Adding files" START { }
 read_vhdl -library xil_defaultlib {
+  D:/Projekte/Arty/hw/hw.srcs/sources_1/new/LogicUnit.vhd
   D:/Projekte/Arty/hw/hw.srcs/sources_1/imports/hdl/RGB_controller.vhd
   D:/Projekte/Arty/hw/hw.srcs/sources_1/new/UART_RX_CTRL.vhd
   D:/Projekte/Arty/hw/hw.srcs/sources_1/imports/hdl/UART_TX_CTRL.vhd
@@ -89,6 +87,13 @@ read_vhdl -library xil_defaultlib {
 }
 read_ip -quiet D:/Projekte/Arty/hw/hw.srcs/sources_1/ip/ProgRam/ProgRam.xci
 set_property used_in_implementation false [get_files -all d:/Projekte/Arty/hw/hw.gen/sources_1/ip/ProgRam/ProgRam_ooc.xdc]
+
+read_ip -quiet D:/Projekte/Arty/hw/hw.srcs/sources_1/ip/DataRam/DataRam.xci
+set_property used_in_implementation false [get_files -all d:/Projekte/Arty/hw/hw.gen/sources_1/ip/DataRam/DataRam_ooc.xdc]
+
+read_ip -quiet D:/Projekte/Arty/hw/hw.srcs/sources_1/ip/Add/Add.xci
+
+read_ip -quiet D:/Projekte/Arty/hw/hw.srcs/sources_1/ip/Sub/Sub.xci
 
 OPTRACE "Adding files" END { }
 # Mark all dcp files as not used in implementation to prevent them from being

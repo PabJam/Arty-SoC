@@ -47,7 +47,7 @@ entity LogicUnit is
 		o_DM_Wr_En : out std_logic_vector(3 downto 0);
 		o_DM_DV : out std_logic;
 		i_DM_Data : in std_logic_vector(31 downto 0);
-		i_DM_DV : in std_logic;
+		i_DM_DV : in std_logic
 	);
 end LogicUnit;
 
@@ -58,7 +58,7 @@ component Add
 	(
 		A : in std_logic_vector(31 downto 0);
 		B : in std_logic_vector(31 downto 0);
-		S : out std_logic_vector(31 downto 0); 
+		S : out std_logic_vector(31 downto 0)
 	);
 end component;
 
@@ -67,33 +67,33 @@ component Sub
 	(
 		A : in std_logic_vector(31 downto 0);
 		B : in std_logic_vector(31 downto 0);
-		S : out std_logic_vector(31 downto 0); 
-	)
+		S : out std_logic_vector(31 downto 0)
+	);
 end component;
 
 signal ctrl_logic_unit : std_logic := '0';
 
-type t_reg_array is array (0 to 31) of unsigned(31 downto 0);
+type t_reg_array is array(0 to 31) of unsigned(31 downto 0);
 signal registers : t_reg_array;
 
 type t_fetch_states is (fetch_state_idle, fetch_state_next, fetch_state_next_2);
 signal fetch_state : t_fetch_states;
 
-type t_byte_array_32 is array (0 to 3) of std_logic_vector(7 downto 0);
-type t_2byte_array_32 is array (0 to 1) of std_logic_vector(15 downto 0);
+type t_byte_array_32 is array(0 to 3) of std_logic_vector(7 downto 0);
+type t_2byte_array_32 is array(0 to 1) of std_logic_vector(15 downto 0);
 signal dm_write_data_bytes : t_byte_array_32;
 signal dm_write_data_2bytes : t_2byte_array_32;
 signal dm_read_data_bytes : t_byte_array_32;
 signal dm_read_data_2bytes : t_2byte_array_32;
 signal dm_addr : std_logic_vector(31 downto 0);
 
-type t_pm_fetch_array is (0 to 3) of unsigned(31 downto 0);
-type t_2_u32 is (0 to 1) of unsigned(31 downto 0);
+type t_pm_fetch_array is array(0 to 3) of unsigned(31 downto 0);
+type t_2_u32 is array(0 to 1) of unsigned(31 downto 0);
 
 signal pc : t_2_u32;
 signal jmp_addr : unsigned(31 downto 0);
 signal pc_fetch : t_pm_fetch_array;
-signal instruction : t_2_u32;
+--signal instruction : t_2_u32;
 signal instruction_fetch : t_pm_fetch_array;
 signal instruction_jump : std_logic := '0';
 signal instruction_ready : std_logic := '0';
@@ -162,7 +162,7 @@ begin
 			pc <= (others => '0');
 			o_PM_Addr <= (others => '0');
 			fetch_state <= fetch_state_next;
-		else if ctrl_logic_unit = '1' and i_Take_Ctrl_Logic_Unit = '0' then
+		elsif ctrl_logic_unit = '1' and i_Take_Ctrl_Logic_Unit = '0' then
 			if (instruction_jump = '1') then
 				o_PM_Addr <= jmp_addr(15 downto 3); -- jmp_addr(2) decides if lower or upper 32bit 
 				pc_fetch(0) <= jmp_addr(31 downto 3) & '0' & jmp_addr(1 downto 0);
@@ -251,16 +251,15 @@ begin
 	end if;
 end process;
 
-process(i_Clk)
-	variable v_dm_addr : std_logic_vector(31 downto 0);
+Instructions_Proc : process (i_Clk)
+	variable v_dm_addr : std_logic_vector(31 downto 0) := (others => '0');
 	variable v_instruction_done : std_logic := '0';
 	variable v_instruction_new : std_logic := '0';
 	variable v_instruction_jump : std_logic := '0';
 	variable v_instruction_valid : std_logic := '0';
 	variable v_instruction : unsigned(31 downto 0) := (others => '0');
 	variable v_pc : unsigned(31 downto 0) := (others => '0');
-	variable v_return_ctrl_logic_unit : std_logic;
-	
+	variable v_return_ctrl_logic_unit : std_logic := '0';
 begin
 	if rising_edge(i_Clk) then
 		o_DM_DV <= '0';
@@ -279,7 +278,7 @@ begin
 		elsif ctrl_logic_unit = '1' and i_Take_Ctrl_Logic_Unit = '0' then
 		
 			if instruction_ready = '1' and wait_instruction_ready = '1' and instruction_jump = '0' then
-				v_instruction <= instruction(to_integer(instruction_upper));
+				v_instruction <= instruction_fetch(to_integer(instruction_upper));
 				v_pc <= pc(to_integer(instruction_upper));
 				instruction_upper <= not instruction_upper;
 				v_instruction_valid <= '1';
@@ -289,7 +288,7 @@ begin
 				instruction_upper <= jmp_addr(2);
 			end if;
 			
-			if (v_instruction_valid = '1') then
+			if v_instruction_valid = '1' then
 				
 				case v_instruction(6 downto 0) is --opcode
 					
@@ -302,14 +301,14 @@ begin
 						v_instruction_done <= '1';
 					
 					when "1101111" => -- jal
-						registers(to_integer(v_instruction(11 downto 7))) <= pc_p4;
+						registers(to_integer(v_instruction(11 downto 7))) <= v_pc + 4;
 						jmp_addr <= v_pc + resize(signed(v_instruction(31) & v_instruction(19 downto 12) & v_instruction(20) & v_instruction(30 downto 21) & '0'), v_pc'length);
 						
 						v_instruction_jump <= '1';
 						v_instruction_done <= '1';
 					
 					when "1100111" => -- jalr
-						registers(to_integer(v_instruction(11 downto 7))) <= pc_p4;
+						registers(to_integer(v_instruction(11 downto 7))) <= v_pc + 4;
 						jmp_addr <= signed(registers(to_integer(v_instruction(19 downto 15)))) + resize(signed(v_instruction(31 downto 20)), v_pc'length);
 						-- v_pc(0) has to be 0
 						jmp_addr(0) <= '0';
@@ -368,8 +367,9 @@ begin
 						end case;
 					
 					--TODO important in memory access all writes must have completed bevore a read access can occur
-					when "0000011" -- I-type
+					when "0000011" => -- I-type
 						case v_instruction(14 downto 12) is -- funct3
+							
 							when "000" => -- lb
 								if v_instruction_new = '1' then
 									dm_addr <= std_logic_vector(signed(registers(to_integer(v_instruction(19 downto 15)))) + resize(signed(v_instruction(31 downto 20)), dm_addr'length));
@@ -428,7 +428,8 @@ begin
 							when others =>
 								null;
 								v_instruction_done <= '1';
-					
+						end case;
+						
 					when "0100011" => -- S-type
 						case v_instruction(14 downto 12) is -- funct3
 							
@@ -462,6 +463,7 @@ begin
 							when others =>
 								null;
 								v_instruction_done <= '1';
+						end case;
 					
 					when "0010011" => -- I-type
 						case v_instruction(14 downto 12) is -- funct3
@@ -488,19 +490,19 @@ begin
 								registers(to_integer(v_instruction(11 downto 7))) <= signed(registers(to_integer(v_instruction(19 downto 15)))) xor resize(signed(v_instruction(31 downto 20)), registers(0)'length);
 								v_instruction_done <= '1';
 							
-							when "110" => --ori
+							when "110" => -- ori
 								registers(to_integer(v_instruction(11 downto 7))) <= signed(registers(to_integer(v_instruction(19 downto 15)))) or resize(signed(v_instruction(31 downto 20)), registers(0)'length);
 								v_instruction_done <= '1';
 							
-							when "111" => --andi
+							when "111" => -- andi
 								registers(to_integer(v_instruction(11 downto 7))) <= signed(registers(to_integer(v_instruction(19 downto 15)))) and resize(signed(v_instruction(31 downto 20)), registers(0)'length);
 								v_instruction_done <= '1';
 							
-							when "001" => --slli
-								registers(to_integer(v_instruction(11 downto 7)))(31 downto 0) <= shift_left(registers(to_integer(v_instruction(19 downto 15))), to_integer(v_instruction(24 downto 20));
+							when "001" => -- slli
+								registers(to_integer(v_instruction(11 downto 7)))(31 downto 0) <= shift_left(registers(to_integer(v_instruction(19 downto 15))), to_integer(v_instruction(24 downto 20)));
 								v_instruction_done <= '1';
 							
-							when "101" => --srli/srai
+							when "101" => -- srli/srai
 								if v_instruction(30) = '0' then -- srli
 									registers(to_integer(v_instruction(11 downto 7)))(31 downto 0) <= shift_right(registers(to_integer(v_instruction(19 downto 15))), to_integer(v_instruction(24 downto 20)));	
 								else	-- srai
@@ -587,13 +589,13 @@ begin
 						else
 							null;
 							v_instruction_done <= '1';
-						end if
+						end if;
 					when others => 
 						null;
 						v_instruction_done <= '1';
 				end case;
 			end if; -- v_instruction valid
-			
+		
 			if v_instruction_done = '1' then
 				v_instruction_valid <= '0';
 				wait_instruction_ready <= '1';
@@ -618,6 +620,7 @@ begin
 		
 	end if; -- clk'rising_edge
 end process;
+
 registers(0) <= (others => '0');
 
 end Behavioral;

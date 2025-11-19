@@ -75,14 +75,18 @@ component LogicUnit
 	(
 		i_Clk : in std_logic;
 		i_Sync_nRst : in std_logic;
-		o_PM_Addr : out std_logic_vector(13 downto 0);
-		i_PM_Data : in std_logic_vector(31 downto 0);
+		i_Give_Ctrl_Logic_Unit : in std_logic;
+		i_Take_Ctrl_Logic_Unit : in std_logic;
+		o_Return_Ctrl_Logic_Unit : out std_logic;
+		o_PM_Addr : out std_logic_vector(12 downto 0);
+		i_PM_Data : in std_logic_vector(63 downto 0);
 		i_PM_DV : in std_logic;
 		o_DM_Addr : out std_logic_vector(31 downto 0);
 		o_DM_Data : out std_logic_vector(31 downto 0);
 		o_DM_Wr_En : out std_logic_vector(3 downto 0);
+		o_DM_DV : out std_logic;
 		i_DM_Data : in std_logic_vector(31 downto 0);
-		i_DM_DV : in std_logic;
+		i_DM_DV : in std_logic
 	);
 end component;
 
@@ -293,19 +297,38 @@ signal uart_Fifo_rd_en : std_logic;
 signal uart_Fifo_valid : std_logic;
 
 --ProgRam signals
-type t_progRam_States is (progRam_Idle, progRam_Write, progRam_PreRead, progRam_ReadWait, ProgRam_Read);
-signal progRam_State : t_progRam_States := progRam_Idle;
+type t_progRam_Uart_States is (progRam_Uart_Idle, progRam_Uart_Write, progRam_Uart_PreRead, progRam_Uart_ReadWait, ProgRam_Uart_Read);
+signal progRam_Uart_State : t_progRam_Uart_States := progRam_Uart_Idle;
 
-signal progRam_Addr : std_logic_vector(13 downto 0) := (others => '0');
+type t_pm_lu_states is (pm_lu_state_idle, pm_lu_state_wait_read, pm_lu_state_read);
+signal pm_lu_state : t_pm_lu_states;
+
+signal progRam_Addr : std_logic_vector(12 downto 0) := (others => '0');
+signal progRam_addr_lu : std_logic_vector(12 downto 0) := (others => '0'); 
+signal progRam_addr_uart : std_logic_vector(12 downto 0) := (others => '0'); 
 signal progRam_Wr_Cntr : unsigned(15 downto 0) := (others => '0');
 signal progRam_Rd_Cntr : unsigned(15 downto 0) := (others => '0');
-signal progRam_Wr_En : std_logic_vector(3 downto 0) := (others => '0'); -- can also write single bytes instead of full 32 bit
-signal progRam_Data_In : std_logic_vector(31 downto 0); 
-signal progRam_Data_Out : std_logic_vector(31 downto 0); 
+signal progRam_Wr_En : std_logic_vector(7 downto 0) := (others => '0'); -- can also write single bytes instead of full 64 bit
+signal progRam_Data_In : std_logic_vector(63 downto 0); 
+signal progRam_Data_Out : std_logic_vector(63 downto 0); 
+signal progRam_dv : std_logic := '0';
 
-type t_byte_array_32 is array (0 to 3) of std_logic_vector(7 downto 0);
-signal progRam_Data_In_Bytes : t_byte_array_32;
-signal progRam_Data_Out_Bytes : t_byte_array_32;
+type t_8byte_array is array (0 to 7) of std_logic_vector(7 downto 0);
+signal progRam_Data_In_Bytes : t_8byte_array;
+signal progRam_Data_Out_Bytes : t_8byte_array;
+
+--DataRam signals
+signal dm_addr : std_logic_vector(13 downto 0) := (others => '0');
+signal dm_data_in : std_logic_vector(31 downto 0) := (others => '0');
+signal dm_data_out : std_logic_vector(31 downto 0) := (others => '0');
+signal dm_wr_en : std_logic_vector(3 downto 0) := (others => '0');
+signal dm_dv : std_logic := '0';
+
+--Logic Unit Signal
+signal ctrl_logic_unit : std_logic := '0';
+signal give_ctrl_logic_unit : std_logic := '0';
+signal take_ctrl_logic_unit : std_logic := '0';
+signal sync_nRst_lu : std_logic := '0';
 
 --attribute mark_debug : string;
 --attribute mark_debug of progRam_Data_In : signal is "true";
@@ -407,23 +430,56 @@ port map
 
 uart_RX <= i_Uart_RXD;
 
---Inst_UART_Fifo: Uart_Fifo
---port map
---(
---	clk => clk,
---    srst => btnDetect,
---    din(7 downto 0) => uart_RX_Data(7 downto 0),
---    wr_en => uart_RX_DV,
---    rd_en => uart_Fifo_rd_en,
---    dout => uart_TX_Data,
---    full => open,
---    empty => open,
---    valid => uart_Fifo_valid
---);
---
---uart_Fifo_rd_en <= '1' when uart_Fifo_valid = '1' and uart_TX_Active = '0' else '0'; 
+----------------------------------------------------------
+------              Logic Unit Control             -------
+----------------------------------------------------------
 
-inst_ProgRam: progRam
+inst_LogicUnit: LogicUnit
+port map
+(
+	i_Clk => clk,
+	i_Sync_nRst => sync_nRst_lu,
+	i_Give_Ctrl_Logic_Unit => give_ctrl_logic_unit,
+	i_Take_Ctrl_Logic_Unit => take_ctrl_logic_unit,
+	o_Return_Ctrl_Logic_Unit => open,
+	o_PM_Addr => progRam_addr_lu,
+	i_PM_Data => progRam_Data_Out,
+	i_PM_DV => progRam_dv,
+	o_DM_Addr => dm_addr,
+	o_DM_Data => dm_data_in,
+	o_DM_Wr_En => dm_wr_en,
+	o_DM_DV => open,
+	i_DM_Data => dm_data_out,
+	i_DM_DV => dm_dv
+);
+
+
+Ctrl_Lu_Proc : process(clk)
+begin
+	if rising_edge(clk) then
+		take_ctrl_logic_unit <= '0';
+		give_ctrl_logic_unit <= '0';
+		sync_nRst_lu <= '1';
+	
+		if (btnReg(3)='0' and btnDeBnc(3)='1') then
+			sync_nRst_lu <= '0';
+		end if;
+		if (btnReg(2)='0' and btnDeBnc(2)='1') then
+			take_ctrl_logic_unit <= '1';
+			ctrl_logic_unit <= '0';
+		end if;
+		if (btnReg(1)='0' and btnDeBnc(1)='1') then
+			give_ctrl_logic_unit <= '1';
+			ctrl_logic_unit <= '1';
+		end if;
+		
+	end if;
+end process;
+----------------------------------------------------------
+------              PM Bram Control                -------
+----------------------------------------------------------
+
+inst_ProgRam: ProgRam
 port map
 (
 	clka => clk,
@@ -439,57 +495,62 @@ begin
 	
 		progRam_Wr_En <= (others => '0'); -- default assignment
 		uart_TX_DV <= '0';
-		case progRam_State is
-			
-			when progRam_Idle =>
-				if uart_RX_DV = '1' then
-					progRam_State <= progRam_Write;	
-				elsif btnReg(0)='0' and btnDeBnc(0)='1' and progRam_Wr_Cntr /= 0 then -- button 0 is pressed 
-					progRam_State <= progRam_PreRead;
-					progRam_Wr_Cntr <= progRam_Wr_Cntr - 1;
-					progRam_Rd_Cntr <= (others => '0');
-				else
-					progRam_State <= progRam_Idle;
-				end if;
+		
+		if ctrl_logic_unit = '0' then
+			case progRam_Uart_State is
 				
-			when progRam_Write =>
-				if progRam_Wr_Cntr < x"FFFF" then
-					progRam_Data_In_Bytes(to_integer(progRam_Wr_Cntr(1 downto 0)))(7 downto 0) <= uart_RX_Data(7 downto 0);
-					progRam_Addr(13 downto 0) <=  std_logic_vector(progRam_Wr_Cntr(15 downto 2));
-					progRam_Wr_En(to_integer(progRam_Wr_Cntr(1 downto 0))) <= '1'; 
-					progRam_Wr_Cntr <= progRam_Wr_Cntr + 1;
-				end if;
-			
-				progRam_State <= progRam_Idle;
-			
-			-- Always takes a clk cycle to read data even if address didn't change
-			-- could be improved to read all 4 bytes in read and only change state when addres changes
-			when progRam_PreRead => 
-				progRam_Addr(13 downto 0) <= std_logic_vector(progRam_Rd_Cntr(15 downto 2));
-				progRam_State <= ProgRam_ReadWait;
-			
-			when progRam_ReadWait =>
-				progRam_State <= ProgRam_Read;
-			
-			when progRam_Read =>
-				if uart_TX_Active = '0' then
-					uart_TX_DV <= '1';
-					uart_TX_Data(7 downto 0) <= progRam_Data_Out_Bytes(to_integer(progRam_Rd_Cntr(1 downto 0)))(7 downto 0);
-					if (progRam_Wr_Cntr /= x"0000") then
-						progRam_Rd_Cntr <= progRam_Rd_Cntr + 1;
+				when progRam_Uart_Idle =>
+					if uart_RX_DV = '1' then
+						progRam_Uart_State <= progRam_Uart_Write;	
+					elsif btnReg(0)='0' and btnDeBnc(0)='1' and progRam_Wr_Cntr /= 0 then -- button 0 is pressed 
+						progRam_Uart_State <= progRam_Uart_PreRead;
 						progRam_Wr_Cntr <= progRam_Wr_Cntr - 1;
-						progRam_State <= progRam_PreRead;
+						progRam_Rd_Cntr <= (others => '0');
 					else
-						progRam_State <= progRam_Idle;
+						progRam_Uart_State <= progRam_Uart_Idle;
 					end if;
-				else
-					progRam_State <= ProgRam_Read;
-				end if;
+					
+				when progRam_Uart_Write =>
+					if progRam_Wr_Cntr < x"FFFF" then
+						progRam_Data_In_Bytes(to_integer(progRam_Wr_Cntr(2 downto 0)))(7 downto 0) <= uart_RX_Data(7 downto 0);
+						progRam_Addr(12 downto 0) <=  std_logic_vector(progRam_Wr_Cntr(15 downto 3));
+						progRam_Wr_En(to_integer(progRam_Wr_Cntr(2 downto 0))) <= '1'; 
+						progRam_Wr_Cntr <= progRam_Wr_Cntr + 1;
+					end if;
 				
-			when others => -- should not be reached
-				progRam_State <= progRam_Idle;
-			
-		end case;
+					progRam_Uart_State <= progRam_Uart_Idle;
+				
+				-- Always takes a clk cycle to read data even if address didn't change
+				-- could be improved to read all 4 bytes in read and only change state when addres changes
+				when progRam_Uart_PreRead => 
+					progRam_Addr(12 downto 0) <= std_logic_vector(progRam_Rd_Cntr(15 downto 3));
+					progRam_Uart_State <= ProgRam_Uart_ReadWait;
+				
+				when progRam_Uart_ReadWait =>
+					progRam_Uart_State <= ProgRam_Uart_Read;
+				
+				when progRam_Uart_Read =>
+					if uart_TX_Active = '0' then
+						uart_TX_DV <= '1';
+						uart_TX_Data(7 downto 0) <= progRam_Data_Out_Bytes(to_integer(progRam_Rd_Cntr(2 downto 0)))(7 downto 0);
+						if (progRam_Wr_Cntr /= x"0000") then
+							progRam_Rd_Cntr <= progRam_Rd_Cntr + 1;
+							progRam_Wr_Cntr <= progRam_Wr_Cntr - 1;
+							progRam_Uart_State <= progRam_Uart_PreRead;
+						else
+							progRam_State <= progRam_Uart_Idle;
+						end if;
+					else
+						progRam_Uart_State <= ProgRam_Uart_Read;
+					end if;
+					
+				when others => -- should not be reached
+					progRam_Uart_State <= progRam_Uart_Idle;
+				
+			end case;
+		else
+			null; -- here comes the statemachine for reading the pm from the logic unit
+		end if;
 	end if;
 end process;
 
@@ -497,11 +558,35 @@ progRam_Data_In(7 downto 0) <= progRam_Data_In_Bytes(0)(7 downto 0);
 progRam_Data_In(15 downto 8) <= progRam_Data_In_Bytes(1)(7 downto 0);
 progRam_Data_In(23 downto 16) <= progRam_Data_In_Bytes(2)(7 downto 0);
 progRam_Data_In(31 downto 24) <= progRam_Data_In_Bytes(3)(7 downto 0);
+progRam_Data_In(39 downto 32) <= progRam_Data_In_Bytes(4)(7 downto 0);
+progRam_Data_In(47 downto 40) <= progRam_Data_In_Bytes(5)(7 downto 0);
+progRam_Data_In(55 downto 48) <= progRam_Data_In_Bytes(6)(7 downto 0);
+progRam_Data_In(63 downto 56) <= progRam_Data_In_Bytes(7)(7 downto 0);
 
 progRam_Data_Out_Bytes(0)(7 downto 0) <= progRam_Data_Out(7 downto 0);
 progRam_Data_Out_Bytes(1)(7 downto 0) <= progRam_Data_Out(15 downto 8);
 progRam_Data_Out_Bytes(2)(7 downto 0) <= progRam_Data_Out(23 downto 16);
 progRam_Data_Out_Bytes(3)(7 downto 0) <= progRam_Data_Out(31 downto 24);
+progRam_Data_Out_Bytes(4)(7 downto 0) <= progRam_Data_Out(39 downto 32);
+progRam_Data_Out_Bytes(5)(7 downto 0) <= progRam_Data_Out(47 downto 40);
+progRam_Data_Out_Bytes(6)(7 downto 0) <= progRam_Data_Out(55 downto 48);
+progRam_Data_Out_Bytes(7)(7 downto 0) <= progRam_Data_Out(63 downto 56);
+
+
+----------------------------------------------------------
+------              DM Bram Control             -------
+----------------------------------------------------------
+
+inst_DataRam: DataRam
+port map
+(
+	clka => clk,
+	wea => dm_wr_en,
+	addra => dm_addr,
+	dina => dm_data_in,
+	douta => dm_data_out
+);
+
 
 ----------------------------------------------------------
 ------            RGB LED Control                  -------
