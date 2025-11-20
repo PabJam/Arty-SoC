@@ -318,7 +318,7 @@ signal progRam_Data_In_Bytes : t_8byte_array;
 signal progRam_Data_Out_Bytes : t_8byte_array;
 
 --DataRam signals
-signal dm_addr : std_logic_vector(13 downto 0) := (others => '0');
+signal dm_addr : std_logic_vector(31 downto 0) := (others => '0');
 signal dm_data_in : std_logic_vector(31 downto 0) := (others => '0');
 signal dm_data_out : std_logic_vector(31 downto 0) := (others => '0');
 signal dm_wr_en : std_logic_vector(3 downto 0) := (others => '0');
@@ -538,7 +538,7 @@ begin
 							progRam_Wr_Cntr <= progRam_Wr_Cntr - 1;
 							progRam_Uart_State <= progRam_Uart_PreRead;
 						else
-							progRam_State <= progRam_Uart_Idle;
+							progRam_Uart_State <= progRam_Uart_Idle;
 						end if;
 					else
 						progRam_Uart_State <= ProgRam_Uart_Read;
@@ -582,7 +582,7 @@ port map
 (
 	clka => clk,
 	wea => dm_wr_en,
-	addra => dm_addr,
+	addra => dm_addr(13 downto 0),
 	dina => dm_data_in,
 	douta => dm_data_out
 );

@@ -100,8 +100,8 @@ signal instruction_ready : std_logic := '0';
 signal instruction_loaded : std_logic := '0';
 signal instruction_p4_ready : std_logic := '0';
 signal wait_instruction_ready : std_logic := '1';
-signal instruction_upper : unsigned(0 downto 0) := '0';
-signal instruction_upper_latch : unsigned(0 downto 0) := '0';
+signal instruction_upper : unsigned(0 downto 0) := (others => '0');
+signal instruction_upper_latch : unsigned(0 downto 0) := (others => '0');
 signal v_instruction_valid : std_logic := '0';
 signal v_instruction_new : std_logic := '0';
 
@@ -152,19 +152,19 @@ dm_read_data_2bytes(1) <= i_DM_Data(31 downto 16);
 o_DM_Addr <= dm_addr;
 
 Instruction_Fetch_Proc : process(i_Clk)
+	variable v_addr_p8 : unsigned(31 downto 0);
 begin
 	if rising_edge(i_Clk) then
 		if (i_Sync_nRst = '0') then
-			pc_fetch(0) <= (others => '0') & "0000";
-			pc_fetch(1) <= (others => '0') & "0100";
-			pc_fetch(2) <= (others => '0') & "1000";
-			pc_fetch(3) <= (others => '0') & "1100";
-			pc <= (others => '0');
+			pc_fetch(0) <= x"0000000" & "0000";
+			pc_fetch(1) <= x"0000000" & "0100";
+			pc_fetch(2) <= x"0000000" & "1000";
+			pc_fetch(3) <= x"0000000" & "1100";
 			o_PM_Addr <= (others => '0');
 			fetch_state <= fetch_state_next;
 		elsif ctrl_logic_unit = '1' and i_Take_Ctrl_Logic_Unit = '0' then
 			if (instruction_jump = '1') then
-				o_PM_Addr <= jmp_addr(15 downto 3); -- jmp_addr(2) decides if lower or upper 32bit 
+				o_PM_Addr <= std_logic_vector(jmp_addr(15 downto 3)); -- jmp_addr(2) decides if lower or upper 32bit 
 				pc_fetch(0) <= jmp_addr(31 downto 3) & '0' & jmp_addr(1 downto 0);
 				pc_fetch(1) <= jmp_addr(31 downto 3) & '1' & jmp_addr(1 downto 0);
 				fetch_state <= fetch_state_next;
@@ -173,21 +173,22 @@ begin
 				case fetch_state is 
 					when fetch_state_next =>
 						instruction_ready <= '0';
-						o_PM_Addr <= pc_fetch(0)(15 downto 3);
+						o_PM_Addr <= std_logic_vector(pc_fetch(0)(15 downto 3));
 						if i_PM_DV = '1' then
-							instruction_fetch(0) <= i_PM_Data(31 downto 0);
-							instruction_fetch(1) <= i_PM_Data(63 downto 32);
+							instruction_fetch(0) <= unsigned(i_PM_Data(31 downto 0));
+							instruction_fetch(1) <= unsigned(i_PM_Data(63 downto 32));
 							pc(0) <= pc_fetch(0);
 							pc(1) <= pc_fetch(1);
 							instruction_ready <= '1';
-							o_PM_Addr <= std_logic_vector(pc_fetch(0) + 8)(15 downto 3);
-							if (instruction_upper = '0') then
+							v_addr_p8 := pc_fetch(0) + 8;
+							o_PM_Addr <= std_logic_vector(v_addr_p8(15 downto 3));
+							if (instruction_upper = "0") then
 								fetch_state <= fetch_state_next_2;
-								pc_fetch(2) <= pc_fetch(0) + 8;
+								pc_fetch(2) <= v_addr_p8;
 								pc_fetch(3) <= pc_fetch(1) + 8;
 							else
 								fetch_state <= fetch_state_next;
-								pc_fetch(0) <= pc_fetch(0) + 8;
+								pc_fetch(0) <= v_addr_p8;
 								pc_fetch(1) <= pc_fetch(1) + 8;
 							end if;
 						else
@@ -196,25 +197,26 @@ begin
 					
 					when fetch_state_next_2 =>
 						instruction_ready <= '1';
-						o_PM_Addr <= pc_fetch(2)(15 downto 3);
+						o_PM_Addr <= std_logic_vector(pc_fetch(2)(15 downto 3));
 						if i_PM_DV = '1' then
-							if instruction_upper = '0' and instruction_upper_latch = '1' then
-								instruction_fetch(0) <= i_PM_Data(31 downto 0);
-								instruction_fetch(1) <= i_PM_Data(63 downto 32);
+							if instruction_upper = "0" and instruction_upper_latch = "1" then
+								instruction_fetch(0) <= unsigned(i_PM_Data(31 downto 0));
+								instruction_fetch(1) <= unsigned(i_PM_Data(63 downto 32));
 								pc_fetch(0) <= pc_fetch(2);
 								pc_fetch(1) <= pc_fetch(3);
 								pc(0) <= pc_fetch(2);
 								pc(1) <= pc_fetch(3);
-								pc_fetch(2) <= pc_fetch(2) + 8;
+								v_addr_p8 := pc_fetch(2) + 8;
+								pc_fetch(2) <= v_addr_p8;
 								pc_fetch(3) <= pc_fetch(3) + 8;
-								o_PM_Addr <= std_logic_vector(pc_fetch(2) + 8)(15 downto 3);
+								o_PM_Addr <= std_logic_vector(v_addr_p8(15 downto 3));
 								fetch_state <= fetch_state_next_2;
 							else
-								instruction_fetch(2) <= i_PM_Data(31 downto 0);
-								instruction_fetch(3) <= i_PM_Data(63 downto 32);
+								instruction_fetch(2) <= unsigned(i_PM_Data(31 downto 0));
+								instruction_fetch(3) <= unsigned(i_PM_Data(63 downto 32));
 								fetch_state <= fetch_state_idle;
 							end if;
-						elsif instruction_upper = '0' and instruction_upper_latch = '1' then
+						elsif instruction_upper = "0" and instruction_upper_latch = "1" then
 							instruction_ready <= '0';
 							pc_fetch(0) <= pc_fetch(2);
 							pc_fetch(1) <= pc_fetch(3);
@@ -225,7 +227,7 @@ begin
 						
 					when fetch_state_idle =>
 						instruction_ready <= '1';
-						if instruction_upper = '0' and instruction_upper_latch = '1' then
+						if instruction_upper = "0" and instruction_upper_latch = "1" then
 							pc_fetch(0) <= pc_fetch(2);
 							pc_fetch(1) <= pc_fetch(3);
 							pc(0) <= pc_fetch(2);
@@ -233,9 +235,10 @@ begin
 							instruction_fetch(0) <= instruction_fetch(2);
 							instruction_fetch(1) <= instruction_fetch(3);
 							fetch_state <= fetch_state_next_2;
-							pc_fetch(2) <= pc_fetch(2) + 8;
+							v_addr_p8 := pc_fetch(2) + 8;
+							pc_fetch(2) <= v_addr_p8;
 							pc_fetch(3) <= pc_fetch(3) + 8;
-							o_PM_Addr <= std_logic_vector(pc_fetch(2) + 8)(15 downto 3);
+							o_PM_Addr <= std_logic_vector(v_addr_p8(15 downto 3));
 						else
 							fetch_state <= fetch_state_idle;
 						end if;
@@ -260,32 +263,33 @@ Instructions_Proc : process (i_Clk)
 	variable v_instruction : unsigned(31 downto 0) := (others => '0');
 	variable v_pc : unsigned(31 downto 0) := (others => '0');
 	variable v_return_ctrl_logic_unit : std_logic := '0';
+	variable v_immediate : unsigned(31 downto 0);
 begin
 	if rising_edge(i_Clk) then
 		o_DM_DV <= '0';
 		o_DM_Wr_En <= (others => '0');
-		v_instruction_new <= '0';
+		v_instruction_new := '0';
 		instruction_jump <= '0';
-		v_instruction_done <= '0';
-		v_instruction_jump <= '0';
+		v_instruction_done := '0';
+		v_instruction_jump := '0';
 		instruction_upper_latch <= instruction_upper;
-		v_return_ctrl_logic_unit <= '0';
+		v_return_ctrl_logic_unit := '0';
 		o_Return_Ctrl_Logic_Unit <= '0';
 		
 		if (i_Sync_nRst = '0') then
-			instruction_upper <= '0';
+			instruction_upper <= (others => '0');
 			wait_instruction_ready <= '1';
 		elsif ctrl_logic_unit = '1' and i_Take_Ctrl_Logic_Unit = '0' then
 		
 			if instruction_ready = '1' and wait_instruction_ready = '1' and instruction_jump = '0' then
-				v_instruction <= instruction_fetch(to_integer(instruction_upper));
-				v_pc <= pc(to_integer(instruction_upper));
+				v_instruction := instruction_fetch(to_integer(instruction_upper));
+				v_pc := pc(to_integer(instruction_upper));
 				instruction_upper <= not instruction_upper;
-				v_instruction_valid <= '1';
-				v_instruction_new <= '1';
+				v_instruction_valid := '1';
+				v_instruction_new := '1';
 				wait_instruction_ready <= '0';
 			elsif instruction_jump = '1' then
-				instruction_upper <= jmp_addr(2);
+				instruction_upper(0) <= jmp_addr(2);
 			end if;
 			
 			if v_instruction_valid = '1' then
@@ -294,75 +298,83 @@ begin
 					
 					when "0110111" => -- lui
 						registers(to_integer(v_instruction(11 downto 7))) <= v_instruction(31 downto 12) & "000000000000";
-						v_instruction_done <= '1';
+						v_instruction_done := '1';
 					
 					when "0010111" => -- auipc
-						registers(to_integer(v_instruction(11 downto 7))) <= v_pc + v_instruction(31 downto 12) & "000000000000";
-						v_instruction_done <= '1';
+						registers(to_integer(v_instruction(11 downto 7))) <= v_pc + (v_instruction(31 downto 12) & "000000000000");
+						v_instruction_done := '1';
 					
 					when "1101111" => -- jal
 						registers(to_integer(v_instruction(11 downto 7))) <= v_pc + 4;
-						jmp_addr <= v_pc + resize(signed(v_instruction(31) & v_instruction(19 downto 12) & v_instruction(20) & v_instruction(30 downto 21) & '0'), v_pc'length);
+						v_immediate := unsigned(resize(signed(v_instruction(31) & v_instruction(19 downto 12) & v_instruction(20) & v_instruction(30 downto 21) & '0'), v_pc'length));
+						jmp_addr <= v_pc + v_immediate;
 						
-						v_instruction_jump <= '1';
-						v_instruction_done <= '1';
+						v_instruction_jump := '1';
+						v_instruction_done := '1';
 					
 					when "1100111" => -- jalr
 						registers(to_integer(v_instruction(11 downto 7))) <= v_pc + 4;
-						jmp_addr <= signed(registers(to_integer(v_instruction(19 downto 15)))) + resize(signed(v_instruction(31 downto 20)), v_pc'length);
+						v_immediate := unsigned(resize(signed(v_instruction(31 downto 20)), v_pc'length));
+						jmp_addr <= registers(to_integer(v_instruction(19 downto 15))) + v_immediate;
 						-- v_pc(0) has to be 0
 						jmp_addr(0) <= '0';
-						v_instruction_jump <= '1';
-						v_instruction_done <= '1';
+						v_instruction_jump := '1';
+						v_instruction_done := '1';
 					
 					when "1100011" => -- B-type
 						case v_instruction(14 downto 12) is -- funct3
 							
 							when "000" => -- beq
 								if registers(to_integer(v_instruction(19 downto 15))) = registers(to_integer(v_instruction(24 downto 20))) then
-									jmp_addr <= v_pc + resize(signed(v_instruction(31) & v_instruction(7) & v_instruction(30 downto 25) & v_instruction(11 downto 8) & '0'), v_pc'length);
-									v_instruction_jump <= '1';
+									v_immediate := unsigned(resize(signed(v_instruction(31) & v_instruction(7) & v_instruction(30 downto 25) & v_instruction(11 downto 8) & '0'), v_pc'length));
+									jmp_addr <= v_pc + v_immediate;
+									v_instruction_jump := '1';
 								end if;
-								v_instruction_done <= '1';
+								v_instruction_done := '1';
 									
 							when "001" => -- bne
 								if registers(to_integer(v_instruction(19 downto 15))) /= registers(to_integer(v_instruction(24 downto 20))) then
-									jmp_addr <= v_pc + resize(signed(v_instruction(31) & v_instruction(7) & v_instruction(30 downto 25) & v_instruction(11 downto 8) & '0'), v_pc'length);
-									v_instruction_jump <= '1';
+									v_immediate := unsigned(resize(signed(v_instruction(31) & v_instruction(7) & v_instruction(30 downto 25) & v_instruction(11 downto 8) & '0'), v_pc'length));
+									jmp_addr <= v_pc + v_immediate;
+									v_instruction_jump := '1';
 								end if;
-								v_instruction_done <= '1';
+								v_instruction_done := '1';
 							
 							when "100" => -- blt
 								if signed(registers(to_integer(v_instruction(19 downto 15)))) < signed(registers(to_integer(v_instruction(24 downto 20)))) then
-									jmp_addr <= v_pc + resize(signed(v_instruction(31) & v_instruction(7) & v_instruction(30 downto 25) & v_instruction(11 downto 8) & '0'), v_pc'length);
-									v_instruction_jump <= '1';
+									v_immediate := unsigned(resize(signed(v_instruction(31) & v_instruction(7) & v_instruction(30 downto 25) & v_instruction(11 downto 8) & '0'), v_pc'length));
+									jmp_addr <= v_pc + v_immediate;
+									v_instruction_jump := '1';
 								end if;
-								v_instruction_done <= '1';
+								v_instruction_done := '1';
 							
 							when "101" => -- bge
 								if signed(registers(to_integer(v_instruction(19 downto 15)))) >= signed(registers(to_integer(v_instruction(24 downto 20)))) then
-									jmp_addr <= v_pc + resize(signed(v_instruction(31) & v_instruction(7) & v_instruction(30 downto 25) & v_instruction(11 downto 8) & '0'), v_pc'length);
-									v_instruction_jump <= '1';
+									v_immediate := unsigned(resize(signed(v_instruction(31) & v_instruction(7) & v_instruction(30 downto 25) & v_instruction(11 downto 8) & '0'), v_pc'length));
+									jmp_addr <= v_pc + v_immediate;
+									v_instruction_jump := '1';
 								end if;
-								v_instruction_done <= '1';
+								v_instruction_done := '1';
 								
 							when "110" => -- bltu
 								if unsigned(registers(to_integer(v_instruction(19 downto 15)))) < unsigned(registers(to_integer(v_instruction(24 downto 20)))) then
-									jmp_addr <= v_pc + resize(signed(v_instruction(31) & v_instruction(7) & v_instruction(30 downto 25) & v_instruction(11 downto 8) & '0'), v_pc'length);
-									v_instruction_jump <= '1';
+									v_immediate := unsigned(resize(signed(v_instruction(31) & v_instruction(7) & v_instruction(30 downto 25) & v_instruction(11 downto 8) & '0'), v_pc'length));
+									jmp_addr <= v_pc + v_immediate;
+									v_instruction_jump := '1';
 								end if;
-								v_instruction_done <= '1';
+								v_instruction_done := '1';
 							
 							when "111" => -- bgeu
 								if unsigned(registers(to_integer(v_instruction(19 downto 15)))) >= unsigned(registers(to_integer(v_instruction(24 downto 20)))) then
-									jmp_addr <= v_pc + resize(signed(v_instruction(31) & v_instruction(7) & v_instruction(30 downto 25) & v_instruction(11 downto 8) & '0'), v_pc'length);
-									v_instruction_jump <= '1';
+									v_immediate := unsigned(resize(signed(v_instruction(31) & v_instruction(7) & v_instruction(30 downto 25) & v_instruction(11 downto 8) & '0'), v_pc'length));
+									jmp_addr <= v_pc + v_immediate;
+									v_instruction_jump := '1';
 								end if;
-								v_instruction_done <= '1';
+								v_instruction_done := '1';
 							
 							when others =>
 								null;
-								v_instruction_done <= '1';
+								v_instruction_done := '1';
 								
 						end case;
 					
@@ -372,147 +384,163 @@ begin
 							
 							when "000" => -- lb
 								if v_instruction_new = '1' then
-									dm_addr <= std_logic_vector(signed(registers(to_integer(v_instruction(19 downto 15)))) + resize(signed(v_instruction(31 downto 20)), dm_addr'length));
+									v_immediate := unsigned(resize(signed(v_instruction(31 downto 20)), dm_addr'length));
+									dm_addr <= std_logic_vector(registers(to_integer(v_instruction(19 downto 15))) + v_immediate);
 									o_DM_DV <= '1';
 								elsif i_DM_DV = '1' then
-									registers(to_integer(v_instruction(11 downto 7))) <= resize(signed(dm_read_data_bytes(to_integer(dm_addr(1 downto 0)))), registers(0)'length);
-									v_instruction_done <= '1';
+									registers(to_integer(v_instruction(11 downto 7))) <= unsigned(resize(signed(dm_read_data_bytes(to_integer(unsigned(dm_addr(1 downto 0))))), registers(0)'length));
+									v_instruction_done := '1';
 								else
 									null; -- wait until load complete
 								end if;
 							
 							when "001" => -- lh
 								if v_instruction_new = '1' then
-									dm_addr <= std_logic_vector(signed(registers(to_integer(v_instruction(19 downto 15)))) + resize(signed(v_instruction(31 downto 20)), dm_addr'length));
+									v_immediate := unsigned(resize(signed(v_instruction(31 downto 20)), dm_addr'length));
+									dm_addr <= std_logic_vector(registers(to_integer(v_instruction(19 downto 15))) + v_immediate);
 									o_DM_DV <= '1';
 								elsif i_DM_DV = '1' then
-									registers(to_integer(v_instruction(11 downto 7))) <= resize(signed(dm_read_data_2bytes(to_integer(dm_addr(1)))), registers(0)'length);
-									v_instruction_done <= '1';
+									registers(to_integer(v_instruction(11 downto 7))) <= unsigned(resize(signed(dm_read_data_2bytes(to_integer(unsigned(dm_addr(1 downto 1))))), registers(0)'length));
+									v_instruction_done := '1';
 								else
 									null; -- wait until load complete
 								end if;
 								
 							when "010" => -- lw
 								if v_instruction_new = '1' then
-									dm_addr <= std_logic_vector(signed(registers(to_integer(v_instruction(19 downto 15)))) + resize(signed(v_instruction(31 downto 20)), dm_addr'length));
+									v_immediate := unsigned(resize(signed(v_instruction(31 downto 20)), dm_addr'length));
+									dm_addr <= std_logic_vector(registers(to_integer(v_instruction(19 downto 15))) + v_immediate);
 									o_DM_DV <= '1';
 								elsif i_DM_DV = '1' then
 									registers(to_integer(v_instruction(11 downto 7))) <= unsigned(i_DM_Data);
-									v_instruction_done <= '1';
+									v_instruction_done := '1';
 								else
 									null; -- wait until load complete
 								end if;
 							
 							when "100" => -- lbu
 								if v_instruction_new = '1' then
-									dm_addr <= std_logic_vector(signed(registers(to_integer(v_instruction(19 downto 15)))) + resize(signed(v_instruction(31 downto 20)), dm_addr'length));
+									v_immediate := unsigned(resize(signed(v_instruction(31 downto 20)), dm_addr'length));
+									dm_addr <= std_logic_vector(registers(to_integer(v_instruction(19 downto 15))) + v_immediate);
 									o_DM_DV <= '1';
 								elsif i_DM_DV = '1' then
-									registers(to_integer(v_instruction(11 downto 7))) <= resize(unsigned(dm_read_data_bytes(to_integer(dm_addr(1 downto 0)))), registers(0)'length);
-									v_instruction_done <= '1';
+									registers(to_integer(v_instruction(11 downto 7))) <= resize(unsigned(dm_read_data_bytes(to_integer(unsigned(dm_addr(1 downto 0))))), registers(0)'length);
+									v_instruction_done := '1';
 								else
 									null; -- wait until load complete
 								end if;
 							
 							when "101" => -- lhu
 								if v_instruction_new = '1' then
-									dm_addr <= std_logic_vector(signed(registers(to_integer(v_instruction(19 downto 15)))) + resize(signed(v_instruction(31 downto 20)), dm_addr'length));
+									v_immediate := unsigned(resize(signed(v_instruction(31 downto 20)), dm_addr'length));
+									dm_addr <= std_logic_vector(registers(to_integer(v_instruction(19 downto 15))) + v_immediate);
 									o_DM_DV <= '1';
 								elsif i_DM_DV = '1' then
-									registers(to_integer(v_instruction(11 downto 7))) <= resize(unsigned(dm_read_data_2bytes(to_integer(dm_addr(1)))), registers(0)'length);
-									v_instruction_done <= '1';
+									registers(to_integer(v_instruction(11 downto 7))) <= resize(unsigned(dm_read_data_2bytes(to_integer(unsigned(dm_addr(1 downto 1))))), registers(0)'length);
+									v_instruction_done := '1';
 								else
 									null; -- wait until load complete
 								end if;
 							
 							when others =>
 								null;
-								v_instruction_done <= '1';
+								v_instruction_done := '1';
 						end case;
 						
 					when "0100011" => -- S-type
 						case v_instruction(14 downto 12) is -- funct3
 							
 							when "000" => -- sb
-								v_dm_addr <= std_logic_vector(signed(registers(to_integer(v_instruction(19 downto 15)))) + resize(signed(v_instruction(31 downto 25) & v_instruction(11 downto 7)), dm_addr'length));
+								v_immediate(11 downto 0) := v_instruction(31 downto 25) & v_instruction(11 downto 7);
+								v_immediate := unsigned(resize(signed(v_immediate(11 downto 0)), dm_addr'length));
+								v_dm_addr := std_logic_vector(v_immediate + registers(to_integer(v_instruction(19 downto 15))));
 								dm_addr <= v_dm_addr;
-								dm_write_data_bytes(to_integer(v_dm_addr(1 downto 0)))(7 downto 0) <= registers(to_integer(v_instruction(24 downto 20)))(7 downto 0);  
-								o_DM_Wr_En(to_integer(v_dm_addr(1 downto 0))) <= '1';
+								dm_write_data_bytes(to_integer(unsigned(v_dm_addr(1 downto 0))))(7 downto 0) <= std_logic_vector(registers(to_integer(v_instruction(24 downto 20)))(7 downto 0));  
+								o_DM_Wr_En(to_integer(unsigned(v_dm_addr(1 downto 0)))) <= '1';
 								o_DM_DV <= '1';	
-								v_instruction_done <= '1';
+								v_instruction_done := '1';
 								
 							when "001" => -- sh
-								v_dm_addr <= std_logic_vector(signed(registers(to_integer(v_instruction(19 downto 15)))) + resize(signed(v_instruction(31 downto 25) & v_instruction(11 downto 7)), dm_addr'length));
+								v_immediate(11 downto 0) := v_instruction(31 downto 25) & v_instruction(11 downto 7);
+								v_immediate := unsigned(resize(signed(v_immediate(11 downto 0)), dm_addr'length));
+								v_dm_addr := std_logic_vector(v_immediate + registers(to_integer(v_instruction(19 downto 15))));
 								dm_addr <= v_dm_addr;
-								dm_write_data_2bytes(to_integer(v_dm_addr(1)))(15 downto 0) <= registers(to_integer(v_instruction(24 downto 20)))(15 downto 0);  
+								dm_write_data_2bytes(to_integer(unsigned(v_dm_addr(1 downto 1))))(15 downto 0) <= std_logic_vector(registers(to_integer(v_instruction(24 downto 20)))(15 downto 0));  
 								if (v_dm_addr(1) = '1') then
 									o_DM_Wr_En <= "1100";
 								else
 									o_DM_Wr_En <= "0011";
 								end if;
 								o_DM_DV <= '1';	
-								v_instruction_done <= '1';
+								v_instruction_done := '1';
 								
 							when "010" => -- sw
-								dm_addr <= std_logic_vector(signed(registers(to_integer(v_instruction(19 downto 15)))) + resize(signed(v_instruction(31 downto 25) & v_instruction(11 downto 7)), dm_addr'length));
-								o_DM_Data <= registers(to_integer(v_instruction(24 downto 20)))(31 downto 0);  
+								v_immediate(11 downto 0) := v_instruction(31 downto 25) & v_instruction(11 downto 7);
+								v_immediate := unsigned(resize(signed(v_immediate(11 downto 0)), dm_addr'length));
+								v_dm_addr := std_logic_vector(v_immediate + registers(to_integer(v_instruction(19 downto 15))));
+								dm_addr <= v_dm_addr;
+								o_DM_Data <= std_logic_vector(registers(to_integer(v_instruction(24 downto 20)))(31 downto 0));  
 								o_DM_Wr_En(3 downto 0) <= "1111";
 								o_DM_DV <= '1';	
-								v_instruction_done <= '1';
+								v_instruction_done := '1';
 							
 							when others =>
 								null;
-								v_instruction_done <= '1';
+								v_instruction_done := '1';
 						end case;
 					
 					when "0010011" => -- I-type
 						case v_instruction(14 downto 12) is -- funct3
 							
 							when "000" => -- addi
-								registers(to_integer(v_instruction(11 downto 7))) <= signed(registers(to_integer(v_instruction(19 downto 15)))) + signed(v_instruction(31 downto 20));
-								v_instruction_done <= '1';
+								v_immediate := unsigned(resize(signed(v_instruction(31 downto 20)), registers(0)'length));
+								registers(to_integer(v_instruction(11 downto 7))) <= v_immediate + registers(to_integer(v_instruction(19 downto 15)));
+								v_instruction_done := '1';
 								
 							when "010" => -- slti
 								registers(to_integer(v_instruction(11 downto 7)))(31 downto 0) <= (others => '0');
 								if signed(registers(to_integer(v_instruction(19 downto 15)))) < signed(v_instruction(31 downto 20)) then
 									registers(to_integer(v_instruction(11 downto 7)))(0) <= '1'; 
 								end if;
-								v_instruction_done <= '1';
+								v_instruction_done := '1';
 								
 							when "011" => -- sltiu
 								registers(to_integer(v_instruction(11 downto 7)))(31 downto 0) <= (others => '0');
 								if registers(to_integer(v_instruction(19 downto 15))) < v_instruction(31 downto 20) then
 									registers(to_integer(v_instruction(11 downto 7)))(0) <= '1'; 
 								end if;
-								v_instruction_done <= '1';
+								v_instruction_done := '1';
 								
 							when "100" => -- xori
-								registers(to_integer(v_instruction(11 downto 7))) <= signed(registers(to_integer(v_instruction(19 downto 15)))) xor resize(signed(v_instruction(31 downto 20)), registers(0)'length);
-								v_instruction_done <= '1';
+								v_immediate := unsigned(resize(signed(v_instruction(31 downto 20)), registers(0)'length));
+								registers(to_integer(v_instruction(11 downto 7))) <= registers(to_integer(v_instruction(19 downto 15))) xor v_immediate;
+								v_instruction_done := '1';
 							
 							when "110" => -- ori
-								registers(to_integer(v_instruction(11 downto 7))) <= signed(registers(to_integer(v_instruction(19 downto 15)))) or resize(signed(v_instruction(31 downto 20)), registers(0)'length);
-								v_instruction_done <= '1';
+								v_immediate := unsigned(resize(signed(v_instruction(31 downto 20)), registers(0)'length));
+								registers(to_integer(v_instruction(11 downto 7))) <= registers(to_integer(v_instruction(19 downto 15))) or v_immediate;
+								v_instruction_done := '1';
 							
 							when "111" => -- andi
-								registers(to_integer(v_instruction(11 downto 7))) <= signed(registers(to_integer(v_instruction(19 downto 15)))) and resize(signed(v_instruction(31 downto 20)), registers(0)'length);
-								v_instruction_done <= '1';
+								v_immediate := unsigned(resize(signed(v_instruction(31 downto 20)), registers(0)'length));
+								registers(to_integer(v_instruction(11 downto 7))) <= registers(to_integer(v_instruction(19 downto 15))) and v_immediate;
+								v_instruction_done := '1';
 							
 							when "001" => -- slli
 								registers(to_integer(v_instruction(11 downto 7)))(31 downto 0) <= shift_left(registers(to_integer(v_instruction(19 downto 15))), to_integer(v_instruction(24 downto 20)));
-								v_instruction_done <= '1';
+								v_instruction_done := '1';
 							
 							when "101" => -- srli/srai
 								if v_instruction(30) = '0' then -- srli
 									registers(to_integer(v_instruction(11 downto 7)))(31 downto 0) <= shift_right(registers(to_integer(v_instruction(19 downto 15))), to_integer(v_instruction(24 downto 20)));	
 								else	-- srai
-									registers(to_integer(v_instruction(11 downto 7)))(31 downto 0) <= shift_right(signed(registers(to_integer(v_instruction(19 downto 15)))), to_integer(v_instruction(24 downto 20)));
+									registers(to_integer(v_instruction(11 downto 7)))(31 downto 0) <= unsigned(shift_right(signed(registers(to_integer(v_instruction(19 downto 15)))), to_integer(v_instruction(24 downto 20))));
 								end if;			
-								v_instruction_done <= '1';
+								v_instruction_done := '1';
 								
 							when others =>
 								null;
-								v_instruction_done <= '1';
+								v_instruction_done := '1';
 						
 						end case;
 							
@@ -526,7 +554,7 @@ begin
 										b_add <= std_logic_vector(registers(to_integer(v_instruction(24 downto 20))));
 									else
 										registers(to_integer(v_instruction(11 downto 7))) <= unsigned(result_add);
-										v_instruction_done <= '1';
+										v_instruction_done := '1';
 									end if;
 								else -- sub
 									if (v_instruction_new = '1') then
@@ -534,70 +562,70 @@ begin
 										b_sub <= std_logic_vector(registers(to_integer(v_instruction(24 downto 20))));
 									else
 										registers(to_integer(v_instruction(11 downto 7))) <= unsigned(result_sub);
-										v_instruction_done <= '1';
+										v_instruction_done := '1';
 									end if;
 								end if;
 								
 							when "001" => -- sll
 								registers(to_integer(v_instruction(11 downto 7)))(31 downto 0) <= shift_left(registers(to_integer(v_instruction(19 downto 15))), to_integer(registers(to_integer(v_instruction(24 downto 20)))(4 downto 0)));
-								v_instruction_done <= '1';
+								v_instruction_done := '1';
 							
 							when "010" => -- slt
 								registers(to_integer(v_instruction(11 downto 7)))(31 downto 0) <= (others => '0');
 								if signed(registers(to_integer(v_instruction(19 downto 15)))) < signed(registers(to_integer(v_instruction(24 downto 20)))) then
 									registers(to_integer(v_instruction(11 downto 7)))(0) <= '1'; 
 								end if;
-								v_instruction_done <= '1';
+								v_instruction_done := '1';
 								
 							when "011" => -- sltu
 								registers(to_integer(v_instruction(11 downto 7)))(31 downto 0) <= (others => '0');
 								if unsigned(registers(to_integer(v_instruction(19 downto 15)))) < unsigned(registers(to_integer(v_instruction(24 downto 20)))) then
 									registers(to_integer(v_instruction(11 downto 7)))(0) <= '1'; 
 								end if;
-								v_instruction_done <= '1';
+								v_instruction_done := '1';
 								
 							when "100" => -- xor
 								registers(to_integer(v_instruction(11 downto 7))) <= registers(to_integer(v_instruction(19 downto 15))) xor registers(to_integer(v_instruction(24 downto 20)));
-								v_instruction_done <= '1';
+								v_instruction_done := '1';
 								
 							when "101" => -- srl/sra
 								if v_instruction(30) = '0' then -- srl
 									registers(to_integer(v_instruction(11 downto 7)))(31 downto 0) <= shift_right(registers(to_integer(v_instruction(19 downto 15))), to_integer(registers(to_integer(v_instruction(24 downto 20)))(4 downto 0)));
 								else	-- sra
-									registers(to_integer(v_instruction(11 downto 7)))(31 downto 0) <= shift_right(signed(registers(to_integer(v_instruction(19 downto 15)))), to_integer(registers(to_integer(v_instruction(24 downto 20)))(4 downto 0)));	
+									registers(to_integer(v_instruction(11 downto 7)))(31 downto 0) <= unsigned(shift_right(signed(registers(to_integer(v_instruction(19 downto 15)))), to_integer(registers(to_integer(v_instruction(24 downto 20)))(4 downto 0))));	
 								end if;
-								v_instruction_done <= '1';
+								v_instruction_done := '1';
 								
 							when "110" => -- or
 								registers(to_integer(v_instruction(11 downto 7))) <= registers(to_integer(v_instruction(19 downto 15))) or registers(to_integer(v_instruction(24 downto 20)));
-								v_instruction_done <= '1';
+								v_instruction_done := '1';
 								
 							when "111" => -- and
 								registers(to_integer(v_instruction(11 downto 7))) <= registers(to_integer(v_instruction(19 downto 15))) and registers(to_integer(v_instruction(24 downto 20)));
-								v_instruction_done <= '1';
+								v_instruction_done := '1';
 								
 							when others => 
 								null;
-								v_instruction_done <= '1';
+								v_instruction_done := '1';
 							
 						end case;
 					
 					when "1110011" => -- I-type
 						if v_instruction = "00000000000100000000000001110011" then -- ebreak;
-							v_return_ctrl_logic_unit <= '1';
-							v_instruction_done <= '1';
+							v_return_ctrl_logic_unit := '1';
+							v_instruction_done := '1';
 						else
 							null;
-							v_instruction_done <= '1';
+							v_instruction_done := '1';
 						end if;
 					when others => 
 						null;
-						v_instruction_done <= '1';
+						v_instruction_done := '1';
 				end case;
 			end if; -- v_instruction valid
 		
 			if v_instruction_done = '1' then
-				v_instruction_valid <= '0';
+				v_instruction_valid := '0';
 				wait_instruction_ready <= '1';
 				if v_instruction_jump = '1' then
 					instruction_jump <= '1';
@@ -618,9 +646,10 @@ begin
 			ctrl_logic_unit <= '0';
 		end if;
 		
+		registers(0) <= (others => '0');
 	end if; -- clk'rising_edge
 end process;
 
-registers(0) <= (others => '0');
+
 
 end Behavioral;
