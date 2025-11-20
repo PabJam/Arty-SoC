@@ -300,11 +300,12 @@ signal uart_Fifo_valid : std_logic;
 type t_progRam_Uart_States is (progRam_Uart_Idle, progRam_Uart_Write, progRam_Uart_PreRead, progRam_Uart_ReadWait, ProgRam_Uart_Read);
 signal progRam_Uart_State : t_progRam_Uart_States := progRam_Uart_Idle;
 
-type t_pm_lu_states is (pm_lu_state_idle, pm_lu_state_wait_read, pm_lu_state_read);
+type t_pm_lu_states is (pm_lu_state_idle, pm_lu_state_read);
 signal pm_lu_state : t_pm_lu_states;
 
 signal progRam_Addr : std_logic_vector(12 downto 0) := (others => '0');
 signal progRam_addr_lu : std_logic_vector(12 downto 0) := (others => '0'); 
+signal latched_progRam_addr_lu : std_logic_vector(12 downto 0) := (others => '0'); 
 signal progRam_addr_uart : std_logic_vector(12 downto 0) := (others => '0'); 
 signal progRam_Wr_Cntr : unsigned(15 downto 0) := (others => '0');
 signal progRam_Rd_Cntr : unsigned(15 downto 0) := (others => '0');
@@ -322,8 +323,8 @@ signal dm_addr : std_logic_vector(31 downto 0) := (others => '0');
 signal dm_data_in : std_logic_vector(31 downto 0) := (others => '0');
 signal dm_data_out : std_logic_vector(31 downto 0) := (others => '0');
 signal dm_wr_en : std_logic_vector(3 downto 0) := (others => '0');
-signal dm_dv : std_logic := '0';
-
+signal dm_read_dv : std_logic := '0';
+signal dm_write_dv : std_logic := '0';
 --Logic Unit Signal
 signal ctrl_logic_unit : std_logic := '0';
 signal give_ctrl_logic_unit : std_logic := '0';
@@ -347,7 +348,7 @@ signal uartState : UART_STATE_TYPE := RST_REG;
 signal btnDeBnc : std_logic_vector(3 downto 0);
 
 signal clk_cntr_reg : std_logic_vector (4 downto 0) := (others=>'0'); 
-
+signal saved_leds : std_logic_vector(3 downto 0) := (others => '0'); 
 --signal pwm_val_reg : std_logic := '0';
 
 --this counter counts the amount of time paused in the UART reset state
@@ -360,8 +361,19 @@ begin
 ----------------------------------------------------------
 
 
-	LED <= SW;
-			 			 
+	--LED <= SW;
+	
+
+LED_Proc: process (clk)
+begin
+	if rising_edge(clk) then
+		LED <= saved_leds;
+		if dm_write_dv = '1' and dm_data_in = x"FFFFFFFF" then
+			saved_leds <= not saved_leds;	
+		end if;
+	end if;
+end process;
+	
 
 ----------------------------------------------------------
 ------              Button Control                 -------
@@ -448,9 +460,9 @@ port map
 	o_DM_Addr => dm_addr,
 	o_DM_Data => dm_data_in,
 	o_DM_Wr_En => dm_wr_en,
-	o_DM_DV => open,
+	o_DM_DV => dm_write_dv,
 	i_DM_Data => dm_data_out,
-	i_DM_DV => dm_dv
+	i_DM_DV => dm_read_dv
 );
 
 
@@ -495,6 +507,8 @@ begin
 	
 		progRam_Wr_En <= (others => '0'); -- default assignment
 		uart_TX_DV <= '0';
+		progRam_dv <= '0';
+		latched_progRam_addr_lu <= progRam_addr_lu;
 		
 		if ctrl_logic_unit = '0' then
 			case progRam_Uart_State is
@@ -548,8 +562,21 @@ begin
 					progRam_Uart_State <= progRam_Uart_Idle;
 				
 			end case;
-		else
-			null; -- here comes the statemachine for reading the pm from the logic unit
+		else -- lu has control over pm
+			progRam_Addr <= progRam_addr_lu; -- this way it takes 1 extra clk cylcle to set the pm address 
+			if (latched_progRam_addr_lu /= progRam_addr_lu) then
+				pm_lu_state <= pm_lu_state_read;
+			else
+				case pm_lu_state is
+					when pm_lu_state_idle =>
+						pm_lu_state <= pm_lu_state_idle;
+					when pm_lu_state_read =>
+						progRam_dv <= '1';
+					when others =>
+						null;
+						pm_lu_state <= pm_lu_state_idle;
+				end case;
+			end if;
 		end if;
 	end if;
 end process;

@@ -56,7 +56,9 @@ if {$::dispatch::connected} {
 }
 
 OPTRACE "synth_1" START { ROLLUP_AUTO }
+set_param chipscope.maxJobs 6
 set_param general.usePosixSpawnForFork 1
+set_param xicom.use_bs_reader 1
 OPTRACE "Creating in-memory project" START { }
 create_project -in_memory -part xc7s25csga324-1
 
@@ -116,7 +118,7 @@ read_checkpoint -auto_incremental -incremental D:/Projekte/Arty/hw/hw.srcs/utils
 close [open __synthesis_is_running__ w]
 
 OPTRACE "synth_design" START { }
-synth_design -top GPIO_demo -part xc7s25csga324-1
+synth_design -top GPIO_demo -part xc7s25csga324-1 -directive FewerCarryChains -keep_equivalent_registers -resource_sharing off -no_lc
 OPTRACE "synth_design" END { }
 if { [get_msg_config -count -severity {CRITICAL WARNING}] > 0 } {
  send_msg_id runtcl-6 info "Synthesis results are not added to the cache due to CRITICAL_WARNING"

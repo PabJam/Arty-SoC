@@ -81,8 +81,6 @@ signal fetch_state : t_fetch_states;
 
 type t_byte_array_32 is array(0 to 3) of std_logic_vector(7 downto 0);
 type t_2byte_array_32 is array(0 to 1) of std_logic_vector(15 downto 0);
-signal dm_write_data_bytes : t_byte_array_32;
-signal dm_write_data_2bytes : t_2byte_array_32;
 signal dm_read_data_bytes : t_byte_array_32;
 signal dm_read_data_2bytes : t_2byte_array_32;
 signal dm_addr : std_logic_vector(31 downto 0);
@@ -132,14 +130,6 @@ port map
 	B => b_sub,
 	S => result_sub
 );
-
-o_DM_Data(7 downto 0) <= dm_write_data_bytes(0); 
-o_DM_Data(15 downto 8) <= dm_write_data_bytes(1); 
-o_DM_Data(23 downto 16) <= dm_write_data_bytes(2); 
-o_DM_Data(31 downto 24) <= dm_write_data_bytes(3);
-
-o_DM_Data(15 downto 0) <= dm_write_data_2bytes(0);
-o_DM_Data(31 downto 16) <= dm_write_data_2bytes(1);
 
 dm_read_data_bytes(0) <= i_DM_Data(7 downto 0);
 dm_read_data_bytes(1) <= i_DM_Data(15 downto 8);
@@ -264,6 +254,8 @@ Instructions_Proc : process (i_Clk)
 	variable v_pc : unsigned(31 downto 0) := (others => '0');
 	variable v_return_ctrl_logic_unit : std_logic := '0';
 	variable v_immediate : unsigned(31 downto 0);
+	variable v_dm_write_data_bytes : t_byte_array_32;
+	variable v_dm_write_data_2bytes : t_2byte_array_32;
 begin
 	if rising_edge(i_Clk) then
 		o_DM_DV <= '0';
@@ -455,7 +447,11 @@ begin
 								v_immediate := unsigned(resize(signed(v_immediate(11 downto 0)), dm_addr'length));
 								v_dm_addr := std_logic_vector(v_immediate + registers(to_integer(v_instruction(19 downto 15))));
 								dm_addr <= v_dm_addr;
-								dm_write_data_bytes(to_integer(unsigned(v_dm_addr(1 downto 0))))(7 downto 0) <= std_logic_vector(registers(to_integer(v_instruction(24 downto 20)))(7 downto 0));  
+								v_dm_write_data_bytes(to_integer(unsigned(v_dm_addr(1 downto 0))))(7 downto 0) := std_logic_vector(registers(to_integer(v_instruction(24 downto 20)))(7 downto 0));  
+								o_DM_Data(7 downto 0) <= v_dm_write_data_bytes(0); 
+								o_DM_Data(15 downto 8) <= v_dm_write_data_bytes(1); 
+								o_DM_Data(23 downto 16) <= v_dm_write_data_bytes(2); 
+								o_DM_Data(31 downto 24) <= v_dm_write_data_bytes(3);
 								o_DM_Wr_En(to_integer(unsigned(v_dm_addr(1 downto 0)))) <= '1';
 								o_DM_DV <= '1';	
 								v_instruction_done := '1';
@@ -465,7 +461,9 @@ begin
 								v_immediate := unsigned(resize(signed(v_immediate(11 downto 0)), dm_addr'length));
 								v_dm_addr := std_logic_vector(v_immediate + registers(to_integer(v_instruction(19 downto 15))));
 								dm_addr <= v_dm_addr;
-								dm_write_data_2bytes(to_integer(unsigned(v_dm_addr(1 downto 1))))(15 downto 0) <= std_logic_vector(registers(to_integer(v_instruction(24 downto 20)))(15 downto 0));  
+								v_dm_write_data_2bytes(to_integer(unsigned(v_dm_addr(1 downto 1))))(15 downto 0) := std_logic_vector(registers(to_integer(v_instruction(24 downto 20)))(15 downto 0));  
+								o_DM_Data(15 downto 0) <= v_dm_write_data_2bytes(0);
+								o_DM_Data(31 downto 16) <= v_dm_write_data_2bytes(1);
 								if (v_dm_addr(1) = '1') then
 									o_DM_Wr_En <= "1100";
 								else
