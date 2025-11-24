@@ -106,7 +106,6 @@ set rc [catch {
   create_msg_db init_design.pb
   set_param chipscope.maxJobs 6
   set_param general.usePosixSpawnForFork 1
-  set_param xicom.use_bs_reader 1
   set_param runs.launchOptions { -jobs 12  }
 OPTRACE "create in-memory project" START { }
   create_project -in_memory -part xc7s25csga324-1
@@ -126,9 +125,9 @@ OPTRACE "set parameters" START { }
 OPTRACE "set parameters" END { }
 OPTRACE "add files" START { }
   add_files -quiet D:/Projekte/Arty/hw/hw.runs/synth_1/GPIO_demo.dcp
+  read_ip -quiet D:/Projekte/Arty/hw/hw.srcs/sources_1/ip/Add/Add.xci
   read_ip -quiet D:/Projekte/Arty/hw/hw.srcs/sources_1/ip/ProgRam/ProgRam.xci
   read_ip -quiet D:/Projekte/Arty/hw/hw.srcs/sources_1/ip/DataRam/DataRam.xci
-  read_ip -quiet D:/Projekte/Arty/hw/hw.srcs/sources_1/ip/Add/Add.xci
   read_ip -quiet D:/Projekte/Arty/hw/hw.srcs/sources_1/ip/Sub/Sub.xci
 OPTRACE "read constraints: implementation" START { }
   read_xdc D:/Projekte/Arty/hw/hw.srcs/constrs_1/imports/constraints/Arty-S7-25-Master.xdc

@@ -2,9 +2,10 @@
 -- Copyright 2022-2025 Advanced Micro Devices, Inc. All Rights Reserved.
 -- --------------------------------------------------------------------------------
 -- Tool Version: Vivado v.2025.1 (win64) Build 6140274 Thu May 22 00:12:29 MDT 2025
--- Date        : Thu Nov 13 14:01:59 2025
+-- Date        : Thu Nov 13 14:01:58 2025
 -- Host        : DESKTOP-E28LK6R running 64-bit major release  (build 9200)
--- Command     : write_vhdl -force -mode synth_stub d:/Projekte/Arty/hw/hw.gen/sources_1/ip/Add/Add_stub.vhdl
+-- Command     : write_vhdl -force -mode synth_stub -rename_top Add -prefix
+--               Add_ Add_stub.vhdl
 -- Design      : Add
 -- Purpose     : Stub declaration of top-level module interface
 -- Device      : xc7s25csga324-1

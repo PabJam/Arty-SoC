@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<GenRun Id="impl_1" LaunchPart="xc7s25csga324-1" LaunchTime="1763650567">
+<GenRun Id="impl_1" LaunchPart="xc7s25csga324-1" LaunchTime="1764009611">
   <File Type="PA-TCL" Name="GPIO_demo.tcl"/>
   <File Type="REPORTS-TCL" Name="GPIO_demo_reports.tcl"/>
   <File Type="INIT-TIMING" Name="GPIO_demo_timing_summary_init.rpt"/>
@@ -113,6 +113,13 @@
   <File Type="POSTROUTE-PHYSOPT-RQS-RPT" Name="postroute_physopt_report_qor_suggestions_0.rpt"/>
   <FileSet Name="sources" Type="DesignSrcs" RelSrcDir="$PSRCDIR/sources_1" RelGenDir="$PGENDIR/sources_1">
     <Filter Type="Srcs"/>
+    <File Path="$PSRCDIR/sources_1/ip/Add/Add.xci">
+      <FileInfo>
+        <Attr Name="UsedIn" Val="synthesis"/>
+        <Attr Name="UsedIn" Val="implementation"/>
+        <Attr Name="UsedIn" Val="simulation"/>
+      </FileInfo>
+    </File>
     <File Path="$PSRCDIR/sources_1/new/LogicUnit.vhd">
       <FileInfo>
         <Attr Name="UsedIn" Val="synthesis"/>
@@ -154,6 +161,14 @@
         <Attr Name="ImportPath" Val="E:/VivadoMigrations2025.1/Arty-S7/hw/src/hdl/GPIO_Demo.vhd"/>
         <Attr Name="ImportTime" Val="1753351783"/>
         <Attr Name="UsedIn" Val="synthesis"/>
+        <Attr Name="UsedIn" Val="simulation"/>
+      </FileInfo>
+    </File>
+    <File Path="$PSRCDIR/sources_1/ip/Add_Sub/Add_Sub.xci">
+      <FileInfo>
+        <Attr Name="AutoDisabled" Val="1"/>
+        <Attr Name="UsedIn" Val="synthesis"/>
+        <Attr Name="UsedIn" Val="implementation"/>
         <Attr Name="UsedIn" Val="simulation"/>
       </FileInfo>
     </File>
@@ -228,6 +243,5 @@
   </Strategy>
   <BlockFileSet Type="BlockSrcs" Name="DataRam"/>
   <BlockFileSet Type="BlockSrcs" Name="ProgRam"/>
-  <BlockFileSet Type="BlockSrcs" Name="Add"/>
   <BlockFileSet Type="BlockSrcs" Name="Sub"/>
 </GenRun>

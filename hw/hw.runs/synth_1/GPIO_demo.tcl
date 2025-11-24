@@ -58,7 +58,6 @@ if {$::dispatch::connected} {
 OPTRACE "synth_1" START { ROLLUP_AUTO }
 set_param chipscope.maxJobs 6
 set_param general.usePosixSpawnForFork 1
-set_param xicom.use_bs_reader 1
 OPTRACE "Creating in-memory project" START { }
 create_project -in_memory -part xc7s25csga324-1
 
@@ -87,13 +86,13 @@ read_vhdl -library xil_defaultlib {
   D:/Projekte/Arty/hw/hw.srcs/sources_1/imports/hdl/debouncer.vhd
   D:/Projekte/Arty/hw/hw.srcs/sources_1/imports/hdl/GPIO_Demo.vhd
 }
+read_ip -quiet D:/Projekte/Arty/hw/hw.srcs/sources_1/ip/Add/Add.xci
+
 read_ip -quiet D:/Projekte/Arty/hw/hw.srcs/sources_1/ip/ProgRam/ProgRam.xci
 set_property used_in_implementation false [get_files -all d:/Projekte/Arty/hw/hw.gen/sources_1/ip/ProgRam/ProgRam_ooc.xdc]
 
 read_ip -quiet D:/Projekte/Arty/hw/hw.srcs/sources_1/ip/DataRam/DataRam.xci
 set_property used_in_implementation false [get_files -all d:/Projekte/Arty/hw/hw.gen/sources_1/ip/DataRam/DataRam_ooc.xdc]
-
-read_ip -quiet D:/Projekte/Arty/hw/hw.srcs/sources_1/ip/Add/Add.xci
 
 read_ip -quiet D:/Projekte/Arty/hw/hw.srcs/sources_1/ip/Sub/Sub.xci
 
@@ -112,6 +111,8 @@ set_property used_in_implementation false [get_files D:/Projekte/Arty/hw/hw.srcs
 read_xdc D:/Projekte/Arty/hw/hw.srcs/constrs_1/new/Arty-S7-25-Debug.xdc
 set_property used_in_implementation false [get_files D:/Projekte/Arty/hw/hw.srcs/constrs_1/new/Arty-S7-25-Debug.xdc]
 
+read_xdc dont_touch.xdc
+set_property used_in_implementation false [get_files dont_touch.xdc]
 set_param ips.enableIPCacheLiteLoad 1
 
 read_checkpoint -auto_incremental -incremental D:/Projekte/Arty/hw/hw.srcs/utils_1/imports/synth_1/GPIO_demo.dcp
