@@ -56,6 +56,7 @@ if {$::dispatch::connected} {
 }
 
 OPTRACE "Sub_synth_1" START { ROLLUP_AUTO }
+set_param chipscope.maxJobs 6
 set_param general.usePosixSpawnForFork 1
 set_param project.vivado.isBlockSynthRun true
 set_msg_config -msgmgr_mode ooc_run
@@ -79,7 +80,8 @@ set_property ip_output_repo d:/Projekte/Arty/hw/hw.cache/ip [current_project]
 set_property ip_cache_permissions {read write} [current_project]
 OPTRACE "Creating in-memory project" END { }
 OPTRACE "Adding files" START { }
-read_ip -quiet d:/Projekte/Arty/hw/hw.srcs/sources_1/ip/Sub/Sub.xci
+read_ip -quiet D:/Projekte/Arty/hw/hw.srcs/sources_1/ip/Sub/Sub.xci
+set_property used_in_implementation false [get_files -all d:/Projekte/Arty/hw/hw.gen/sources_1/ip/Sub/Sub_ooc.xdc]
 
 OPTRACE "Adding files" END { }
 # Mark all dcp files as not used in implementation to prevent them from being
@@ -90,6 +92,8 @@ OPTRACE "Adding files" END { }
 foreach dcp [get_files -quiet -all -filter file_type=="Design\ Checkpoint"] {
   set_property used_in_implementation false $dcp
 }
+read_xdc dont_touch.xdc
+set_property used_in_implementation false [get_files dont_touch.xdc]
 set_param ips.enableIPCacheLiteLoad 1
 OPTRACE "Configure IP Cache" START { }
 

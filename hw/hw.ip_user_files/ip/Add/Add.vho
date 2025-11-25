@@ -55,6 +55,7 @@ COMPONENT Add
   PORT (
     A : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
     B : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
+    CLK : IN STD_LOGIC;
     S : OUT STD_LOGIC_VECTOR(31 DOWNTO 0) 
   );
 END COMPONENT;
@@ -68,6 +69,7 @@ your_instance_name : Add
   PORT MAP (
     A => A,
     B => B,
+    CLK => CLK,
     S => S
   );
 -- INST_TAG_END ------ End INSTANTIATION Template ---------

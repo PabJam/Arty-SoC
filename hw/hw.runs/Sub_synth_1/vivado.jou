@@ -3,8 +3,8 @@
 # SW Build 6140274 on Thu May 22 00:12:29 MDT 2025
 # IP Build 6138677 on Thu May 22 03:10:11 MDT 2025
 # SharedData Build 6139179 on Tue May 20 17:58:58 MDT 2025
-# Start of session at: Thu Nov 13 14:02:17 2025
-# Process ID         : 17912
+# Start of session at: Tue Nov 25 10:15:13 2025
+# Process ID         : 5916
 # Current directory  : D:/Projekte/Arty/hw/hw.runs/Sub_synth_1
 # Command line       : vivado.exe -log Sub.vds -product Vivado -mode batch -messageDb vivado.pb -notrace -source Sub.tcl
 # Log file           : D:/Projekte/Arty/hw/hw.runs/Sub_synth_1/Sub.vds
@@ -19,6 +19,6 @@
 # Host memory        : 34257 MB
 # Swap memory        : 5100 MB
 # Total Virtual      : 39358 MB
-# Available Virtual  : 24366 MB
+# Available Virtual  : 22194 MB
 #-----------------------------------------------------------
 source Sub.tcl -notrace

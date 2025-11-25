@@ -56,6 +56,7 @@ architecture Behavioral of LogicUnit is
 component Add
 	port
 	(
+		CLK : in std_logic;
 		A : in std_logic_vector(31 downto 0);
 		B : in std_logic_vector(31 downto 0);
 		S : out std_logic_vector(31 downto 0)
@@ -65,6 +66,7 @@ end component;
 component Sub
 	port 
 	(
+		CLK : in std_logic;
 		A : in std_logic_vector(31 downto 0);
 		B : in std_logic_vector(31 downto 0);
 		S : out std_logic_vector(31 downto 0)
@@ -120,6 +122,7 @@ begin
 inst_add: Add
 port map
 (
+	CLK => i_Clk, 
 	A => a_add,
 	B => b_add,
 	S => result_add
@@ -128,6 +131,7 @@ port map
 inst_sub: Sub
 port map
 (
+	CLK => i_Clk,
 	A => a_sub,
 	B => b_sub,
 	S => result_sub
