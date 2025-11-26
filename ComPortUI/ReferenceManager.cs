@@ -30,7 +30,8 @@ namespace ComPortUI
             SerialPort sp = (SerialPort)sender;
 
             //Read all available data
-            string data = sp.ReadExisting();
+            byte[] bytes = Encoding.ASCII.GetBytes(sp.ReadExisting());
+            string data = Encoding.ASCII.GetString(bytes);
             //byte[] bytes = Encoding.ASCII.GetBytes(data);
 
             mainWindow.Dispatcher.Invoke(() =>
@@ -39,7 +40,8 @@ namespace ComPortUI
                 //{
                 //    mainWindow.Output_TB.AppendText(bytes[i].ToString("X") + " "); 
                 //}
-                mainWindow.Output_TB.AppendText(data);
+                data = mainWindow.GetOutputText(false) + data;
+                mainWindow.SetOutputText(data);
 
             });
         }

@@ -23,9 +23,10 @@
         <TextBox x:Name="Input_TB" 
                  Grid.Column="0"
                  TextWrapping="Wrap" 
-                 Margin="10,77,10,0"
-                 KeyDown="Input_TB_KeyDown" FontSize="18"/>
+                 Margin="10,77,10,10"
+                 KeyDown="Input_TB_KeyDown" FontSize="18" FontFamily="Consolas"/>
         <Button x:Name="LoadFileButton" Grid.Column="0" Content="Load File" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,10,0,0" FontSize="18" Click="LoadFileButton_Click"/>
+        <CheckBox x:Name="ConvertStringToBin"  Content="Convert String to Binary" Grid.Column="0" HorizontalAlignment="Left" VerticalAlignment="Top" VerticalContentAlignment="Center" Margin="100,12,0,0" FontSize="18"/>
         <!-- Output Section -->
         <Label x:Name="Outpu_Label" 
                Content="Output" 
@@ -37,7 +38,14 @@
                  Grid.Column="1"
                  TextWrapping="Wrap" 
                  Focusable="True"
-                 Margin="10,77,10,0" FontSize="18"/>
+                 Margin="10,77,10,10" FontSize="18" FontFamily="Consolas"/>
+        <ComboBox x:Name="OutputFormat_CB" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,10,0,0" Width="120" FontSize="18" SelectionChanged="OutputFormat_CB_SelectionChanged">
+            <ComboBoxItem IsSelected="True">ASCII</ComboBoxItem>
+            <ComboBoxItem>Hex</ComboBoxItem>
+        </ComboBox>
+        <Button x:Name="ClearOutput_Btn" Grid.Column="1" Content="Clear" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="145,10,0,0" Width="70" FontSize="18" Click="ClearOutput_Btn_Click"/>
+
+
 
     </Grid>
 </Window>
