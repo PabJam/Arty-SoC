@@ -332,13 +332,13 @@ signal take_ctrl_logic_unit : std_logic := '0';
 signal sync_nRst_lu : std_logic := '0';
 
 --attribute mark_debug : string;
+--attribute mark_debug of uart_RX_Data : signal is "true";
+--attribute mark_debug of uart_RX_DV : signal is "true";
 --attribute mark_debug of progRam_Data_In : signal is "true";
---attribute mark_debug of progRam_Addr : signal is "true";
---attribute mark_debug of progRam_Wr_En : signal is "true";
 --attribute mark_debug of progRam_Wr_Cntr : signal is "true";
 --attribute mark_debug of progRam_Data_Out : signal is "true";
 --attribute mark_debug of progRam_Rd_Cntr : signal is "true";
---attribute mark_debug of progRam_State : signal is "true";
+--attribute mark_debug of progRam_Uart_State : signal is "true";
 
 --Current uart state signal
 signal uartState : UART_STATE_TYPE := RST_REG;
@@ -547,6 +547,7 @@ begin
 					if uart_TX_Active = '0' then
 						uart_TX_DV <= '1';
 						uart_TX_Data(7 downto 0) <= progRam_Data_Out_Bytes(to_integer(progRam_Rd_Cntr(2 downto 0)))(7 downto 0);
+						--uart_TX_Data(7 downto 0) <= x"9B";
 						if (progRam_Wr_Cntr /= x"0000") then
 							progRam_Rd_Cntr <= progRam_Rd_Cntr + 1;
 							progRam_Wr_Cntr <= progRam_Wr_Cntr - 1;

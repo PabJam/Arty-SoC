@@ -22,26 +22,24 @@ namespace ComPortUI
         {
             mainWindow = (MainWindow)System.Windows.Application.Current.MainWindow;
             serialPort = new SerialPort(portName, baudRate, parity, dataBits, stopBits);
+            serialPort.Encoding = Encoding.Latin1;
             serialPort.DataReceived += new SerialDataReceivedEventHandler(SerialDataRecievedHandler);
         }
 
         private static void SerialDataRecievedHandler(object sender, SerialDataReceivedEventArgs e)
         {
             SerialPort sp = (SerialPort)sender;
+            int bytesToRead = sp.BytesToRead;
+            byte[] bytes = new byte[bytesToRead];
+            for (int i = 0; i < bytesToRead; i++)
+            {
+                bytes[i] = (byte)sp.ReadByte();
+            }
 
-            //Read all available data
-            byte[] bytes = Encoding.ASCII.GetBytes(sp.ReadExisting());
-            string data = Encoding.ASCII.GetString(bytes);
-            //byte[] bytes = Encoding.ASCII.GetBytes(data);
 
             mainWindow.Dispatcher.Invoke(() =>
             {
-                //for (int i = 0; i < bytes.Length; i++)
-                //{
-                //    mainWindow.Output_TB.AppendText(bytes[i].ToString("X") + " "); 
-                //}
-                data = mainWindow.GetOutputText(false) + data;
-                mainWindow.SetOutputText(data);
+                mainWindow.AddOutputBytes(bytes);
 
             });
         }

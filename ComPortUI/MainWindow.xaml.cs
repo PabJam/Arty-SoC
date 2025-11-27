@@ -23,8 +23,9 @@ namespace ComPortUI
     public partial class MainWindow : Window
     {
         SerialPort serialPort;
-        private string formattedOutputText = string.Empty;
-        private string realOutput = string.Empty;
+        private string textOutput = string.Empty;
+        List<byte> realOutput = new List<byte>();
+
         public MainWindow()
         {
             InitializeComponent();
@@ -127,53 +128,62 @@ namespace ComPortUI
             return bytes;
         }
 
-        public void SetOutputText(string text)
+        public void SetOutputText(byte[] bytes)
         {
-            realOutput = text; 
+            realOutput.Clear();
+            AddOutputBytes(bytes);
+            
+        }
+
+        public void AddOutputBytes(byte[] bytes)
+        {
+            realOutput.AddRange(bytes);
+            WriteToOutput_TB();
+        }
+
+        private void WriteToOutput_TB()
+        {
             switch (OutputFormat_CB.SelectedIndex)
             {
                 case 0: // ASCII
-                    formattedOutputText = text;
+                    textOutput = Encoding.ASCII.GetString(realOutput.ToArray());
                     break;
 
                 case 1: // HEX
                     StringBuilder sb = new StringBuilder();
-                    byte[] asciiBytes = Encoding.ASCII.GetBytes(text);
-                    for (int i = 0; i < asciiBytes.Length; i++)
+                    for (int i = 0; i < realOutput.Count; i++)
                     {
                         if (i != 0 && i % 4 == 0)
                         {
                             sb.Append("| ");
-                           
+
                         }
-                        sb.Append($"{asciiBytes[i].ToString("X2")} ");
+                        sb.Append($"{realOutput[i].ToString("X2")} ");
                     }
-                    formattedOutputText = sb.ToString();
+                    textOutput = sb.ToString();
                     break;
             }
-            Output_TB.Text = formattedOutputText;
+            Output_TB.Text = textOutput;
         }
 
-        public string GetOutputText(bool formatted)
+        public string GetOutputText()
         {
-            if (formatted)
-            {
-                return formattedOutputText;
-            }
-            else
-            {
-                return realOutput;
-            }
+            return textOutput;
+        }
+
+        public byte[] GetOutput()
+        {
+            return realOutput.ToArray();
         }
 
         private void OutputFormat_CB_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            SetOutputText(GetOutputText(false));
+            SetOutputText(GetOutput());
         }
 
         private void ClearOutput_Btn_Click(object sender, RoutedEventArgs e)
         {
-            SetOutputText(string.Empty);
+            SetOutputText(new byte[0]);
         }
     }   
 }
