@@ -300,8 +300,8 @@ signal uart_Fifo_valid : std_logic;
 type t_progRam_Uart_States is (progRam_Uart_Idle, progRam_Uart_Write, progRam_Uart_PreRead, progRam_Uart_ReadWait, ProgRam_Uart_Read);
 signal progRam_Uart_State : t_progRam_Uart_States := progRam_Uart_Idle;
 
-type t_pm_lu_states is (pm_lu_state_idle, pm_lu_state_read);
-signal pm_lu_state : t_pm_lu_states;
+type t_pm_lu_states is (pm_lu_state_pre_read, pm_lu_state_read);
+signal pm_lu_state : t_pm_lu_states := pm_lu_state_pre_read;
 
 signal progRam_Addr : std_logic_vector(12 downto 0) := (others => '0');
 signal progRam_addr_lu : std_logic_vector(12 downto 0) := (others => '0'); 
@@ -332,7 +332,7 @@ signal take_ctrl_logic_unit : std_logic := '0';
 signal sync_nRst_lu : std_logic := '0';
 
 --attribute mark_debug : string;
---attribute mark_debug of uart_RX_Data : signal is "true";
+--attribute mark_debug of pm_lu_state : signal is "true";
 --attribute mark_debug of uart_RX_DV : signal is "true";
 --attribute mark_debug of progRam_Data_In : signal is "true";
 --attribute mark_debug of progRam_Wr_Cntr : signal is "true";
@@ -566,16 +566,18 @@ begin
 		else -- lu has control over pm
 			progRam_Addr <= progRam_addr_lu; -- this way it takes 1 extra clk cylcle to set the pm address 
 			if (latched_progRam_addr_lu /= progRam_addr_lu) then
-				pm_lu_state <= pm_lu_state_read;
+				pm_lu_state <= pm_lu_state_pre_read;
 			else
 				case pm_lu_state is
-					when pm_lu_state_idle =>
-						pm_lu_state <= pm_lu_state_idle;
+					when pm_lu_state_pre_read =>
+						pm_lu_state <= pm_lu_state_read;
 					when pm_lu_state_read =>
 						progRam_dv <= '1';
+						pm_lu_state <= pm_lu_state_read;
+						--pm_lu_state <= pm_lu_state_idle;
 					when others =>
 						null;
-						pm_lu_state <= pm_lu_state_idle;
+						pm_lu_state <= pm_lu_state_pre_read;
 				end case;
 			end if;
 		end if;

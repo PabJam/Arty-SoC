@@ -120,10 +120,13 @@ namespace ComPortUI
         public static byte[] BinaryStringToBytes(string binaryString)
         {
             byte[] bytes = new byte[binaryString.Length / 8];
+            
             for (int i = 0; i < binaryString.Length; i += 8)
             {
+                int idx = i / 8;
+                idx += 3 - 2 * (idx % 4); // reverse byte order
                 string byteString = binaryString.Substring(i, 8);
-                bytes[i / 8] = Convert.ToByte(byteString, 2);
+                bytes[idx] = Convert.ToByte(byteString, 2);
             }
             return bytes;
         }

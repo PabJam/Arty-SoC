@@ -1,6 +1,5 @@
 +====================+===================+=============================================+
 | Launch Setup Clock | Launch Hold Clock | Pin                                         |
 +====================+===================+=============================================+
-| sys_clk_pin        | sys_clk_pin       | inst_LogicUnit/instruction_multicycle_reg/D |
 | sys_clk_pin        | sys_clk_pin       | inst_LogicUnit/wait_instruction_ready_reg/D |
 +--------------------+-------------------+---------------------------------------------+

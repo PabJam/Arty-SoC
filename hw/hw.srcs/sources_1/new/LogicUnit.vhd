@@ -114,6 +114,18 @@ signal a_sub : std_logic_vector(31 downto 0);
 signal b_sub : std_logic_vector(31 downto 0);
 signal result_sub : std_logic_vector(31 downto 0);
 
+--attribute mark_debug : string;
+--attribute mark_debug of ctrl_logic_unit : signal is "true";
+--attribute mark_debug of i_Take_Ctrl_Logic_Unit : signal is "true";
+--attribute mark_debug of instruction_valid : signal is "true";
+--attribute mark_debug of current_instruction : signal is "true";
+--attribute mark_debug of current_pc : signal is "true";
+--attribute mark_debug of fetch_state : signal is "true";
+--attribute mark_debug of pc_fetch : signal is "true";
+--attribute mark_debug of instruction_fetch : signal is "true";
+
+
+
 
 begin
 

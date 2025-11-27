@@ -3,8 +3,8 @@
 # SW Build 6140274 on Thu May 22 00:12:29 MDT 2025
 # IP Build 6138677 on Thu May 22 03:10:11 MDT 2025
 # SharedData Build 6139179 on Tue May 20 17:58:58 MDT 2025
-# Start of session at: Thu Nov 27 12:45:22 2025
-# Process ID         : 23844
+# Start of session at: Thu Nov 27 15:55:00 2025
+# Process ID         : 30976
 # Current directory  : D:/Projekte/Arty/hw/hw.runs/synth_1
 # Command line       : vivado.exe -log GPIO_demo.vds -product Vivado -mode batch -messageDb vivado.pb -notrace -source GPIO_demo.tcl
 # Log file           : D:/Projekte/Arty/hw/hw.runs/synth_1/GPIO_demo.vds
@@ -19,7 +19,7 @@
 # Host memory        : 34257 MB
 # Swap memory        : 5100 MB
 # Total Virtual      : 39358 MB
-# Available Virtual  : 20577 MB
+# Available Virtual  : 17860 MB
 #-----------------------------------------------------------
 source GPIO_demo.tcl -notrace
 INFO: [IP_Flow 19-234] Refreshing IP repositories
@@ -34,13 +34,11 @@ Starting synth_design
 Attempting to get a license for feature 'Synthesis' and/or device 'xc7s25'
 INFO: [Common 17-349] Got license for feature 'Synthesis' and/or device 'xc7s25'
 INFO: [Device 21-403] Loading part xc7s25csga324-1
-INFO: [Designutils 20-5440] No compile time benefit to using incremental synthesis; A full resynthesis will be run
-INFO: [Designutils 20-4379] Flow is switching to default flow due to incremental criteria not met. If you would like to alter this behaviour and have the flow terminate instead, please set the following parameter config_implementation {autoIncr.Synth.RejectBehavior Terminate}
 INFO: [Synth 8-7079] Multithreading enabled for synth_design using a maximum of 2 processes.
 INFO: [Synth 8-7078] Launching helper process for spawning children vivado processes
-INFO: [Synth 8-7075] Helper process launched with PID 15696
+INFO: [Synth 8-7075] Helper process launched with PID 26924
 ---------------------------------------------------------------------------------
-Starting RTL Elaboration : Time (s): cpu = 00:00:04 ; elapsed = 00:00:04 . Memory (MB): peak = 1159.934 ; gain = 492.352
+Starting RTL Elaboration : Time (s): cpu = 00:00:04 ; elapsed = 00:00:04 . Memory (MB): peak = 1159.812 ; gain = 491.867
 ---------------------------------------------------------------------------------
 INFO: [Synth 8-638] synthesizing module 'GPIO_demo' [D:/Projekte/Arty/hw/hw.srcs/sources_1/imports/hdl/GPIO_Demo.vhd:70]
 	Parameter DEBNC_CLOCKS bound to: 65536 - type: integer 
@@ -62,21 +60,21 @@ INFO: [Synth 8-638] synthesizing module 'UART_RX_CTRL' [D:/Projekte/Arty/hw/hw.s
 INFO: [Synth 8-256] done synthesizing module 'UART_RX_CTRL' (0#1) [D:/Projekte/Arty/hw/hw.srcs/sources_1/new/UART_RX_CTRL.vhd:34]
 INFO: [Synth 8-3491] module 'LogicUnit' declared at 'D:/Projekte/Arty/hw/hw.srcs/sources_1/new/LogicUnit.vhd:34' bound to instance 'inst_LogicUnit' of component 'LogicUnit' [D:/Projekte/Arty/hw/hw.srcs/sources_1/imports/hdl/GPIO_Demo.vhd:449]
 INFO: [Synth 8-638] synthesizing module 'LogicUnit' [D:/Projekte/Arty/hw/hw.srcs/sources_1/new/LogicUnit.vhd:54]
-INFO: [Synth 8-3491] module 'Add' declared at 'D:/Projekte/Arty/hw/hw.runs/synth_1/.Xil/Vivado-23844-DESKTOP-E28LK6R/realtime/Add_stub.vhdl:6' bound to instance 'inst_add' of component 'Add' [D:/Projekte/Arty/hw/hw.srcs/sources_1/new/LogicUnit.vhd:122]
-INFO: [Synth 8-638] synthesizing module 'Add' [D:/Projekte/Arty/hw/hw.runs/synth_1/.Xil/Vivado-23844-DESKTOP-E28LK6R/realtime/Add_stub.vhdl:22]
-INFO: [Synth 8-3491] module 'Sub' declared at 'D:/Projekte/Arty/hw/hw.runs/synth_1/.Xil/Vivado-23844-DESKTOP-E28LK6R/realtime/Sub_stub.vhdl:6' bound to instance 'inst_sub' of component 'Sub' [D:/Projekte/Arty/hw/hw.srcs/sources_1/new/LogicUnit.vhd:131]
-INFO: [Synth 8-638] synthesizing module 'Sub' [D:/Projekte/Arty/hw/hw.runs/synth_1/.Xil/Vivado-23844-DESKTOP-E28LK6R/realtime/Sub_stub.vhdl:22]
-INFO: [Synth 8-226] default block is never used [D:/Projekte/Arty/hw/hw.srcs/sources_1/new/LogicUnit.vhd:459]
-INFO: [Synth 8-226] default block is never used [D:/Projekte/Arty/hw/hw.srcs/sources_1/new/LogicUnit.vhd:514]
-INFO: [Synth 8-226] default block is never used [D:/Projekte/Arty/hw/hw.srcs/sources_1/new/LogicUnit.vhd:704]
-INFO: [Synth 8-226] default block is never used [D:/Projekte/Arty/hw/hw.srcs/sources_1/new/LogicUnit.vhd:737]
+INFO: [Synth 8-3491] module 'Add' declared at 'D:/Projekte/Arty/hw/hw.runs/synth_1/.Xil/Vivado-30976-DESKTOP-E28LK6R/realtime/Add_stub.vhdl:6' bound to instance 'inst_add' of component 'Add' [D:/Projekte/Arty/hw/hw.srcs/sources_1/new/LogicUnit.vhd:134]
+INFO: [Synth 8-638] synthesizing module 'Add' [D:/Projekte/Arty/hw/hw.runs/synth_1/.Xil/Vivado-30976-DESKTOP-E28LK6R/realtime/Add_stub.vhdl:22]
+INFO: [Synth 8-3491] module 'Sub' declared at 'D:/Projekte/Arty/hw/hw.runs/synth_1/.Xil/Vivado-30976-DESKTOP-E28LK6R/realtime/Sub_stub.vhdl:6' bound to instance 'inst_sub' of component 'Sub' [D:/Projekte/Arty/hw/hw.srcs/sources_1/new/LogicUnit.vhd:143]
+INFO: [Synth 8-638] synthesizing module 'Sub' [D:/Projekte/Arty/hw/hw.runs/synth_1/.Xil/Vivado-30976-DESKTOP-E28LK6R/realtime/Sub_stub.vhdl:22]
+INFO: [Synth 8-226] default block is never used [D:/Projekte/Arty/hw/hw.srcs/sources_1/new/LogicUnit.vhd:471]
+INFO: [Synth 8-226] default block is never used [D:/Projekte/Arty/hw/hw.srcs/sources_1/new/LogicUnit.vhd:526]
+INFO: [Synth 8-226] default block is never used [D:/Projekte/Arty/hw/hw.srcs/sources_1/new/LogicUnit.vhd:716]
+INFO: [Synth 8-226] default block is never used [D:/Projekte/Arty/hw/hw.srcs/sources_1/new/LogicUnit.vhd:749]
 INFO: [Synth 8-256] done synthesizing module 'LogicUnit' (0#1) [D:/Projekte/Arty/hw/hw.srcs/sources_1/new/LogicUnit.vhd:54]
-INFO: [Synth 8-3491] module 'ProgRam' declared at 'D:/Projekte/Arty/hw/hw.runs/synth_1/.Xil/Vivado-23844-DESKTOP-E28LK6R/realtime/ProgRam_stub.vhdl:6' bound to instance 'inst_ProgRam' of component 'ProgRam' [D:/Projekte/Arty/hw/hw.srcs/sources_1/imports/hdl/GPIO_Demo.vhd:494]
-INFO: [Synth 8-638] synthesizing module 'ProgRam' [D:/Projekte/Arty/hw/hw.runs/synth_1/.Xil/Vivado-23844-DESKTOP-E28LK6R/realtime/ProgRam_stub.vhdl:23]
+INFO: [Synth 8-3491] module 'ProgRam' declared at 'D:/Projekte/Arty/hw/hw.runs/synth_1/.Xil/Vivado-30976-DESKTOP-E28LK6R/realtime/ProgRam_stub.vhdl:6' bound to instance 'inst_ProgRam' of component 'ProgRam' [D:/Projekte/Arty/hw/hw.srcs/sources_1/imports/hdl/GPIO_Demo.vhd:494]
+INFO: [Synth 8-638] synthesizing module 'ProgRam' [D:/Projekte/Arty/hw/hw.runs/synth_1/.Xil/Vivado-30976-DESKTOP-E28LK6R/realtime/ProgRam_stub.vhdl:23]
 INFO: [Synth 8-226] default block is never used [D:/Projekte/Arty/hw/hw.srcs/sources_1/imports/hdl/GPIO_Demo.vhd:571]
-INFO: [Synth 8-3491] module 'DataRam' declared at 'D:/Projekte/Arty/hw/hw.runs/synth_1/.Xil/Vivado-23844-DESKTOP-E28LK6R/realtime/DataRam_stub.vhdl:6' bound to instance 'inst_DataRam' of component 'DataRam' [D:/Projekte/Arty/hw/hw.srcs/sources_1/imports/hdl/GPIO_Demo.vhd:608]
-INFO: [Synth 8-638] synthesizing module 'DataRam' [D:/Projekte/Arty/hw/hw.runs/synth_1/.Xil/Vivado-23844-DESKTOP-E28LK6R/realtime/DataRam_stub.vhdl:23]
-INFO: [Synth 8-3491] module 'RGB_controller' declared at 'D:/Projekte/Arty/hw/hw.srcs/sources_1/imports/hdl/RGB_controller.vhd:20' bound to instance 'RGB_Core1' of component 'RGB_controller' [D:/Projekte/Arty/hw/hw.srcs/sources_1/imports/hdl/GPIO_Demo.vhd:625]
+INFO: [Synth 8-3491] module 'DataRam' declared at 'D:/Projekte/Arty/hw/hw.runs/synth_1/.Xil/Vivado-30976-DESKTOP-E28LK6R/realtime/DataRam_stub.vhdl:6' bound to instance 'inst_DataRam' of component 'DataRam' [D:/Projekte/Arty/hw/hw.srcs/sources_1/imports/hdl/GPIO_Demo.vhd:610]
+INFO: [Synth 8-638] synthesizing module 'DataRam' [D:/Projekte/Arty/hw/hw.runs/synth_1/.Xil/Vivado-30976-DESKTOP-E28LK6R/realtime/DataRam_stub.vhdl:23]
+INFO: [Synth 8-3491] module 'RGB_controller' declared at 'D:/Projekte/Arty/hw/hw.srcs/sources_1/imports/hdl/RGB_controller.vhd:20' bound to instance 'RGB_Core1' of component 'RGB_controller' [D:/Projekte/Arty/hw/hw.srcs/sources_1/imports/hdl/GPIO_Demo.vhd:627]
 INFO: [Synth 8-638] synthesizing module 'RGB_controller' [D:/Projekte/Arty/hw/hw.srcs/sources_1/imports/hdl/RGB_controller.vhd:28]
 INFO: [Synth 8-256] done synthesizing module 'RGB_controller' (0#1) [D:/Projekte/Arty/hw/hw.srcs/sources_1/imports/hdl/RGB_controller.vhd:28]
 INFO: [Synth 8-256] done synthesizing module 'GPIO_demo' (0#1) [D:/Projekte/Arty/hw/hw.srcs/sources_1/imports/hdl/GPIO_Demo.vhd:70]
@@ -85,18 +83,18 @@ WARNING: [Synth 8-7129] Port SW[2] in module GPIO_demo is either unconnected or 
 WARNING: [Synth 8-7129] Port SW[1] in module GPIO_demo is either unconnected or has no load
 WARNING: [Synth 8-7129] Port SW[0] in module GPIO_demo is either unconnected or has no load
 ---------------------------------------------------------------------------------
-Finished RTL Elaboration : Time (s): cpu = 00:00:07 ; elapsed = 00:00:07 . Memory (MB): peak = 1387.738 ; gain = 720.156
+Finished RTL Elaboration : Time (s): cpu = 00:00:07 ; elapsed = 00:00:07 . Memory (MB): peak = 1386.840 ; gain = 718.895
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
 Start Handling Custom Attributes
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
-Finished Handling Custom Attributes : Time (s): cpu = 00:00:07 ; elapsed = 00:00:07 . Memory (MB): peak = 1387.738 ; gain = 720.156
+Finished Handling Custom Attributes : Time (s): cpu = 00:00:07 ; elapsed = 00:00:07 . Memory (MB): peak = 1386.840 ; gain = 718.895
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
-Finished RTL Optimization Phase 1 : Time (s): cpu = 00:00:07 ; elapsed = 00:00:07 . Memory (MB): peak = 1387.738 ; gain = 720.156
+Finished RTL Optimization Phase 1 : Time (s): cpu = 00:00:07 ; elapsed = 00:00:07 . Memory (MB): peak = 1386.840 ; gain = 718.895
 ---------------------------------------------------------------------------------
-Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.270 . Memory (MB): peak = 1387.738 ; gain = 0.000
+Netlist sorting complete. Time (s): cpu = 00:00:01 ; elapsed = 00:00:00.276 . Memory (MB): peak = 1386.840 ; gain = 0.000
 INFO: [Project 1-570] Preparing netlist for logic optimization
 
 Processing XDC Constraints
@@ -117,30 +115,38 @@ Parsing XDC File [D:/Projekte/Arty/hw/hw.srcs/constrs_1/new/Arty-S7-25-Debug.xdc
 Finished Parsing XDC File [D:/Projekte/Arty/hw/hw.srcs/constrs_1/new/Arty-S7-25-Debug.xdc]
 Completed Processing XDC Constraints
 
-Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.002 . Memory (MB): peak = 1469.117 ; gain = 0.000
+Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.002 . Memory (MB): peak = 1471.152 ; gain = 0.000
 INFO: [Project 1-111] Unisim Transformation Summary:
 No Unisim elements were transformed.
 
-Constraint Validation Runtime : Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.015 . Memory (MB): peak = 1469.117 ; gain = 0.000
+Constraint Validation Runtime : Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.017 . Memory (MB): peak = 1471.152 ; gain = 0.000
 WARNING: [Timing 38-316] Clock period '20.000' specified during out-of-context synthesis of instance 'inst_DataRam' at clock pin 'clka' is different from the actual clock period '10.000', this can lead to different synthesis results.
 WARNING: [Timing 38-316] Clock period '20.000' specified during out-of-context synthesis of instance 'inst_ProgRam' at clock pin 'clka' is different from the actual clock period '10.000', this can lead to different synthesis results.
-INFO: [Designutils 20-5440] No compile time benefit to using incremental synthesis; A full resynthesis will be run
-INFO: [Designutils 20-4379] Flow is switching to default flow due to incremental criteria not met. If you would like to alter this behaviour and have the flow terminate instead, please set the following parameter config_implementation {autoIncr.Synth.RejectBehavior Terminate}
 ---------------------------------------------------------------------------------
-Finished Constraint Validation : Time (s): cpu = 00:00:16 ; elapsed = 00:00:16 . Memory (MB): peak = 1469.355 ; gain = 801.773
+Finished Constraint Validation : Time (s): cpu = 00:00:16 ; elapsed = 00:00:16 . Memory (MB): peak = 1472.441 ; gain = 804.496
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
 Start Loading Part and Timing Information
 ---------------------------------------------------------------------------------
 Loading part: xc7s25csga324-1
 ---------------------------------------------------------------------------------
-Finished Loading Part and Timing Information : Time (s): cpu = 00:00:16 ; elapsed = 00:00:16 . Memory (MB): peak = 1469.355 ; gain = 801.773
+Finished Loading Part and Timing Information : Time (s): cpu = 00:00:16 ; elapsed = 00:00:16 . Memory (MB): peak = 1472.441 ; gain = 804.496
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
 Start Applying 'set_property' XDC Constraints
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
-Finished applying 'set_property' XDC Constraints : Time (s): cpu = 00:00:16 ; elapsed = 00:00:16 . Memory (MB): peak = 1469.355 ; gain = 801.773
+Finished applying 'set_property' XDC Constraints : Time (s): cpu = 00:00:16 ; elapsed = 00:00:16 . Memory (MB): peak = 1472.441 ; gain = 804.496
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Preparing Guide Design
+---------------------------------------------------------------------------------
+WARNING: [Synth 8-6702] IncrSynth : Design change found in an area of the design that prevents previous synthesis information being used, Reverting to default synthesis
+---------------------------------------------------------------------------------
+Finished Doing Graph Differ : Time (s): cpu = 00:00:17 ; elapsed = 00:00:17 . Memory (MB): peak = 1472.441 ; gain = 804.496
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Preparing Guide Design : Time (s): cpu = 00:00:17 ; elapsed = 00:00:17 . Memory (MB): peak = 1472.441 ; gain = 804.496
 ---------------------------------------------------------------------------------
 INFO: [Synth 8-802] inferred FSM for state register 'r_SM_Main_reg' in module 'UART_TX_CTRL'
 INFO: [Synth 8-802] inferred FSM for state register 'fetch_state_reg' in module 'LogicUnit'
@@ -175,8 +181,18 @@ INFO: [Synth 8-3354] encoded FSM with state register 'fetch_state_reg' using enc
 ---------------------------------------------------------------------------------------------------
 INFO: [Synth 8-3354] encoded FSM with state register 'progRam_Uart_State_reg' using encoding 'sequential' in module 'GPIO_demo'
 ---------------------------------------------------------------------------------
-Finished RTL Optimization Phase 2 : Time (s): cpu = 00:00:22 ; elapsed = 00:00:22 . Memory (MB): peak = 1469.355 ; gain = 801.773
+Finished RTL Optimization Phase 2 : Time (s): cpu = 00:00:23 ; elapsed = 00:00:23 . Memory (MB): peak = 1472.441 ; gain = 804.496
 ---------------------------------------------------------------------------------
+
+
+Incremental Synthesis Report Summary:
+
+1. Incremental synthesis run: no
+
+   Reason for not running incremental synthesis : Design change found in an area of the design that prevents previous synthesis information being used
+
+
+INFO: [Synth 8-7130] Flow is switching to default flow due to incremental criteria not met. If you would like to alter this behaviour and have the flow terminate instead, please set the following parameter config_implementation {autoIncr.Synth.RejectBehavior Terminate}
 ---------------------------------------------------------------------------------
 Start RTL Component Statistics 
 ---------------------------------------------------------------------------------
@@ -228,7 +244,7 @@ Detailed RTL Component Info :
 	   5 Input    3 Bit        Muxes := 1     
 	   3 Input    2 Bit        Muxes := 2     
 	   2 Input    2 Bit        Muxes := 7     
-	   2 Input    1 Bit        Muxes := 288   
+	   2 Input    1 Bit        Muxes := 287   
 	   4 Input    1 Bit        Muxes := 3     
 	   8 Input    1 Bit        Muxes := 5     
 	   6 Input    1 Bit        Muxes := 6     
@@ -288,27 +304,27 @@ INFO: [Synth 8-3333] propagating constant 0 across sequential element (\register
 INFO: [Synth 8-5587] ROM size for "instruction_jump" is below threshold of ROM address width. It will be mapped to LUTs
 INFO: [Synth 8-5587] ROM size for "instruction_jump" is below threshold of ROM address width. It will be mapped to LUTs
 ---------------------------------------------------------------------------------
-Finished Cross Boundary and Area Optimization : Time (s): cpu = 00:00:34 ; elapsed = 00:00:48 . Memory (MB): peak = 1469.355 ; gain = 801.773
+Finished Cross Boundary and Area Optimization : Time (s): cpu = 00:00:35 ; elapsed = 00:00:49 . Memory (MB): peak = 1472.441 ; gain = 804.496
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
 Start Applying XDC Timing Constraints
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
-Finished Applying XDC Timing Constraints : Time (s): cpu = 00:00:38 ; elapsed = 00:00:52 . Memory (MB): peak = 1534.359 ; gain = 866.777
+Finished Applying XDC Timing Constraints : Time (s): cpu = 00:00:40 ; elapsed = 00:00:53 . Memory (MB): peak = 1562.016 ; gain = 894.070
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
 Start Timing Optimization
 ---------------------------------------------------------------------------------
 info: optimization accepted worst group hill climbing move (2506.0/oG.CP 272.0ps)
 ---------------------------------------------------------------------------------
-Finished Timing Optimization : Time (s): cpu = 00:02:10 ; elapsed = 00:02:24 . Memory (MB): peak = 1941.758 ; gain = 1274.176
+Finished Timing Optimization : Time (s): cpu = 00:02:10 ; elapsed = 00:02:25 . Memory (MB): peak = 1967.777 ; gain = 1299.832
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
 Start Technology Mapping
 ---------------------------------------------------------------------------------
 WARNING: [Synth 8-7080] Parallel synthesis criteria is not met
 ---------------------------------------------------------------------------------
-Finished Technology Mapping : Time (s): cpu = 00:02:12 ; elapsed = 00:02:26 . Memory (MB): peak = 1941.758 ; gain = 1274.176
+Finished Technology Mapping : Time (s): cpu = 00:02:12 ; elapsed = 00:02:27 . Memory (MB): peak = 1967.777 ; gain = 1299.832
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
 Start IO Insertion
@@ -326,37 +342,37 @@ Start Final Netlist Cleanup
 Finished Final Netlist Cleanup
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
-Finished IO Insertion : Time (s): cpu = 00:02:15 ; elapsed = 00:02:29 . Memory (MB): peak = 1941.758 ; gain = 1274.176
+Finished IO Insertion : Time (s): cpu = 00:02:16 ; elapsed = 00:02:31 . Memory (MB): peak = 1967.777 ; gain = 1299.832
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
 Start Renaming Generated Instances
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
-Finished Renaming Generated Instances : Time (s): cpu = 00:02:15 ; elapsed = 00:02:29 . Memory (MB): peak = 1941.758 ; gain = 1274.176
+Finished Renaming Generated Instances : Time (s): cpu = 00:02:16 ; elapsed = 00:02:31 . Memory (MB): peak = 1967.777 ; gain = 1299.832
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
 Start Rebuilding User Hierarchy
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
-Finished Rebuilding User Hierarchy : Time (s): cpu = 00:02:15 ; elapsed = 00:02:29 . Memory (MB): peak = 1941.758 ; gain = 1274.176
+Finished Rebuilding User Hierarchy : Time (s): cpu = 00:02:16 ; elapsed = 00:02:31 . Memory (MB): peak = 1967.777 ; gain = 1299.832
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
 Start Renaming Generated Ports
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
-Finished Renaming Generated Ports : Time (s): cpu = 00:02:15 ; elapsed = 00:02:29 . Memory (MB): peak = 1941.758 ; gain = 1274.176
+Finished Renaming Generated Ports : Time (s): cpu = 00:02:16 ; elapsed = 00:02:31 . Memory (MB): peak = 1967.777 ; gain = 1299.832
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
 Start Handling Custom Attributes
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
-Finished Handling Custom Attributes : Time (s): cpu = 00:02:15 ; elapsed = 00:02:29 . Memory (MB): peak = 1941.758 ; gain = 1274.176
+Finished Handling Custom Attributes : Time (s): cpu = 00:02:16 ; elapsed = 00:02:31 . Memory (MB): peak = 1967.777 ; gain = 1299.832
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
 Start Renaming Generated Nets
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
-Finished Renaming Generated Nets : Time (s): cpu = 00:02:15 ; elapsed = 00:02:29 . Memory (MB): peak = 1941.758 ; gain = 1274.176
+Finished Renaming Generated Nets : Time (s): cpu = 00:02:16 ; elapsed = 00:02:31 . Memory (MB): peak = 1967.777 ; gain = 1299.832
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
 Start Writing Synthesis Report
@@ -383,41 +399,41 @@ Report Cell Usage:
 |5     |BUFG         |     1|
 |6     |CARRY4       |   139|
 |7     |LUT1         |    91|
-|8     |LUT2         |   215|
-|9     |LUT3         |   284|
+|8     |LUT2         |   214|
+|9     |LUT3         |   286|
 |10    |LUT4         |   433|
 |11    |LUT5         |   489|
 |12    |LUT6         |  1538|
 |13    |MUXF7        |   187|
 |14    |MUXF8        |     9|
-|15    |FDRE         |  2019|
+|15    |FDRE         |  2020|
 |16    |FDSE         |     4|
 |17    |IBUF         |     6|
 |18    |OBUF         |    11|
 +------+-------------+------+
 ---------------------------------------------------------------------------------
-Finished Writing Synthesis Report : Time (s): cpu = 00:02:15 ; elapsed = 00:02:29 . Memory (MB): peak = 1941.758 ; gain = 1274.176
+Finished Writing Synthesis Report : Time (s): cpu = 00:02:16 ; elapsed = 00:02:31 . Memory (MB): peak = 1967.777 ; gain = 1299.832
 ---------------------------------------------------------------------------------
-Synthesis finished with 0 errors, 0 critical warnings and 6 warnings.
-Synthesis Optimization Runtime : Time (s): cpu = 00:02:04 ; elapsed = 00:02:26 . Memory (MB): peak = 1941.758 ; gain = 1192.559
-Synthesis Optimization Complete : Time (s): cpu = 00:02:15 ; elapsed = 00:02:30 . Memory (MB): peak = 1941.758 ; gain = 1274.176
+Synthesis finished with 0 errors, 0 critical warnings and 7 warnings.
+Synthesis Optimization Runtime : Time (s): cpu = 00:02:05 ; elapsed = 00:02:27 . Memory (MB): peak = 1967.777 ; gain = 1214.230
+Synthesis Optimization Complete : Time (s): cpu = 00:02:16 ; elapsed = 00:02:31 . Memory (MB): peak = 1967.777 ; gain = 1299.832
 INFO: [Project 1-571] Translating synthesized netlist
-Netlist sorting complete. Time (s): cpu = 00:00:01 ; elapsed = 00:00:00.054 . Memory (MB): peak = 1941.758 ; gain = 0.000
+Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.039 . Memory (MB): peak = 1967.777 ; gain = 0.000
 INFO: [Netlist 29-17] Analyzing 335 Unisim elements for replacement
 INFO: [Netlist 29-28] Unisim Transformation completed in 0 CPU seconds
 WARNING: [Netlist 29-101] Netlist 'GPIO_demo' is not ideal for floorplanning, since the cellview 'LogicUnit' contains a large number of primitives.  Please consider enabling hierarchy in synthesis if you want to do floorplanning.
 INFO: [Project 1-570] Preparing netlist for logic optimization
 INFO: [Opt 31-138] Pushed 0 inverter(s) to 0 load pin(s).
-Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.001 . Memory (MB): peak = 1941.758 ; gain = 0.000
+Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.001 . Memory (MB): peak = 1967.777 ; gain = 0.000
 INFO: [Project 1-111] Unisim Transformation Summary:
 No Unisim elements were transformed.
 
-Synth Design complete | Checksum: 39f9c28c
+Synth Design complete | Checksum: 1256fb0c
 INFO: [Common 17-83] Releasing license: Synthesis
-93 Infos, 14 Warnings, 0 Critical Warnings and 0 Errors encountered.
+90 Infos, 15 Warnings, 0 Critical Warnings and 0 Errors encountered.
 synth_design completed successfully
-synth_design: Time (s): cpu = 00:02:18 ; elapsed = 00:02:35 . Memory (MB): peak = 1941.758 ; gain = 1435.906
-Write ShapeDB Complete: Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.003 . Memory (MB): peak = 1941.758 ; gain = 0.000
+synth_design: Time (s): cpu = 00:02:19 ; elapsed = 00:02:36 . Memory (MB): peak = 1967.777 ; gain = 1462.047
+Write ShapeDB Complete: Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.004 . Memory (MB): peak = 1967.777 ; gain = 0.000
 INFO: [Common 17-1381] The checkpoint 'D:/Projekte/Arty/hw/hw.runs/synth_1/GPIO_demo.dcp' has been generated.
 INFO: [Vivado 12-24828] Executing command : report_utilization -file GPIO_demo_utilization_synth.rpt -pb GPIO_demo_utilization_synth.pb
-INFO: [Common 17-206] Exiting Vivado at Thu Nov 27 12:48:05 2025...
+INFO: [Common 17-206] Exiting Vivado at Thu Nov 27 15:57:44 2025...
