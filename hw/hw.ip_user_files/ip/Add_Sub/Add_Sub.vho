@@ -55,6 +55,7 @@ COMPONENT Add_Sub
   PORT (
     A : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
     B : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
+    CLK : IN STD_LOGIC;
     ADD : IN STD_LOGIC;
     S : OUT STD_LOGIC_VECTOR(31 DOWNTO 0) 
   );
@@ -69,6 +70,7 @@ your_instance_name : Add_Sub
   PORT MAP (
     A => A,
     B => B,
+    CLK => CLK,
     ADD => ADD,
     S => S
   );

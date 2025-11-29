@@ -56,7 +56,6 @@ if {$::dispatch::connected} {
 }
 
 OPTRACE "Sub_synth_1" START { ROLLUP_AUTO }
-set_param chipscope.maxJobs 6
 set_param general.usePosixSpawnForFork 1
 set_param project.vivado.isBlockSynthRun true
 set_msg_config -msgmgr_mode ooc_run

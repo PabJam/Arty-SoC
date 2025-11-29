@@ -114,6 +114,20 @@ component UART_TX_CTRL
 	);
 end component;
 
+component UART_Fifo is
+  Port ( 
+    clk : in STD_LOGIC;
+    srst : in STD_LOGIC;
+    din : in STD_LOGIC_VECTOR ( 7 downto 0 );
+    wr_en : in STD_LOGIC;
+    rd_en : in STD_LOGIC;
+    dout : out STD_LOGIC_VECTOR ( 7 downto 0 );
+    full : out STD_LOGIC;
+    empty : out STD_LOGIC;
+    valid : out STD_LOGIC
+  );
+end component;
+
 component ProgRam
 	port 
 	(
@@ -292,9 +306,14 @@ signal uart_TX_DV :  std_logic;
 signal uart_TX_Data : std_logic_vector(7 downto 0) := (others => '0');
 signal uart_TX_Active : std_logic;
 signal uart_TX_done : std_logic;
-signal uart_Fifo_empty : std_logic;
-signal uart_Fifo_rd_en : std_logic;
-signal uart_Fifo_valid : std_logic;
+signal uart_fifo_empty : std_logic;
+signal uart_fifo_rd_en : std_logic;
+signal uart_fifo_valid : std_logic;
+signal uart_fifo_wr_en : std_logic;
+signal uart_fifo_dout : std_logic_vector(7 downto 0);
+signal uart_fifo_din : std_logic_vector(7 downto 0);
+signal uart_fifo_srst : std_logic;
+
 
 --ProgRam signals
 type t_progRam_Uart_States is (progRam_Uart_Idle, progRam_Uart_Write, progRam_Uart_PreRead, progRam_Uart_ReadWait, ProgRam_Uart_Read);
@@ -362,17 +381,7 @@ begin
 
 
 	--LED <= SW;
-	
 
-LED_Proc: process (clk)
-begin
-	if rising_edge(clk) then
-		LED <= saved_leds;
-		if dm_write_dv = '1' and dm_data_in = x"FFFFFFFF" then
-			saved_leds <= not saved_leds;	
-		end if;
-	end if;
-end process;
 	
 
 ----------------------------------------------------------
@@ -442,6 +451,21 @@ port map
 
 uart_RX <= i_Uart_RXD;
 
+Inst_UART_Fifo: UART_Fifo
+port map
+(
+    clk => CLK,
+    srst => uart_fifo_srst,
+    din => uart_fifo_din,
+    wr_en => uart_fifo_wr_en,
+    rd_en => uart_fifo_rd_en,
+    dout => uart_fifo_dout,
+    full => open,
+    empty => uart_fifo_empty,
+    valid => uart_fifo_valid
+);
+
+
 ----------------------------------------------------------
 ------              Logic Unit Control             -------
 ----------------------------------------------------------
@@ -472,8 +496,10 @@ begin
 		take_ctrl_logic_unit <= '0';
 		give_ctrl_logic_unit <= '0';
 		sync_nRst_lu <= '1';
-	
+		uart_fifo_srst <= '0';
+		
 		if (btnReg(3)='0' and btnDeBnc(3)='1') then
+			uart_fifo_srst <= '1';
 			sync_nRst_lu <= '0';
 		end if;
 		if (btnReg(2)='0' and btnDeBnc(2)='1') then
@@ -508,6 +534,7 @@ begin
 		progRam_Wr_En <= (others => '0'); -- default assignment
 		uart_TX_DV <= '0';
 		progRam_dv <= '0';
+		uart_fifo_rd_en <= '1';
 		latched_progRam_addr_lu <= progRam_addr_lu;
 		
 		if ctrl_logic_unit = '0' then
@@ -580,6 +607,31 @@ begin
 						pm_lu_state <= pm_lu_state_pre_read;
 				end case;
 			end if;
+			
+			if uart_fifo_valid = '1' and uart_TX_Active = '0' then
+				uart_TX_Data <= uart_fifo_dout;
+				uart_fifo_rd_en <= '1';
+				uart_TX_DV <= '1';
+			end if;
+			
+		end if;
+	end if;
+end process;
+
+address_map: process (clk)
+begin
+	if rising_edge(clk) then
+		uart_fifo_wr_en <= '0';
+		if dm_write_dv = '1' then
+			case dm_addr is
+				when x"AAAAAAAA" =>	
+					LED <= dm_data_in(3 downto 0);
+				when x"BBBBBBBB" =>
+					uart_fifo_din <= dm_data_in(7 downto 0);
+					uart_fifo_wr_en <= '1';
+				when others =>
+					null;
+			end case;
 		end if;
 	end if;
 end process;

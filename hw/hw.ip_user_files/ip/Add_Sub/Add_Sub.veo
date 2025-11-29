@@ -57,6 +57,7 @@
 Add_Sub your_instance_name (
   .A(A),      // input wire [31 : 0] A
   .B(B),      // input wire [31 : 0] B
+  .CLK(CLK),  // input wire CLK
   .ADD(ADD),  // input wire ADD
   .S(S)      // output wire [31 : 0] S
 );

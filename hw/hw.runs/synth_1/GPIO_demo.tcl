@@ -56,11 +56,8 @@ if {$::dispatch::connected} {
 }
 
 OPTRACE "synth_1" START { ROLLUP_AUTO }
-set_param tcl.collectionResultDisplayLimit 0
 set_param chipscope.maxJobs 6
 set_param general.usePosixSpawnForFork 1
-set_param xicom.use_bs_reader 1
-set_msg_config -id {Common 17-41} -limit 10000000
 OPTRACE "Creating in-memory project" START { }
 create_project -in_memory -part xc7s25csga324-1
 
@@ -70,7 +67,7 @@ set_param synth.vivado.isSynthRun true
 set_msg_config -source 4 -id {IP_Flow 19-2162} -severity warning -new_severity info
 set_property webtalk.parent_dir D:/Projekte/Arty/hw/hw.cache/wt [current_project]
 set_property parent.project_path D:/Projekte/Arty/hw/hw.xpr [current_project]
-set_property XPM_LIBRARIES XPM_MEMORY [current_project]
+set_property XPM_LIBRARIES {XPM_CDC XPM_MEMORY} [current_project]
 set_property default_lib xil_defaultlib [current_project]
 set_property target_language VHDL [current_project]
 set_property board_part_repo_paths {D:/Projekte/Arty/hw/hw.board} [current_project]
@@ -89,17 +86,15 @@ read_vhdl -library xil_defaultlib {
   D:/Projekte/Arty/hw/hw.srcs/sources_1/imports/hdl/debouncer.vhd
   D:/Projekte/Arty/hw/hw.srcs/sources_1/imports/hdl/GPIO_Demo.vhd
 }
+read_ip -quiet D:/Projekte/Arty/hw/hw.srcs/sources_1/ip/UART_Fifo/UART_Fifo.xci
+set_property used_in_implementation false [get_files -all d:/Projekte/Arty/hw/hw.gen/sources_1/ip/UART_Fifo_2/UART_Fifo.xdc]
+set_property used_in_implementation false [get_files -all d:/Projekte/Arty/hw/hw.gen/sources_1/ip/UART_Fifo_2/UART_Fifo_ooc.xdc]
+
 read_ip -quiet D:/Projekte/Arty/hw/hw.srcs/sources_1/ip/ProgRam/ProgRam.xci
 set_property used_in_implementation false [get_files -all d:/Projekte/Arty/hw/hw.gen/sources_1/ip/ProgRam/ProgRam_ooc.xdc]
 
 read_ip -quiet D:/Projekte/Arty/hw/hw.srcs/sources_1/ip/DataRam/DataRam.xci
 set_property used_in_implementation false [get_files -all d:/Projekte/Arty/hw/hw.gen/sources_1/ip/DataRam/DataRam_ooc.xdc]
-
-read_ip -quiet D:/Projekte/Arty/hw/hw.srcs/sources_1/ip/Sub/Sub.xci
-set_property used_in_implementation false [get_files -all d:/Projekte/Arty/hw/hw.gen/sources_1/ip/Sub/Sub_ooc.xdc]
-
-read_ip -quiet D:/Projekte/Arty/hw/hw.srcs/sources_1/ip/Add/Add.xci
-set_property used_in_implementation false [get_files -all d:/Projekte/Arty/hw/hw.gen/sources_1/ip/Add/Add_ooc.xdc]
 
 OPTRACE "Adding files" END { }
 # Mark all dcp files as not used in implementation to prevent them from being

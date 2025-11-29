@@ -3,8 +3,8 @@
 # SW Build 6140274 on Thu May 22 00:12:29 MDT 2025
 # IP Build 6138677 on Thu May 22 03:10:11 MDT 2025
 # SharedData Build 6139179 on Tue May 20 17:58:58 MDT 2025
-# Start of session at: Thu Nov 27 15:55:00 2025
-# Process ID         : 30976
+# Start of session at: Sat Nov 29 01:09:30 2025
+# Process ID         : 33424
 # Current directory  : D:/Projekte/Arty/hw/hw.runs/synth_1
 # Command line       : vivado.exe -log GPIO_demo.vds -product Vivado -mode batch -messageDb vivado.pb -notrace -source GPIO_demo.tcl
 # Log file           : D:/Projekte/Arty/hw/hw.runs/synth_1/GPIO_demo.vds
@@ -19,7 +19,7 @@
 # Host memory        : 34257 MB
 # Swap memory        : 5100 MB
 # Total Virtual      : 39358 MB
-# Available Virtual  : 17860 MB
+# Available Virtual  : 21189 MB
 #-----------------------------------------------------------
 source GPIO_demo.tcl -notrace
 INFO: [IP_Flow 19-234] Refreshing IP repositories
@@ -34,47 +34,47 @@ Starting synth_design
 Attempting to get a license for feature 'Synthesis' and/or device 'xc7s25'
 INFO: [Common 17-349] Got license for feature 'Synthesis' and/or device 'xc7s25'
 INFO: [Device 21-403] Loading part xc7s25csga324-1
+INFO: [Designutils 20-5440] No compile time benefit to using incremental synthesis; A full resynthesis will be run
+INFO: [Designutils 20-4379] Flow is switching to default flow due to incremental criteria not met. If you would like to alter this behaviour and have the flow terminate instead, please set the following parameter config_implementation {autoIncr.Synth.RejectBehavior Terminate}
 INFO: [Synth 8-7079] Multithreading enabled for synth_design using a maximum of 2 processes.
 INFO: [Synth 8-7078] Launching helper process for spawning children vivado processes
-INFO: [Synth 8-7075] Helper process launched with PID 26924
+INFO: [Synth 8-7075] Helper process launched with PID 672
 ---------------------------------------------------------------------------------
-Starting RTL Elaboration : Time (s): cpu = 00:00:04 ; elapsed = 00:00:04 . Memory (MB): peak = 1159.812 ; gain = 491.867
+Starting RTL Elaboration : Time (s): cpu = 00:00:04 ; elapsed = 00:00:04 . Memory (MB): peak = 1160.410 ; gain = 492.227
 ---------------------------------------------------------------------------------
 INFO: [Synth 8-638] synthesizing module 'GPIO_demo' [D:/Projekte/Arty/hw/hw.srcs/sources_1/imports/hdl/GPIO_Demo.vhd:70]
 	Parameter DEBNC_CLOCKS bound to: 65536 - type: integer 
 	Parameter PORT_WIDTH bound to: 4 - type: integer 
-INFO: [Synth 8-3491] module 'debouncer' declared at 'D:/Projekte/Arty/hw/hw.srcs/sources_1/imports/hdl/debouncer.vhd:42' bound to instance 'Inst_btn_debounce' of component 'debouncer' [D:/Projekte/Arty/hw/hw.srcs/sources_1/imports/hdl/GPIO_Demo.vhd:386]
+INFO: [Synth 8-3491] module 'debouncer' declared at 'D:/Projekte/Arty/hw/hw.srcs/sources_1/imports/hdl/debouncer.vhd:42' bound to instance 'Inst_btn_debounce' of component 'debouncer' [D:/Projekte/Arty/hw/hw.srcs/sources_1/imports/hdl/GPIO_Demo.vhd:395]
 INFO: [Synth 8-638] synthesizing module 'debouncer' [D:/Projekte/Arty/hw/hw.srcs/sources_1/imports/hdl/debouncer.vhd:50]
 	Parameter DEBNC_CLOCKS bound to: 65536 - type: integer 
 	Parameter PORT_WIDTH bound to: 4 - type: integer 
 INFO: [Synth 8-256] done synthesizing module 'debouncer' (0#1) [D:/Projekte/Arty/hw/hw.srcs/sources_1/imports/hdl/debouncer.vhd:50]
 	Parameter g_CLKS_PER_BIT bound to: 868 - type: integer 
-INFO: [Synth 8-3491] module 'UART_TX_CTRL' declared at 'D:/Projekte/Arty/hw/hw.srcs/sources_1/imports/hdl/UART_TX_CTRL.vhd:15' bound to instance 'Inst_UART_TX_CTRL' of component 'UART_TX_CTRL' [D:/Projekte/Arty/hw/hw.srcs/sources_1/imports/hdl/GPIO_Demo.vhd:418]
+INFO: [Synth 8-3491] module 'UART_TX_CTRL' declared at 'D:/Projekte/Arty/hw/hw.srcs/sources_1/imports/hdl/UART_TX_CTRL.vhd:15' bound to instance 'Inst_UART_TX_CTRL' of component 'UART_TX_CTRL' [D:/Projekte/Arty/hw/hw.srcs/sources_1/imports/hdl/GPIO_Demo.vhd:427]
 INFO: [Synth 8-638] synthesizing module 'UART_TX_CTRL' [D:/Projekte/Arty/hw/hw.srcs/sources_1/imports/hdl/UART_TX_CTRL.vhd:32]
 	Parameter g_CLKS_PER_BIT bound to: 868 - type: integer 
 INFO: [Synth 8-256] done synthesizing module 'UART_TX_CTRL' (0#1) [D:/Projekte/Arty/hw/hw.srcs/sources_1/imports/hdl/UART_TX_CTRL.vhd:32]
 	Parameter g_CLKS_PER_BIT bound to: 868 - type: integer 
-INFO: [Synth 8-3491] module 'UART_RX_CTRL' declared at 'D:/Projekte/Arty/hw/hw.srcs/sources_1/new/UART_RX_CTRL.vhd:20' bound to instance 'Inst_UART_RX_CTRL' of component 'UART_RX_CTRL' [D:/Projekte/Arty/hw/hw.srcs/sources_1/imports/hdl/GPIO_Demo.vhd:433]
+INFO: [Synth 8-3491] module 'UART_RX_CTRL' declared at 'D:/Projekte/Arty/hw/hw.srcs/sources_1/new/UART_RX_CTRL.vhd:20' bound to instance 'Inst_UART_RX_CTRL' of component 'UART_RX_CTRL' [D:/Projekte/Arty/hw/hw.srcs/sources_1/imports/hdl/GPIO_Demo.vhd:442]
 INFO: [Synth 8-638] synthesizing module 'UART_RX_CTRL' [D:/Projekte/Arty/hw/hw.srcs/sources_1/new/UART_RX_CTRL.vhd:34]
 	Parameter g_CLKS_PER_BIT bound to: 868 - type: integer 
 INFO: [Synth 8-256] done synthesizing module 'UART_RX_CTRL' (0#1) [D:/Projekte/Arty/hw/hw.srcs/sources_1/new/UART_RX_CTRL.vhd:34]
-INFO: [Synth 8-3491] module 'LogicUnit' declared at 'D:/Projekte/Arty/hw/hw.srcs/sources_1/new/LogicUnit.vhd:34' bound to instance 'inst_LogicUnit' of component 'LogicUnit' [D:/Projekte/Arty/hw/hw.srcs/sources_1/imports/hdl/GPIO_Demo.vhd:449]
+INFO: [Synth 8-3491] module 'UART_Fifo' declared at 'D:/Projekte/Arty/hw/hw.runs/synth_1/.Xil/Vivado-33424-DESKTOP-E28LK6R/realtime/UART_Fifo_stub.vhdl:6' bound to instance 'Inst_UART_Fifo' of component 'UART_Fifo' [D:/Projekte/Arty/hw/hw.srcs/sources_1/imports/hdl/GPIO_Demo.vhd:454]
+INFO: [Synth 8-638] synthesizing module 'UART_Fifo' [D:/Projekte/Arty/hw/hw.runs/synth_1/.Xil/Vivado-33424-DESKTOP-E28LK6R/realtime/UART_Fifo_stub.vhdl:27]
+INFO: [Synth 8-3491] module 'LogicUnit' declared at 'D:/Projekte/Arty/hw/hw.srcs/sources_1/new/LogicUnit.vhd:34' bound to instance 'inst_LogicUnit' of component 'LogicUnit' [D:/Projekte/Arty/hw/hw.srcs/sources_1/imports/hdl/GPIO_Demo.vhd:473]
 INFO: [Synth 8-638] synthesizing module 'LogicUnit' [D:/Projekte/Arty/hw/hw.srcs/sources_1/new/LogicUnit.vhd:54]
-INFO: [Synth 8-3491] module 'Add' declared at 'D:/Projekte/Arty/hw/hw.runs/synth_1/.Xil/Vivado-30976-DESKTOP-E28LK6R/realtime/Add_stub.vhdl:6' bound to instance 'inst_add' of component 'Add' [D:/Projekte/Arty/hw/hw.srcs/sources_1/new/LogicUnit.vhd:134]
-INFO: [Synth 8-638] synthesizing module 'Add' [D:/Projekte/Arty/hw/hw.runs/synth_1/.Xil/Vivado-30976-DESKTOP-E28LK6R/realtime/Add_stub.vhdl:22]
-INFO: [Synth 8-3491] module 'Sub' declared at 'D:/Projekte/Arty/hw/hw.runs/synth_1/.Xil/Vivado-30976-DESKTOP-E28LK6R/realtime/Sub_stub.vhdl:6' bound to instance 'inst_sub' of component 'Sub' [D:/Projekte/Arty/hw/hw.srcs/sources_1/new/LogicUnit.vhd:143]
-INFO: [Synth 8-638] synthesizing module 'Sub' [D:/Projekte/Arty/hw/hw.runs/synth_1/.Xil/Vivado-30976-DESKTOP-E28LK6R/realtime/Sub_stub.vhdl:22]
 INFO: [Synth 8-226] default block is never used [D:/Projekte/Arty/hw/hw.srcs/sources_1/new/LogicUnit.vhd:471]
 INFO: [Synth 8-226] default block is never used [D:/Projekte/Arty/hw/hw.srcs/sources_1/new/LogicUnit.vhd:526]
-INFO: [Synth 8-226] default block is never used [D:/Projekte/Arty/hw/hw.srcs/sources_1/new/LogicUnit.vhd:716]
-INFO: [Synth 8-226] default block is never used [D:/Projekte/Arty/hw/hw.srcs/sources_1/new/LogicUnit.vhd:749]
+INFO: [Synth 8-226] default block is never used [D:/Projekte/Arty/hw/hw.srcs/sources_1/new/LogicUnit.vhd:712]
+INFO: [Synth 8-226] default block is never used [D:/Projekte/Arty/hw/hw.srcs/sources_1/new/LogicUnit.vhd:745]
 INFO: [Synth 8-256] done synthesizing module 'LogicUnit' (0#1) [D:/Projekte/Arty/hw/hw.srcs/sources_1/new/LogicUnit.vhd:54]
-INFO: [Synth 8-3491] module 'ProgRam' declared at 'D:/Projekte/Arty/hw/hw.runs/synth_1/.Xil/Vivado-30976-DESKTOP-E28LK6R/realtime/ProgRam_stub.vhdl:6' bound to instance 'inst_ProgRam' of component 'ProgRam' [D:/Projekte/Arty/hw/hw.srcs/sources_1/imports/hdl/GPIO_Demo.vhd:494]
-INFO: [Synth 8-638] synthesizing module 'ProgRam' [D:/Projekte/Arty/hw/hw.runs/synth_1/.Xil/Vivado-30976-DESKTOP-E28LK6R/realtime/ProgRam_stub.vhdl:23]
-INFO: [Synth 8-226] default block is never used [D:/Projekte/Arty/hw/hw.srcs/sources_1/imports/hdl/GPIO_Demo.vhd:571]
-INFO: [Synth 8-3491] module 'DataRam' declared at 'D:/Projekte/Arty/hw/hw.runs/synth_1/.Xil/Vivado-30976-DESKTOP-E28LK6R/realtime/DataRam_stub.vhdl:6' bound to instance 'inst_DataRam' of component 'DataRam' [D:/Projekte/Arty/hw/hw.srcs/sources_1/imports/hdl/GPIO_Demo.vhd:610]
-INFO: [Synth 8-638] synthesizing module 'DataRam' [D:/Projekte/Arty/hw/hw.runs/synth_1/.Xil/Vivado-30976-DESKTOP-E28LK6R/realtime/DataRam_stub.vhdl:23]
-INFO: [Synth 8-3491] module 'RGB_controller' declared at 'D:/Projekte/Arty/hw/hw.srcs/sources_1/imports/hdl/RGB_controller.vhd:20' bound to instance 'RGB_Core1' of component 'RGB_controller' [D:/Projekte/Arty/hw/hw.srcs/sources_1/imports/hdl/GPIO_Demo.vhd:627]
+INFO: [Synth 8-3491] module 'ProgRam' declared at 'D:/Projekte/Arty/hw/hw.runs/synth_1/.Xil/Vivado-33424-DESKTOP-E28LK6R/realtime/ProgRam_stub.vhdl:6' bound to instance 'inst_ProgRam' of component 'ProgRam' [D:/Projekte/Arty/hw/hw.srcs/sources_1/imports/hdl/GPIO_Demo.vhd:520]
+INFO: [Synth 8-638] synthesizing module 'ProgRam' [D:/Projekte/Arty/hw/hw.runs/synth_1/.Xil/Vivado-33424-DESKTOP-E28LK6R/realtime/ProgRam_stub.vhdl:23]
+INFO: [Synth 8-226] default block is never used [D:/Projekte/Arty/hw/hw.srcs/sources_1/imports/hdl/GPIO_Demo.vhd:598]
+INFO: [Synth 8-3491] module 'DataRam' declared at 'D:/Projekte/Arty/hw/hw.runs/synth_1/.Xil/Vivado-33424-DESKTOP-E28LK6R/realtime/DataRam_stub.vhdl:6' bound to instance 'inst_DataRam' of component 'DataRam' [D:/Projekte/Arty/hw/hw.srcs/sources_1/imports/hdl/GPIO_Demo.vhd:662]
+INFO: [Synth 8-638] synthesizing module 'DataRam' [D:/Projekte/Arty/hw/hw.runs/synth_1/.Xil/Vivado-33424-DESKTOP-E28LK6R/realtime/DataRam_stub.vhdl:23]
+INFO: [Synth 8-3491] module 'RGB_controller' declared at 'D:/Projekte/Arty/hw/hw.srcs/sources_1/imports/hdl/RGB_controller.vhd:20' bound to instance 'RGB_Core1' of component 'RGB_controller' [D:/Projekte/Arty/hw/hw.srcs/sources_1/imports/hdl/GPIO_Demo.vhd:679]
 INFO: [Synth 8-638] synthesizing module 'RGB_controller' [D:/Projekte/Arty/hw/hw.srcs/sources_1/imports/hdl/RGB_controller.vhd:28]
 INFO: [Synth 8-256] done synthesizing module 'RGB_controller' (0#1) [D:/Projekte/Arty/hw/hw.srcs/sources_1/imports/hdl/RGB_controller.vhd:28]
 INFO: [Synth 8-256] done synthesizing module 'GPIO_demo' (0#1) [D:/Projekte/Arty/hw/hw.srcs/sources_1/imports/hdl/GPIO_Demo.vhd:70]
@@ -83,30 +83,28 @@ WARNING: [Synth 8-7129] Port SW[2] in module GPIO_demo is either unconnected or 
 WARNING: [Synth 8-7129] Port SW[1] in module GPIO_demo is either unconnected or has no load
 WARNING: [Synth 8-7129] Port SW[0] in module GPIO_demo is either unconnected or has no load
 ---------------------------------------------------------------------------------
-Finished RTL Elaboration : Time (s): cpu = 00:00:07 ; elapsed = 00:00:07 . Memory (MB): peak = 1386.840 ; gain = 718.895
+Finished RTL Elaboration : Time (s): cpu = 00:00:07 ; elapsed = 00:00:07 . Memory (MB): peak = 1388.461 ; gain = 720.277
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
 Start Handling Custom Attributes
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
-Finished Handling Custom Attributes : Time (s): cpu = 00:00:07 ; elapsed = 00:00:07 . Memory (MB): peak = 1386.840 ; gain = 718.895
+Finished Handling Custom Attributes : Time (s): cpu = 00:00:07 ; elapsed = 00:00:07 . Memory (MB): peak = 1388.461 ; gain = 720.277
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
-Finished RTL Optimization Phase 1 : Time (s): cpu = 00:00:07 ; elapsed = 00:00:07 . Memory (MB): peak = 1386.840 ; gain = 718.895
+Finished RTL Optimization Phase 1 : Time (s): cpu = 00:00:07 ; elapsed = 00:00:07 . Memory (MB): peak = 1388.461 ; gain = 720.277
 ---------------------------------------------------------------------------------
-Netlist sorting complete. Time (s): cpu = 00:00:01 ; elapsed = 00:00:00.276 . Memory (MB): peak = 1386.840 ; gain = 0.000
+Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.263 . Memory (MB): peak = 1388.461 ; gain = 0.000
 INFO: [Project 1-570] Preparing netlist for logic optimization
 
 Processing XDC Constraints
 Initializing timing engine
+Parsing XDC File [d:/Projekte/Arty/hw/hw.gen/sources_1/ip/UART_Fifo_2/UART_Fifo/UART_Fifo_in_context.xdc] for cell 'Inst_UART_Fifo'
+Finished Parsing XDC File [d:/Projekte/Arty/hw/hw.gen/sources_1/ip/UART_Fifo_2/UART_Fifo/UART_Fifo_in_context.xdc] for cell 'Inst_UART_Fifo'
 Parsing XDC File [d:/Projekte/Arty/hw/hw.gen/sources_1/ip/ProgRam/ProgRam/ProgRam_in_context.xdc] for cell 'inst_ProgRam'
 Finished Parsing XDC File [d:/Projekte/Arty/hw/hw.gen/sources_1/ip/ProgRam/ProgRam/ProgRam_in_context.xdc] for cell 'inst_ProgRam'
 Parsing XDC File [d:/Projekte/Arty/hw/hw.gen/sources_1/ip/DataRam/DataRam/DataRam_in_context.xdc] for cell 'inst_DataRam'
 Finished Parsing XDC File [d:/Projekte/Arty/hw/hw.gen/sources_1/ip/DataRam/DataRam/DataRam_in_context.xdc] for cell 'inst_DataRam'
-Parsing XDC File [d:/Projekte/Arty/hw/hw.gen/sources_1/ip/Sub/Sub/Sub_in_context.xdc] for cell 'inst_LogicUnit/inst_sub'
-Finished Parsing XDC File [d:/Projekte/Arty/hw/hw.gen/sources_1/ip/Sub/Sub/Sub_in_context.xdc] for cell 'inst_LogicUnit/inst_sub'
-Parsing XDC File [d:/Projekte/Arty/hw/hw.gen/sources_1/ip/Add/Add/Add_in_context.xdc] for cell 'inst_LogicUnit/inst_add'
-Finished Parsing XDC File [d:/Projekte/Arty/hw/hw.gen/sources_1/ip/Add/Add/Add_in_context.xdc] for cell 'inst_LogicUnit/inst_add'
 Parsing XDC File [D:/Projekte/Arty/hw/hw.srcs/constrs_1/imports/constraints/Arty-S7-25-Master.xdc]
 Finished Parsing XDC File [D:/Projekte/Arty/hw/hw.srcs/constrs_1/imports/constraints/Arty-S7-25-Master.xdc]
 INFO: [Project 1-236] Implementation specific constraints were found while reading constraint file [D:/Projekte/Arty/hw/hw.srcs/constrs_1/imports/constraints/Arty-S7-25-Master.xdc]. These constraints will be ignored for synthesis but will be used in implementation. Impacted constraints are listed in the file [.Xil/GPIO_demo_propImpl.xdc].
@@ -115,38 +113,30 @@ Parsing XDC File [D:/Projekte/Arty/hw/hw.srcs/constrs_1/new/Arty-S7-25-Debug.xdc
 Finished Parsing XDC File [D:/Projekte/Arty/hw/hw.srcs/constrs_1/new/Arty-S7-25-Debug.xdc]
 Completed Processing XDC Constraints
 
-Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.002 . Memory (MB): peak = 1471.152 ; gain = 0.000
+Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.002 . Memory (MB): peak = 1472.418 ; gain = 0.000
 INFO: [Project 1-111] Unisim Transformation Summary:
 No Unisim elements were transformed.
 
-Constraint Validation Runtime : Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.017 . Memory (MB): peak = 1471.152 ; gain = 0.000
+Constraint Validation Runtime : Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.018 . Memory (MB): peak = 1472.418 ; gain = 0.000
 WARNING: [Timing 38-316] Clock period '20.000' specified during out-of-context synthesis of instance 'inst_DataRam' at clock pin 'clka' is different from the actual clock period '10.000', this can lead to different synthesis results.
 WARNING: [Timing 38-316] Clock period '20.000' specified during out-of-context synthesis of instance 'inst_ProgRam' at clock pin 'clka' is different from the actual clock period '10.000', this can lead to different synthesis results.
+INFO: [Designutils 20-5440] No compile time benefit to using incremental synthesis; A full resynthesis will be run
+INFO: [Designutils 20-4379] Flow is switching to default flow due to incremental criteria not met. If you would like to alter this behaviour and have the flow terminate instead, please set the following parameter config_implementation {autoIncr.Synth.RejectBehavior Terminate}
 ---------------------------------------------------------------------------------
-Finished Constraint Validation : Time (s): cpu = 00:00:16 ; elapsed = 00:00:16 . Memory (MB): peak = 1472.441 ; gain = 804.496
+Finished Constraint Validation : Time (s): cpu = 00:00:16 ; elapsed = 00:00:16 . Memory (MB): peak = 1472.418 ; gain = 804.234
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
 Start Loading Part and Timing Information
 ---------------------------------------------------------------------------------
 Loading part: xc7s25csga324-1
 ---------------------------------------------------------------------------------
-Finished Loading Part and Timing Information : Time (s): cpu = 00:00:16 ; elapsed = 00:00:16 . Memory (MB): peak = 1472.441 ; gain = 804.496
+Finished Loading Part and Timing Information : Time (s): cpu = 00:00:16 ; elapsed = 00:00:16 . Memory (MB): peak = 1472.418 ; gain = 804.234
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
 Start Applying 'set_property' XDC Constraints
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
-Finished applying 'set_property' XDC Constraints : Time (s): cpu = 00:00:16 ; elapsed = 00:00:16 . Memory (MB): peak = 1472.441 ; gain = 804.496
----------------------------------------------------------------------------------
----------------------------------------------------------------------------------
-Start Preparing Guide Design
----------------------------------------------------------------------------------
-WARNING: [Synth 8-6702] IncrSynth : Design change found in an area of the design that prevents previous synthesis information being used, Reverting to default synthesis
----------------------------------------------------------------------------------
-Finished Doing Graph Differ : Time (s): cpu = 00:00:17 ; elapsed = 00:00:17 . Memory (MB): peak = 1472.441 ; gain = 804.496
----------------------------------------------------------------------------------
----------------------------------------------------------------------------------
-Finished Preparing Guide Design : Time (s): cpu = 00:00:17 ; elapsed = 00:00:17 . Memory (MB): peak = 1472.441 ; gain = 804.496
+Finished applying 'set_property' XDC Constraints : Time (s): cpu = 00:00:16 ; elapsed = 00:00:16 . Memory (MB): peak = 1472.418 ; gain = 804.234
 ---------------------------------------------------------------------------------
 INFO: [Synth 8-802] inferred FSM for state register 'r_SM_Main_reg' in module 'UART_TX_CTRL'
 INFO: [Synth 8-802] inferred FSM for state register 'fetch_state_reg' in module 'LogicUnit'
@@ -181,24 +171,15 @@ INFO: [Synth 8-3354] encoded FSM with state register 'fetch_state_reg' using enc
 ---------------------------------------------------------------------------------------------------
 INFO: [Synth 8-3354] encoded FSM with state register 'progRam_Uart_State_reg' using encoding 'sequential' in module 'GPIO_demo'
 ---------------------------------------------------------------------------------
-Finished RTL Optimization Phase 2 : Time (s): cpu = 00:00:23 ; elapsed = 00:00:23 . Memory (MB): peak = 1472.441 ; gain = 804.496
+Finished RTL Optimization Phase 2 : Time (s): cpu = 00:00:22 ; elapsed = 00:00:22 . Memory (MB): peak = 1472.418 ; gain = 804.234
 ---------------------------------------------------------------------------------
-
-
-Incremental Synthesis Report Summary:
-
-1. Incremental synthesis run: no
-
-   Reason for not running incremental synthesis : Design change found in an area of the design that prevents previous synthesis information being used
-
-
-INFO: [Synth 8-7130] Flow is switching to default flow due to incremental criteria not met. If you would like to alter this behaviour and have the flow terminate instead, please set the following parameter config_implementation {autoIncr.Synth.RejectBehavior Terminate}
 ---------------------------------------------------------------------------------
 Start RTL Component Statistics 
 ---------------------------------------------------------------------------------
 Detailed RTL Component Info : 
 +---Adders : 
-	   2 Input   32 Bit       Adders := 10    
+	   2 Input   32 Bit       Adders := 11    
+	   3 Input   32 Bit       Adders := 1     
 	   2 Input   20 Bit       Adders := 1     
 	   2 Input   16 Bit       Adders := 7     
 	   2 Input   10 Bit       Adders := 2     
@@ -209,21 +190,21 @@ Detailed RTL Component Info :
 	   2 Input     32 Bit         XORs := 2     
 	   2 Input      1 Bit         XORs := 4     
 +---Registers : 
-	               32 Bit    Registers := 50    
+	               32 Bit    Registers := 48    
 	               20 Bit    Registers := 1     
 	               16 Bit    Registers := 8     
 	               13 Bit    Registers := 3     
 	               10 Bit    Registers := 2     
 	                9 Bit    Registers := 1     
-	                8 Bit    Registers := 17    
-	                4 Bit    Registers := 5     
+	                8 Bit    Registers := 18    
+	                4 Bit    Registers := 4     
 	                3 Bit    Registers := 3     
-	                1 Bit    Registers := 27    
+	                1 Bit    Registers := 30    
 +---Muxes : 
 	   2 Input   32 Bit        Muxes := 319   
+	   4 Input   32 Bit        Muxes := 1     
 	   8 Input   32 Bit        Muxes := 62    
 	   6 Input   32 Bit        Muxes := 31    
-	   4 Input   32 Bit        Muxes := 1     
 	   3 Input   32 Bit        Muxes := 8     
 	   2 Input   16 Bit        Muxes := 5     
 	   5 Input   16 Bit        Muxes := 2     
@@ -232,7 +213,7 @@ Detailed RTL Component Info :
 	   5 Input   13 Bit        Muxes := 1     
 	   2 Input   10 Bit        Muxes := 1     
 	   6 Input   10 Bit        Muxes := 1     
-	   2 Input    8 Bit        Muxes := 15    
+	   2 Input    8 Bit        Muxes := 16    
 	   4 Input    8 Bit        Muxes := 1     
 	   6 Input    8 Bit        Muxes := 1     
 	   5 Input    8 Bit        Muxes := 1     
@@ -244,10 +225,10 @@ Detailed RTL Component Info :
 	   5 Input    3 Bit        Muxes := 1     
 	   3 Input    2 Bit        Muxes := 2     
 	   2 Input    2 Bit        Muxes := 7     
-	   2 Input    1 Bit        Muxes := 287   
-	   4 Input    1 Bit        Muxes := 3     
-	   8 Input    1 Bit        Muxes := 5     
+	   2 Input    1 Bit        Muxes := 291   
 	   6 Input    1 Bit        Muxes := 6     
+	   8 Input    1 Bit        Muxes := 3     
+	   4 Input    1 Bit        Muxes := 3     
 	   3 Input    1 Bit        Muxes := 7     
 	   5 Input    1 Bit        Muxes := 20    
 ---------------------------------------------------------------------------------
@@ -265,66 +246,32 @@ Finished Part Resource Summary
 ---------------------------------------------------------------------------------
 Start Cross Boundary and Area Optimization
 ---------------------------------------------------------------------------------
+WARNING: [Synth 8-7080] Parallel synthesis criteria is not met
 WARNING: [Synth 8-7129] Port SW[3] in module GPIO_demo is either unconnected or has no load
 WARNING: [Synth 8-7129] Port SW[2] in module GPIO_demo is either unconnected or has no load
 WARNING: [Synth 8-7129] Port SW[1] in module GPIO_demo is either unconnected or has no load
 WARNING: [Synth 8-7129] Port SW[0] in module GPIO_demo is either unconnected or has no load
-INFO: [Synth 8-3333] propagating constant 0 across sequential element (\registers_reg[0][16] )
-INFO: [Synth 8-3333] propagating constant 0 across sequential element (\registers_reg[0][8] )
-INFO: [Synth 8-3333] propagating constant 0 across sequential element (\registers_reg[0][24] )
-INFO: [Synth 8-3333] propagating constant 0 across sequential element (\registers_reg[0][20] )
-INFO: [Synth 8-3333] propagating constant 0 across sequential element (\registers_reg[0][12] )
-INFO: [Synth 8-3333] propagating constant 0 across sequential element (\registers_reg[0][28] )
-INFO: [Synth 8-3333] propagating constant 0 across sequential element (\registers_reg[0][18] )
-INFO: [Synth 8-3333] propagating constant 0 across sequential element (\registers_reg[0][10] )
-INFO: [Synth 8-3333] propagating constant 0 across sequential element (\registers_reg[0][26] )
-INFO: [Synth 8-3333] propagating constant 0 across sequential element (\registers_reg[0][6] )
-INFO: [Synth 8-3333] propagating constant 0 across sequential element (\registers_reg[0][22] )
-INFO: [Synth 8-3333] propagating constant 0 across sequential element (\registers_reg[0][14] )
-INFO: [Synth 8-3333] propagating constant 0 across sequential element (\registers_reg[0][30] )
-INFO: [Synth 8-3333] propagating constant 0 across sequential element (\registers_reg[0][17] )
-INFO: [Synth 8-3333] propagating constant 0 across sequential element (\registers_reg[0][9] )
-INFO: [Synth 8-3333] propagating constant 0 across sequential element (\registers_reg[0][25] )
-INFO: [Synth 8-3333] propagating constant 0 across sequential element (\registers_reg[0][5] )
-INFO: [Synth 8-3333] propagating constant 0 across sequential element (\registers_reg[0][21] )
-INFO: [Synth 8-3333] propagating constant 0 across sequential element (\registers_reg[0][13] )
-INFO: [Synth 8-3333] propagating constant 0 across sequential element (\registers_reg[0][29] )
-INFO: [Synth 8-3333] propagating constant 0 across sequential element (\registers_reg[0][19] )
-INFO: [Synth 8-3333] propagating constant 0 across sequential element (\registers_reg[0][11] )
-INFO: [Synth 8-3333] propagating constant 0 across sequential element (\registers_reg[0][27] )
-INFO: [Synth 8-3333] propagating constant 0 across sequential element (\registers_reg[0][7] )
-INFO: [Synth 8-3333] propagating constant 0 across sequential element (\registers_reg[0][23] )
-INFO: [Synth 8-3333] propagating constant 0 across sequential element (\registers_reg[0][15] )
-INFO: [Synth 8-3333] propagating constant 0 across sequential element (\registers_reg[0][31] )
-INFO: [Synth 8-3333] propagating constant 0 across sequential element (\registers_reg[0][4] )
-INFO: [Synth 8-3333] propagating constant 0 across sequential element (\registers_reg[0][3] )
-INFO: [Synth 8-3333] propagating constant 0 across sequential element (\registers_reg[0][2] )
-INFO: [Synth 8-3333] propagating constant 0 across sequential element (\registers_reg[0][1] )
-INFO: [Synth 8-3333] propagating constant 0 across sequential element (\registers_reg[0][0] )
-INFO: [Synth 8-5587] ROM size for "instruction_jump" is below threshold of ROM address width. It will be mapped to LUTs
-INFO: [Synth 8-5587] ROM size for "instruction_jump" is below threshold of ROM address width. It will be mapped to LUTs
 ---------------------------------------------------------------------------------
-Finished Cross Boundary and Area Optimization : Time (s): cpu = 00:00:35 ; elapsed = 00:00:49 . Memory (MB): peak = 1472.441 ; gain = 804.496
+Finished Cross Boundary and Area Optimization : Time (s): cpu = 00:01:12 ; elapsed = 00:01:14 . Memory (MB): peak = 1721.520 ; gain = 1053.336
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
 Start Applying XDC Timing Constraints
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
-Finished Applying XDC Timing Constraints : Time (s): cpu = 00:00:40 ; elapsed = 00:00:53 . Memory (MB): peak = 1562.016 ; gain = 894.070
+Finished Applying XDC Timing Constraints : Time (s): cpu = 00:01:16 ; elapsed = 00:01:18 . Memory (MB): peak = 1721.520 ; gain = 1053.336
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
 Start Timing Optimization
 ---------------------------------------------------------------------------------
-info: optimization accepted worst group hill climbing move (2506.0/oG.CP 272.0ps)
+info: optimization accepted worst group hill climbing move (1729.0/oG. 56.0ps)
 ---------------------------------------------------------------------------------
-Finished Timing Optimization : Time (s): cpu = 00:02:10 ; elapsed = 00:02:25 . Memory (MB): peak = 1967.777 ; gain = 1299.832
+Finished Timing Optimization : Time (s): cpu = 00:02:14 ; elapsed = 00:02:16 . Memory (MB): peak = 1932.137 ; gain = 1263.953
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
 Start Technology Mapping
 ---------------------------------------------------------------------------------
-WARNING: [Synth 8-7080] Parallel synthesis criteria is not met
 ---------------------------------------------------------------------------------
-Finished Technology Mapping : Time (s): cpu = 00:02:12 ; elapsed = 00:02:27 . Memory (MB): peak = 1967.777 ; gain = 1299.832
+Finished Technology Mapping : Time (s): cpu = 00:02:16 ; elapsed = 00:02:18 . Memory (MB): peak = 1932.137 ; gain = 1263.953
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
 Start IO Insertion
@@ -342,37 +289,37 @@ Start Final Netlist Cleanup
 Finished Final Netlist Cleanup
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
-Finished IO Insertion : Time (s): cpu = 00:02:16 ; elapsed = 00:02:31 . Memory (MB): peak = 1967.777 ; gain = 1299.832
+Finished IO Insertion : Time (s): cpu = 00:02:19 ; elapsed = 00:02:21 . Memory (MB): peak = 1932.137 ; gain = 1263.953
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
 Start Renaming Generated Instances
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
-Finished Renaming Generated Instances : Time (s): cpu = 00:02:16 ; elapsed = 00:02:31 . Memory (MB): peak = 1967.777 ; gain = 1299.832
+Finished Renaming Generated Instances : Time (s): cpu = 00:02:19 ; elapsed = 00:02:21 . Memory (MB): peak = 1932.137 ; gain = 1263.953
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
 Start Rebuilding User Hierarchy
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
-Finished Rebuilding User Hierarchy : Time (s): cpu = 00:02:16 ; elapsed = 00:02:31 . Memory (MB): peak = 1967.777 ; gain = 1299.832
+Finished Rebuilding User Hierarchy : Time (s): cpu = 00:02:19 ; elapsed = 00:02:21 . Memory (MB): peak = 1932.137 ; gain = 1263.953
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
 Start Renaming Generated Ports
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
-Finished Renaming Generated Ports : Time (s): cpu = 00:02:16 ; elapsed = 00:02:31 . Memory (MB): peak = 1967.777 ; gain = 1299.832
+Finished Renaming Generated Ports : Time (s): cpu = 00:02:19 ; elapsed = 00:02:21 . Memory (MB): peak = 1932.137 ; gain = 1263.953
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
 Start Handling Custom Attributes
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
-Finished Handling Custom Attributes : Time (s): cpu = 00:02:16 ; elapsed = 00:02:31 . Memory (MB): peak = 1967.777 ; gain = 1299.832
+Finished Handling Custom Attributes : Time (s): cpu = 00:02:19 ; elapsed = 00:02:22 . Memory (MB): peak = 1932.137 ; gain = 1263.953
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
 Start Renaming Generated Nets
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
-Finished Renaming Generated Nets : Time (s): cpu = 00:02:16 ; elapsed = 00:02:31 . Memory (MB): peak = 1967.777 ; gain = 1299.832
+Finished Renaming Generated Nets : Time (s): cpu = 00:02:19 ; elapsed = 00:02:22 . Memory (MB): peak = 1932.137 ; gain = 1263.953
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
 Start Writing Synthesis Report
@@ -382,58 +329,56 @@ Report BlackBoxes:
 +------+--------------+----------+
 |      |BlackBox name |Instances |
 +------+--------------+----------+
-|1     |ProgRam       |         1|
-|2     |DataRam       |         1|
-|3     |Sub           |         1|
-|4     |Add           |         1|
+|1     |UART_Fifo     |         1|
+|2     |ProgRam       |         1|
+|3     |DataRam       |         1|
 +------+--------------+----------+
 
 Report Cell Usage: 
-+------+-------------+------+
-|      |Cell         |Count |
-+------+-------------+------+
-|1     |Add_bbox     |     1|
-|2     |DataRam_bbox |     1|
-|3     |ProgRam_bbox |     1|
-|4     |Sub_bbox     |     1|
-|5     |BUFG         |     1|
-|6     |CARRY4       |   139|
-|7     |LUT1         |    91|
-|8     |LUT2         |   214|
-|9     |LUT3         |   286|
-|10    |LUT4         |   433|
-|11    |LUT5         |   489|
-|12    |LUT6         |  1538|
-|13    |MUXF7        |   187|
-|14    |MUXF8        |     9|
-|15    |FDRE         |  2020|
-|16    |FDSE         |     4|
-|17    |IBUF         |     6|
-|18    |OBUF         |    11|
-+------+-------------+------+
++------+---------------+------+
+|      |Cell           |Count |
++------+---------------+------+
+|1     |DataRam_bbox   |     1|
+|2     |ProgRam_bbox   |     1|
+|3     |UART_Fifo_bbox |     1|
+|4     |BUFG           |     1|
+|5     |CARRY4         |   159|
+|6     |LUT1           |    36|
+|7     |LUT2           |   310|
+|8     |LUT3           |   383|
+|9     |LUT4           |   398|
+|10    |LUT5           |   496|
+|11    |LUT6           |  1455|
+|12    |MUXF7          |   233|
+|13    |MUXF8          |    20|
+|14    |FDRE           |  1973|
+|15    |FDSE           |     4|
+|16    |IBUF           |     6|
+|17    |OBUF           |    11|
++------+---------------+------+
 ---------------------------------------------------------------------------------
-Finished Writing Synthesis Report : Time (s): cpu = 00:02:16 ; elapsed = 00:02:31 . Memory (MB): peak = 1967.777 ; gain = 1299.832
+Finished Writing Synthesis Report : Time (s): cpu = 00:02:19 ; elapsed = 00:02:22 . Memory (MB): peak = 1932.137 ; gain = 1263.953
 ---------------------------------------------------------------------------------
-Synthesis finished with 0 errors, 0 critical warnings and 7 warnings.
-Synthesis Optimization Runtime : Time (s): cpu = 00:02:05 ; elapsed = 00:02:27 . Memory (MB): peak = 1967.777 ; gain = 1214.230
-Synthesis Optimization Complete : Time (s): cpu = 00:02:16 ; elapsed = 00:02:31 . Memory (MB): peak = 1967.777 ; gain = 1299.832
+Synthesis finished with 0 errors, 0 critical warnings and 6 warnings.
+Synthesis Optimization Runtime : Time (s): cpu = 00:02:08 ; elapsed = 00:02:18 . Memory (MB): peak = 1932.137 ; gain = 1179.996
+Synthesis Optimization Complete : Time (s): cpu = 00:02:19 ; elapsed = 00:02:22 . Memory (MB): peak = 1932.137 ; gain = 1263.953
 INFO: [Project 1-571] Translating synthesized netlist
-Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.039 . Memory (MB): peak = 1967.777 ; gain = 0.000
-INFO: [Netlist 29-17] Analyzing 335 Unisim elements for replacement
+Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.041 . Memory (MB): peak = 1932.137 ; gain = 0.000
+INFO: [Netlist 29-17] Analyzing 412 Unisim elements for replacement
 INFO: [Netlist 29-28] Unisim Transformation completed in 0 CPU seconds
 WARNING: [Netlist 29-101] Netlist 'GPIO_demo' is not ideal for floorplanning, since the cellview 'LogicUnit' contains a large number of primitives.  Please consider enabling hierarchy in synthesis if you want to do floorplanning.
 INFO: [Project 1-570] Preparing netlist for logic optimization
 INFO: [Opt 31-138] Pushed 0 inverter(s) to 0 load pin(s).
-Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.001 . Memory (MB): peak = 1967.777 ; gain = 0.000
+Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.002 . Memory (MB): peak = 1932.137 ; gain = 0.000
 INFO: [Project 1-111] Unisim Transformation Summary:
 No Unisim elements were transformed.
 
-Synth Design complete | Checksum: 1256fb0c
+Synth Design complete | Checksum: b5312aef
 INFO: [Common 17-83] Releasing license: Synthesis
-90 Infos, 15 Warnings, 0 Critical Warnings and 0 Errors encountered.
+57 Infos, 14 Warnings, 0 Critical Warnings and 0 Errors encountered.
 synth_design completed successfully
-synth_design: Time (s): cpu = 00:02:19 ; elapsed = 00:02:36 . Memory (MB): peak = 1967.777 ; gain = 1462.047
-Write ShapeDB Complete: Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.004 . Memory (MB): peak = 1967.777 ; gain = 0.000
+synth_design: Time (s): cpu = 00:02:22 ; elapsed = 00:02:26 . Memory (MB): peak = 1932.137 ; gain = 1426.504
+Write ShapeDB Complete: Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.004 . Memory (MB): peak = 1932.137 ; gain = 0.000
 INFO: [Common 17-1381] The checkpoint 'D:/Projekte/Arty/hw/hw.runs/synth_1/GPIO_demo.dcp' has been generated.
 INFO: [Vivado 12-24828] Executing command : report_utilization -file GPIO_demo_utilization_synth.rpt -pb GPIO_demo_utilization_synth.pb
-INFO: [Common 17-206] Exiting Vivado at Thu Nov 27 15:57:44 2025...
+INFO: [Common 17-206] Exiting Vivado at Sat Nov 29 01:12:04 2025...

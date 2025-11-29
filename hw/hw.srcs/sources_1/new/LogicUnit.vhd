@@ -53,25 +53,25 @@ end LogicUnit;
 
 architecture Behavioral of LogicUnit is
 
-component Add
-	port
-	(
-		CLK : in std_logic;
-		A : in std_logic_vector(31 downto 0);
-		B : in std_logic_vector(31 downto 0);
-		S : out std_logic_vector(31 downto 0)
-	);
-end component;
-
-component Sub
-	port 
-	(
-		CLK : in std_logic;
-		A : in std_logic_vector(31 downto 0);
-		B : in std_logic_vector(31 downto 0);
-		S : out std_logic_vector(31 downto 0)
-	);
-end component;
+--component Add
+--	port
+--	(
+--		CLK : in std_logic;
+--		A : in std_logic_vector(31 downto 0);
+--		B : in std_logic_vector(31 downto 0);
+--		S : out std_logic_vector(31 downto 0)
+--	);
+--end component;
+--
+--component Sub
+--	port 
+--	(
+--		CLK : in std_logic;
+--		A : in std_logic_vector(31 downto 0);
+--		B : in std_logic_vector(31 downto 0);
+--		S : out std_logic_vector(31 downto 0)
+--	);
+--end component;
 
 signal ctrl_logic_unit : std_logic := '0';
 
@@ -107,8 +107,8 @@ signal current_instruction : unsigned(31 downto 0) := (others => '0');
 signal current_pc : unsigned(31 downto 0) := (others => '0');
 signal instruction_valid : std_logic := '0';
 
-signal a_add : std_logic_vector(31 downto 0);
-signal b_add : std_logic_vector(31 downto 0);
+signal a_add : unsigned(31 downto 0);
+signal b_add : unsigned(31 downto 0);
 signal result_add : std_logic_vector(31 downto 0);
 signal a_sub : std_logic_vector(31 downto 0);
 signal b_sub : std_logic_vector(31 downto 0);
@@ -131,23 +131,23 @@ begin
 
 
 
-inst_add: Add
-port map
-(
-	CLK => i_Clk, 
-	A => a_add,
-	B => b_add,
-	S => result_add
-);
-
-inst_sub: Sub
-port map
-(
-	CLK => i_Clk,
-	A => a_sub,
-	B => b_sub,
-	S => result_sub
-);
+--inst_add: Add
+--port map
+--(
+--	CLK => i_Clk, 
+--	A => a_add,
+--	B => b_add,
+--	S => result_add
+--);
+--
+--inst_sub: Sub
+--port map
+--(
+--	CLK => i_Clk,
+--	A => a_sub,
+--	B => b_sub,
+--	S => result_sub
+--);
 
 dm_read_data_bytes(0) <= i_DM_Data(7 downto 0);
 dm_read_data_bytes(1) <= i_DM_Data(15 downto 8);
@@ -526,13 +526,9 @@ begin
 						case current_instruction(14 downto 12) is -- funct3
 							
 							when "000" => -- add/sub
-								if current_instruction(30) = '0' then --add
-									a_add <= std_logic_vector(registers(to_integer(current_instruction(19 downto 15))));
-									b_add <= std_logic_vector(registers(to_integer(current_instruction(24 downto 20))));
-								else -- sub
-									a_sub <= std_logic_vector(registers(to_integer(current_instruction(19 downto 15))));
-									b_sub <= std_logic_vector(registers(to_integer(current_instruction(24 downto 20))));
-								end if;
+								a_add <= registers(to_integer(current_instruction(19 downto 15)));
+								b_add <= registers(to_integer(current_instruction(24 downto 20)));
+								
 								instruction_multicycle <= '1';
 								
 							when "001" => -- sll
@@ -750,9 +746,9 @@ begin
 							
 							when "000" => -- add/sub
 								if current_instruction(30) = '0' then --add
-									registers(to_integer(current_instruction(11 downto 7))) <= unsigned(result_add);
+									registers(to_integer(current_instruction(11 downto 7))) <= a_add + b_add;
 								else -- sub
-									registers(to_integer(current_instruction(11 downto 7))) <= unsigned(result_sub);
+									registers(to_integer(current_instruction(11 downto 7))) <= a_add - b_add;
 								end if;
 								v_instruction_done := '1';
 							
