@@ -311,7 +311,7 @@ signal uart_fifo_rd_en : std_logic;
 signal uart_fifo_valid : std_logic;
 signal uart_fifo_wr_en : std_logic;
 signal uart_fifo_dout : std_logic_vector(7 downto 0);
-signal uart_fifo_din : std_logic_vector(7 downto 0);
+signal uart_fifo_din : std_logic_vector(7 downto 0) := (others => '0');
 signal uart_fifo_srst : std_logic;
 
 
@@ -349,15 +349,23 @@ signal ctrl_logic_unit : std_logic := '0';
 signal give_ctrl_logic_unit : std_logic := '0';
 signal take_ctrl_logic_unit : std_logic := '0';
 signal sync_nRst_lu : std_logic := '0';
+Signal debug_flags : std_logic_vector(7 downto 0) := "11111111";
 
---attribute mark_debug : string;
---attribute mark_debug of pm_lu_state : signal is "true";
---attribute mark_debug of uart_RX_DV : signal is "true";
---attribute mark_debug of progRam_Data_In : signal is "true";
---attribute mark_debug of progRam_Wr_Cntr : signal is "true";
---attribute mark_debug of progRam_Data_Out : signal is "true";
---attribute mark_debug of progRam_Rd_Cntr : signal is "true";
---attribute mark_debug of progRam_Uart_State : signal is "true";
+attribute mark_debug : string;
+attribute mark_debug of dm_addr : signal is "true";
+attribute mark_debug of dm_data_in : signal is "true";
+attribute mark_debug of dm_write_dv : signal is "true";
+attribute mark_debug of uart_fifo_din : signal is "true";
+attribute mark_debug of uart_fifo_dout : signal is "true";
+attribute mark_debug of uart_fifo_wr_en : signal is "true";
+attribute mark_debug of uart_fifo_rd_en : signal is "true";
+attribute mark_debug of uart_fifo_valid : signal is "true";
+attribute mark_debug of uart_fifo_empty : signal is "true";
+attribute mark_debug of uart_fifo_srst : signal is "true";
+attribute mark_debug of uart_TX_Active : signal is "true";
+attribute mark_debug of uart_TX_Data : signal is "true";
+attribute mark_debug of uart_TX_DV : signal is "true";
+attribute mark_debug of debug_flags : signal is "true";
 
 --Current uart state signal
 signal uartState : UART_STATE_TYPE := RST_REG;
@@ -534,7 +542,7 @@ begin
 		progRam_Wr_En <= (others => '0'); -- default assignment
 		uart_TX_DV <= '0';
 		progRam_dv <= '0';
-		uart_fifo_rd_en <= '1';
+		uart_fifo_rd_en <= '0';
 		latched_progRam_addr_lu <= progRam_addr_lu;
 		
 		if ctrl_logic_unit = '0' then
@@ -608,7 +616,7 @@ begin
 				end case;
 			end if;
 			
-			if uart_fifo_valid = '1' and uart_TX_Active = '0' then
+			if uart_fifo_valid = '1' and uart_TX_Active = '0' and uart_fifo_empty = '0' and uart_fifo_rd_en <= '0' then
 				uart_TX_Data <= uart_fifo_dout;
 				uart_fifo_rd_en <= '1';
 				uart_TX_DV <= '1';
@@ -621,17 +629,25 @@ end process;
 address_map: process (clk)
 begin
 	if rising_edge(clk) then
+		debug_flags <= (others => '0');
 		uart_fifo_wr_en <= '0';
-		if dm_write_dv = '1' then
-			case dm_addr is
-				when x"AAAAAAAA" =>	
-					LED <= dm_data_in(3 downto 0);
-				when x"BBBBBBBB" =>
-					uart_fifo_din <= dm_data_in(7 downto 0);
+		LED <= saved_leds;
+		if dm_write_dv = '1' and dm_addr(31) = '1' then
+			debug_flags(0) <= '1';
+			case dm_addr(7 downto 0) is
+				when "00000100" =>	
+					saved_leds <= dm_data_in(3 downto 0);
+					debug_flags(1) <= '1';
+				when "00001000" =>
+					uart_fifo_din(7 downto 0) <= dm_data_in(7 downto 0);
 					uart_fifo_wr_en <= '1';
+					debug_flags(2) <= '1';
 				when others =>
+					debug_flags(3) <= '1';
 					null;
 			end case;
+		else
+			debug_flags(4) <= '1';
 		end if;
 	end if;
 end process;
