@@ -4,5 +4,5 @@ xpm_VCOMP.vhd,vhdl,xpm,../../../../../../../../../../../Xilinx/2025.1/Vivado/dat
 fifo_generator_vlog_beh.v,verilog,fifo_generator_v13_2_13,../../../ipstatic/simulation/fifo_generator_vlog_beh.v,incdir="C:/Xilinx/2025.1/Vivado/data/rsb/busdef"
 fifo_generator_v13_2_rfs.vhd,vhdl,fifo_generator_v13_2_13,../../../ipstatic/hdl/fifo_generator_v13_2_rfs.vhd,incdir="C:/Xilinx/2025.1/Vivado/data/rsb/busdef"
 fifo_generator_v13_2_rfs.v,verilog,fifo_generator_v13_2_13,../../../ipstatic/hdl/fifo_generator_v13_2_rfs.v,incdir="C:/Xilinx/2025.1/Vivado/data/rsb/busdef"
-UART_Fifo.v,verilog,xil_defaultlib,../../../../hw.gen/sources_1/ip/UART_Fifo_2/sim/UART_Fifo.v,incdir="C:/Xilinx/2025.1/Vivado/data/rsb/busdef"
+UART_Fifo.v,verilog,xil_defaultlib,../../../../hw.gen/sources_1/ip/UART_Fifo/sim/UART_Fifo.v,incdir="C:/Xilinx/2025.1/Vivado/data/rsb/busdef"
 glbl.v,Verilog,xil_defaultlib,glbl.v

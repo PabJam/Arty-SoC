@@ -1,5 +1,5 @@
 verilog xil_defaultlib -i "C:/Xilinx/2025.1/Vivado/data/rsb/busdef" \
-"../../../../hw.gen/sources_1/ip/UART_Fifo_2/sim/UART_Fifo.v" \
+"../../../../hw.gen/sources_1/ip/UART_Fifo/sim/UART_Fifo.v" \
 
 verilog xil_defaultlib "glbl.v"
 

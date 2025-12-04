@@ -88,15 +88,12 @@ read_vhdl -library xil_defaultlib {
   D:/Projekte/Arty/hw/hw.srcs/sources_1/imports/hdl/debouncer.vhd
   D:/Projekte/Arty/hw/hw.srcs/sources_1/imports/hdl/GPIO_Demo.vhd
 }
-read_ip -quiet D:/Projekte/Arty/hw/hw.srcs/sources_1/ip/UART_Fifo/UART_Fifo.xci
-set_property used_in_implementation false [get_files -all d:/Projekte/Arty/hw/hw.gen/sources_1/ip/UART_Fifo_2/UART_Fifo.xdc]
-set_property used_in_implementation false [get_files -all d:/Projekte/Arty/hw/hw.gen/sources_1/ip/UART_Fifo_2/UART_Fifo_ooc.xdc]
+read_ip -quiet d:/Projekte/Arty/hw/hw.srcs/sources_1/ip/UART_Fifo/UART_Fifo.xci
+set_property used_in_implementation false [get_files -all d:/Projekte/Arty/hw/hw.gen/sources_1/ip/UART_Fifo/UART_Fifo.xdc]
+set_property used_in_implementation false [get_files -all d:/Projekte/Arty/hw/hw.gen/sources_1/ip/UART_Fifo/UART_Fifo_ooc.xdc]
 
 read_ip -quiet D:/Projekte/Arty/hw/hw.srcs/sources_1/ip/ProgRam/ProgRam.xci
 set_property used_in_implementation false [get_files -all d:/Projekte/Arty/hw/hw.gen/sources_1/ip/ProgRam/ProgRam_ooc.xdc]
-
-read_ip -quiet D:/Projekte/Arty/hw/hw.srcs/sources_1/ip/DataRam/DataRam.xci
-set_property used_in_implementation false [get_files -all d:/Projekte/Arty/hw/hw.gen/sources_1/ip/DataRam/DataRam_ooc.xdc]
 
 OPTRACE "Adding files" END { }
 # Mark all dcp files as not used in implementation to prevent them from being

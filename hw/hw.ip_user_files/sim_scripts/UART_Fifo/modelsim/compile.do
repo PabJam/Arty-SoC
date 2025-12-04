@@ -26,7 +26,7 @@ vlog -work fifo_generator_v13_2_13  -incr -mfcu  "+incdir+C:/Xilinx/2025.1/Vivad
 "../../../ipstatic/hdl/fifo_generator_v13_2_rfs.v" \
 
 vlog -work xil_defaultlib  -incr -mfcu  "+incdir+C:/Xilinx/2025.1/Vivado/data/rsb/busdef" \
-"../../../../hw.gen/sources_1/ip/UART_Fifo_2/sim/UART_Fifo.v" \
+"../../../../hw.gen/sources_1/ip/UART_Fifo/sim/UART_Fifo.v" \
 
 vlog -work xil_defaultlib \
 "glbl.v"

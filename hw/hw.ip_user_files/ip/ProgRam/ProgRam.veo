@@ -59,7 +59,12 @@ ProgRam your_instance_name (
   .wea(wea),      // input wire [7 : 0] wea
   .addra(addra),  // input wire [12 : 0] addra
   .dina(dina),    // input wire [63 : 0] dina
-  .douta(douta)  // output wire [63 : 0] douta
+  .douta(douta),  // output wire [63 : 0] douta
+  .clkb(clkb),    // input wire clkb
+  .web(web),      // input wire [3 : 0] web
+  .addrb(addrb),  // input wire [13 : 0] addrb
+  .dinb(dinb),    // input wire [31 : 0] dinb
+  .doutb(doutb)  // output wire [31 : 0] doutb
 );
 // INST_TAG_END ------ End INSTANTIATION Template ---------
 

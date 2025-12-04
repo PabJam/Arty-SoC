@@ -53,7 +53,7 @@
 `timescale 1ns/1ps
 
 (* DowngradeIPIdentifiedWarnings = "yes" *)
-module uart_Fifo (
+module UART_Fifo (
   clk,
   srst,
   din,

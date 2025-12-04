@@ -1,8 +1,8 @@
 -------------------------------------
 | Tool Version : Vivado v.2025.1
-| Date         : Tue Dec  2 16:39:37 2025
+| Date         : Thu Dec  4 17:44:33 2025
 | Host         : DESKTOP-E28LK6R
-| Design       : design_1
+| Design       : checkpoint_GPIO_demo
 | Device       : xc7s25-csga324-1--
 -------------------------------------
 

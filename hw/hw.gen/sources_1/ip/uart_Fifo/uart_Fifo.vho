@@ -51,7 +51,7 @@
 -- The following code must appear in the VHDL architecture header.
 
 ------------- Begin Cut here for COMPONENT Declaration ------ COMP_TAG
-COMPONENT uart_Fifo
+COMPONENT UART_Fifo
   PORT (
     clk : IN STD_LOGIC;
     srst : IN STD_LOGIC;
@@ -70,7 +70,7 @@ END COMPONENT;
 -- body. Substitute your own instance name and net names.
 
 ------------- Begin Cut here for INSTANTIATION Template ----- INST_TAG
-your_instance_name : uart_Fifo
+your_instance_name : UART_Fifo
   PORT MAP (
     clk => clk,
     srst => srst,
@@ -84,8 +84,8 @@ your_instance_name : uart_Fifo
   );
 -- INST_TAG_END ------ End INSTANTIATION Template ---------
 
--- You must compile the wrapper file uart_Fifo.vhd when simulating
--- the core, uart_Fifo. When compiling the wrapper file, be sure to
+-- You must compile the wrapper file UART_Fifo.vhd when simulating
+-- the core, UART_Fifo. When compiling the wrapper file, be sure to
 -- reference the VHDL simulation library.
 
 

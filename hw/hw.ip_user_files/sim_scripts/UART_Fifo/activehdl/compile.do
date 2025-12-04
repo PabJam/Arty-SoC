@@ -29,7 +29,7 @@ vlog -work fifo_generator_v13_2_13  -v2k5 "+incdir+C:/Xilinx/2025.1/Vivado/data/
 "../../../ipstatic/hdl/fifo_generator_v13_2_rfs.v" \
 
 vlog -work xil_defaultlib  -v2k5 "+incdir+C:/Xilinx/2025.1/Vivado/data/rsb/busdef" -l xpm -l fifo_generator_v13_2_13 -l xil_defaultlib \
-"../../../../hw.gen/sources_1/ip/UART_Fifo_2/sim/UART_Fifo.v" \
+"../../../../hw.gen/sources_1/ip/UART_Fifo/sim/UART_Fifo.v" \
 
 vlog -work xil_defaultlib \
 "glbl.v"

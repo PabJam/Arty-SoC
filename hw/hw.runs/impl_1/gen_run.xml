@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<GenRun Id="impl_1" LaunchPart="xc7s25csga324-1" LaunchTime="1764689751">
+<GenRun Id="impl_1" LaunchPart="xc7s25csga324-1" LaunchTime="1764866617">
+  <File Type="PA-DCP" Name="GPIO_demo.dcp"/>
   <File Type="PA-TCL" Name="GPIO_demo.tcl"/>
   <File Type="REPORTS-TCL" Name="GPIO_demo_reports.tcl"/>
   <File Type="INIT-TIMING" Name="GPIO_demo_timing_summary_init.rpt"/>
@@ -231,6 +232,5 @@
       <Option Id="BinFile">1</Option>
     </Step>
   </Strategy>
-  <BlockFileSet Type="BlockSrcs" Name="DataRam"/>
   <BlockFileSet Type="BlockSrcs" Name="ProgRam"/>
 </GenRun>

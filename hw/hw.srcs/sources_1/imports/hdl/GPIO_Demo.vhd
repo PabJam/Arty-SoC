@@ -135,20 +135,25 @@ component ProgRam
 		wea : in std_logic_vector ( 7 downto 0 );
 		addra : in std_logic_vector ( 12 downto 0 );
 		dina : in std_logic_vector ( 63 downto 0 );
-		douta : out std_logic_vector ( 63 downto 0 )
+		douta : out std_logic_vector ( 63 downto 0 );
+		clkb : in std_logic;
+		web : in std_logic_vector ( 3 downto 0 );
+		addrb : in std_logic_vector ( 13 downto 0 );
+		dinb : in std_logic_vector ( 31 downto 0 );
+		doutb : out std_logic_vector ( 31 downto 0 )
 	);
 end component;
 
-component DataRam
-	port
-	(
-		clka : in std_logic;
-		wea : in std_logic_vector ( 3 downto 0 );
-		addra : in std_logic_vector ( 13 downto 0 );
-		dina : in std_logic_vector ( 31 downto 0 );
-		douta : out std_logic_vector ( 31 downto 0 )
-	);
-end component;
+--component DataRam
+--	port
+--	(
+--		clka : in std_logic;
+--		wea : in std_logic_vector ( 3 downto 0 );
+--		addra : in std_logic_vector ( 13 downto 0 );
+--		dina : in std_logic_vector ( 31 downto 0 );
+--		douta : out std_logic_vector ( 31 downto 0 )
+--	);
+--end component;
 
 component debouncer
 Generic(
@@ -343,29 +348,40 @@ signal dm_data_in : std_logic_vector(31 downto 0) := (others => '0');
 signal dm_data_out : std_logic_vector(31 downto 0) := (others => '0');
 signal dm_wr_en : std_logic_vector(3 downto 0) := (others => '0');
 signal dm_read_dv : std_logic := '0';
-signal dm_write_dv : std_logic := '0';
+signal dm_lu_addr_dv : std_logic := '0';
+type t_dm_read_states is (state_dm_read_wait, state_dm_read);
+signal dm_read_state : t_dm_read_states := state_dm_read_wait;
 --Logic Unit Signal
 signal ctrl_logic_unit : std_logic := '0';
 signal give_ctrl_logic_unit : std_logic := '0';
 signal take_ctrl_logic_unit : std_logic := '0';
 signal sync_nRst_lu : std_logic := '0';
-Signal debug_flags : std_logic_vector(7 downto 0) := "11111111";
+--Signal debug_flags : std_logic_vector(7 downto 0) := "11111111";
 
 attribute mark_debug : string;
 attribute mark_debug of dm_addr : signal is "true";
 attribute mark_debug of dm_data_in : signal is "true";
-attribute mark_debug of dm_write_dv : signal is "true";
-attribute mark_debug of uart_fifo_din : signal is "true";
-attribute mark_debug of uart_fifo_dout : signal is "true";
-attribute mark_debug of uart_fifo_wr_en : signal is "true";
-attribute mark_debug of uart_fifo_rd_en : signal is "true";
-attribute mark_debug of uart_fifo_valid : signal is "true";
-attribute mark_debug of uart_fifo_empty : signal is "true";
-attribute mark_debug of uart_fifo_srst : signal is "true";
-attribute mark_debug of uart_TX_Active : signal is "true";
-attribute mark_debug of uart_TX_Data : signal is "true";
-attribute mark_debug of uart_TX_DV : signal is "true";
-attribute mark_debug of debug_flags : signal is "true";
+attribute mark_debug of dm_data_out : signal is "true";
+attribute mark_debug of dm_wr_en : signal is "true";
+attribute mark_debug of dm_read_dv : signal is "true";
+attribute mark_debug of dm_read_state : signal is "true";
+attribute mark_debug of dm_lu_addr_dv : signal is "true";
+attribute mark_debug of progRam_Uart_State : signal is "true";
+attribute mark_debug of progRam_Addr : signal is "true";
+attribute mark_debug of progRam_Wr_En : signal is "true";
+attribute mark_debug of progRam_Data_In : signal is "true";
+attribute mark_debug of progRam_Data_Out : signal is "true";
+--attribute mark_debug of uart_fifo_din : signal is "true";
+--attribute mark_debug of uart_fifo_dout : signal is "true";
+--attribute mark_debug of uart_fifo_wr_en : signal is "true";
+--attribute mark_debug of uart_fifo_rd_en : signal is "true";
+--attribute mark_debug of uart_fifo_valid : signal is "true";
+--attribute mark_debug of uart_fifo_empty : signal is "true";
+--attribute mark_debug of uart_fifo_srst : signal is "true";
+--attribute mark_debug of uart_TX_Active : signal is "true";
+--attribute mark_debug of uart_TX_Data : signal is "true";
+--attribute mark_debug of uart_TX_DV : signal is "true";
+--attribute mark_debug of debug_flags : signal is "true";
 
 --Current uart state signal
 signal uartState : UART_STATE_TYPE := RST_REG;
@@ -492,7 +508,7 @@ port map
 	o_DM_Addr => dm_addr,
 	o_DM_Data => dm_data_in,
 	o_DM_Wr_En => dm_wr_en,
-	o_DM_DV => dm_write_dv,
+	o_DM_DV => dm_lu_addr_dv,
 	i_DM_Data => dm_data_out,
 	i_DM_DV => dm_read_dv
 );
@@ -532,7 +548,12 @@ port map
 	wea => progRam_Wr_En,
 	addra => progRam_Addr,
 	dina => progRam_Data_In,
-	douta => progRam_Data_Out
+	douta => progRam_Data_Out,
+	clkb => clk,
+	web => dm_wr_en,
+	addrb => dm_addr(15 downto 2),
+	dinb => dm_data_in,
+	doutb => dm_data_out
 );
 
 Prog_Ram_Proc : process(CLK)
@@ -626,28 +647,50 @@ begin
 	end if;
 end process;
 
-address_map: process (clk)
+address_map_proc: process(clk)
 begin
 	if rising_edge(clk) then
-		debug_flags <= (others => '0');
+		--debug_flags <= (others => '0');
 		uart_fifo_wr_en <= '0';
-		LED <= saved_leds;
-		if dm_write_dv = '1' and dm_addr(31) = '1' then
-			debug_flags(0) <= '1';
-			case dm_addr(7 downto 0) is
-				when "00000100" =>	
-					saved_leds <= dm_data_in(3 downto 0);
-					debug_flags(1) <= '1';
-				when "00001000" =>
-					uart_fifo_din(7 downto 0) <= dm_data_in(7 downto 0);
-					uart_fifo_wr_en <= '1';
-					debug_flags(2) <= '1';
+		if sync_nRst_lu = '0' then
+			saved_leds <= (others => '0');
+		else 
+			if dm_lu_addr_dv = '1' and dm_addr(31) = '1' then -- peripherals
+				--debug_flags(0) <= '1';
+				case dm_addr(7 downto 0) is
+					when "00000100" =>	
+						saved_leds <= dm_data_in(3 downto 0);
+						--debug_flags(1) <= '1';
+					when "00001000" =>
+						uart_fifo_din(7 downto 0) <= dm_data_in(7 downto 0);
+						uart_fifo_wr_en <= '1';
+						--debug_flags(2) <= '1';
+					when others =>
+						--debug_flags(3) <= '1';
+						null;
+				end case;	
+			end if;
+		end if;
+		
+	end if;
+end process;
+
+ram_access_proc: process(clk)
+begin
+	if rising_edge(clk) then
+		dm_read_dv <= '0';
+		if dm_lu_addr_dv = '1' and dm_wr_en = "0000" and dm_addr(31) = '0' then
+			dm_read_state <= state_dm_read_wait;
+		else
+			case dm_read_state is
+				when state_dm_read_wait => 
+					dm_read_state <= state_dm_read;
+				when state_dm_read =>
+					dm_read_state <= state_dm_read;
+					dm_read_dv <= '1';
 				when others =>
-					debug_flags(3) <= '1';
 					null;
 			end case;
-		else
-			debug_flags(4) <= '1';
 		end if;
 	end if;
 end process;
@@ -670,21 +713,16 @@ progRam_Data_Out_Bytes(5)(7 downto 0) <= progRam_Data_Out(47 downto 40);
 progRam_Data_Out_Bytes(6)(7 downto 0) <= progRam_Data_Out(55 downto 48);
 progRam_Data_Out_Bytes(7)(7 downto 0) <= progRam_Data_Out(63 downto 56);
 
-
 ----------------------------------------------------------
-------              DM Bram Control             -------
+------             LED Control                  -------
 ----------------------------------------------------------
 
-inst_DataRam: DataRam
-port map
-(
-	clka => clk,
-	wea => dm_wr_en,
-	addra => dm_addr(13 downto 0),
-	dina => dm_data_in,
-	douta => dm_data_out
-);
-
+led_proc: process (clk)
+begin
+	if rising_edge(clk) then
+		LED <= saved_leds;
+	end if;
+end process;
 
 ----------------------------------------------------------
 ------            RGB LED Control                  -------

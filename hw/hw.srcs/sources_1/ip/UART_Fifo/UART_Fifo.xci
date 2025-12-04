@@ -4,7 +4,7 @@
     "xci_name": "UART_Fifo",
     "component_reference": "xilinx.com:ip:fifo_generator:13.2",
     "ip_revision": "13",
-    "gen_directory": "../../../../hw.gen/sources_1/ip/UART_Fifo_2",
+    "gen_directory": "../../../../hw.gen/sources_1/ip/UART_Fifo",
     "parameters": {
       "component_parameters": {
         "Component_Name": [ { "value": "UART_Fifo", "resolve_type": "user", "usage": "all" } ],
@@ -397,7 +397,7 @@
         "IPCONTEXT": [ { "value": "IP_Flow" } ],
         "IPREVISION": [ { "value": "13" } ],
         "MANAGED": [ { "value": "TRUE" } ],
-        "OUTPUTDIR": [ { "value": "../../../../hw.gen/sources_1/ip/UART_Fifo_2" } ],
+        "OUTPUTDIR": [ { "value": "../../../../hw.gen/sources_1/ip/UART_Fifo" } ],
         "SELECTEDSIMMODEL": [ { "value": "" } ],
         "SHAREDDIR": [ { "value": "." } ],
         "SWVERSION": [ { "value": "2025.1" } ],
