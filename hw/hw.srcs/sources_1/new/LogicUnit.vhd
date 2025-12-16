@@ -115,8 +115,8 @@ signal b_sub : std_logic_vector(31 downto 0);
 signal result_sub : std_logic_vector(31 downto 0);
 
 --attribute mark_debug : string;
---attribute mark_debug of ctrl_logic_unit : signal is "true";
 --attribute mark_debug of i_Take_Ctrl_Logic_Unit : signal is "true";
+--attribute mark_debug of ctrl_logic_unit : signal is "true";
 --attribute mark_debug of instruction_valid : signal is "true";
 --attribute mark_debug of current_instruction : signal is "true";
 --attribute mark_debug of current_pc : signal is "true";
@@ -168,6 +168,12 @@ begin
 			pc_fetch(1) <= x"0000000" & "0100";
 			pc_fetch(2) <= x"0000000" & "1000";
 			pc_fetch(3) <= x"0000000" & "1100";
+			pc(0) <= (others => '0');
+			pc(1) <= (others => '0');
+			instruction_fetch(0) <= (others => '0'); 
+			instruction_fetch(1) <= (others => '0'); 
+			instruction_fetch(2) <= (others => '0'); 
+			instruction_fetch(3) <= (others => '0'); 
 			o_PM_Addr <= (others => '0');
 			fetch_state <= fetch_state_next;
 		elsif ctrl_logic_unit = '1' and i_Take_Ctrl_Logic_Unit = '0' then

@@ -347,30 +347,32 @@ signal dm_addr : std_logic_vector(31 downto 0) := (others => '0');
 signal dm_data_in : std_logic_vector(31 downto 0) := (others => '0');
 signal dm_data_out : std_logic_vector(31 downto 0) := (others => '0');
 signal dm_wr_en : std_logic_vector(3 downto 0) := (others => '0');
+Signal dm_wr_ram_en : std_logic_vector(3 downto 0) := (others => '0');
 signal dm_read_dv : std_logic := '0';
 signal dm_lu_addr_dv : std_logic := '0';
-type t_dm_read_states is (state_dm_read_wait, state_dm_read);
-signal dm_read_state : t_dm_read_states := state_dm_read_wait;
+type t_dm_read_states is (state_dm_read_idle, state_dm_read_wait, state_dm_read);
+signal dm_read_state : t_dm_read_states := state_dm_read_idle;
 --Logic Unit Signal
 signal ctrl_logic_unit : std_logic := '0';
+Signal get_ctrl_logic_unit : std_logic := '0';
 signal give_ctrl_logic_unit : std_logic := '0';
 signal take_ctrl_logic_unit : std_logic := '0';
 signal sync_nRst_lu : std_logic := '0';
 --Signal debug_flags : std_logic_vector(7 downto 0) := "11111111";
 
-attribute mark_debug : string;
-attribute mark_debug of dm_addr : signal is "true";
-attribute mark_debug of dm_data_in : signal is "true";
-attribute mark_debug of dm_data_out : signal is "true";
-attribute mark_debug of dm_wr_en : signal is "true";
-attribute mark_debug of dm_read_dv : signal is "true";
-attribute mark_debug of dm_read_state : signal is "true";
-attribute mark_debug of dm_lu_addr_dv : signal is "true";
-attribute mark_debug of progRam_Uart_State : signal is "true";
-attribute mark_debug of progRam_Addr : signal is "true";
-attribute mark_debug of progRam_Wr_En : signal is "true";
-attribute mark_debug of progRam_Data_In : signal is "true";
-attribute mark_debug of progRam_Data_Out : signal is "true";
+--attribute mark_debug : string;
+--attribute mark_debug of ctrl_logic_unit : signal is "true";
+--attribute mark_debug of dm_data_in : signal is "true";
+--attribute mark_debug of dm_data_out : signal is "true";
+--attribute mark_debug of dm_wr_en : signal is "true";
+--attribute mark_debug of dm_read_dv : signal is "true";
+--attribute mark_debug of dm_read_state : signal is "true";
+--attribute mark_debug of dm_lu_addr_dv : signal is "true";
+--attribute mark_debug of progRam_Uart_State : signal is "true";
+--attribute mark_debug of progRam_Addr : signal is "true";
+--attribute mark_debug of progRam_Wr_En : signal is "true";
+--attribute mark_debug of progRam_Data_In : signal is "true";
+--attribute mark_debug of progRam_Data_Out : signal is "true";
 --attribute mark_debug of uart_fifo_din : signal is "true";
 --attribute mark_debug of uart_fifo_dout : signal is "true";
 --attribute mark_debug of uart_fifo_wr_en : signal is "true";
@@ -522,14 +524,20 @@ begin
 		sync_nRst_lu <= '1';
 		uart_fifo_srst <= '0';
 		
+		if (get_ctrl_logic_unit = '1') then
+			ctrl_logic_unit <= '0';
+		end if;
+		
 		if (btnReg(3)='0' and btnDeBnc(3)='1') then
 			uart_fifo_srst <= '1';
 			sync_nRst_lu <= '0';
 		end if;
+		
 		if (btnReg(2)='0' and btnDeBnc(2)='1') then
 			take_ctrl_logic_unit <= '1';
 			ctrl_logic_unit <= '0';
 		end if;
+		
 		if (btnReg(1)='0' and btnDeBnc(1)='1') then
 			give_ctrl_logic_unit <= '1';
 			ctrl_logic_unit <= '1';
@@ -541,6 +549,8 @@ end process;
 ------              PM Bram Control                -------
 ----------------------------------------------------------
 
+dm_wr_ram_en <= dm_wr_en when dm_addr(31) = '0' else (others => '0');
+
 inst_ProgRam: ProgRam
 port map
 (
@@ -550,7 +560,7 @@ port map
 	dina => progRam_Data_In,
 	douta => progRam_Data_Out,
 	clkb => clk,
-	web => dm_wr_en,
+	web => dm_wr_ram_en,
 	addrb => dm_addr(15 downto 2),
 	dinb => dm_data_in,
 	doutb => dm_data_out
@@ -679,19 +689,21 @@ ram_access_proc: process(clk)
 begin
 	if rising_edge(clk) then
 		dm_read_dv <= '0';
-		if dm_lu_addr_dv = '1' and dm_wr_en = "0000" and dm_addr(31) = '0' then
-			dm_read_state <= state_dm_read_wait;
-		else
-			case dm_read_state is
-				when state_dm_read_wait => 
-					dm_read_state <= state_dm_read;
-				when state_dm_read =>
-					dm_read_state <= state_dm_read;
-					dm_read_dv <= '1';
-				when others =>
-					null;
-			end case;
-		end if;
+		case dm_read_state is
+			when state_dm_read_idle =>
+				if dm_lu_addr_dv = '1' and dm_wr_en = "0000" and dm_addr(31) = '0' then
+					dm_read_state <= state_dm_read_wait;
+				else
+					dm_read_state <= state_dm_read_idle;
+				end if;
+			when state_dm_read_wait => 
+				dm_read_state <= state_dm_read;
+			when state_dm_read =>
+				dm_read_state <= state_dm_read_idle;
+				dm_read_dv <= '1';
+			when others =>
+				null;
+		end case;	
 	end if;
 end process;
 
