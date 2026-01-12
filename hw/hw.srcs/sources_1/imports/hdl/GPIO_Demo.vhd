@@ -358,6 +358,8 @@ Signal get_ctrl_logic_unit : std_logic := '0';
 signal give_ctrl_logic_unit : std_logic := '0';
 signal take_ctrl_logic_unit : std_logic := '0';
 signal sync_nRst_lu : std_logic := '0';
+Signal wait_peripheral_access_finish : std_logic := '0';
+Signal wait_setup_pm : std_logic := '0';
 --Signal debug_flags : std_logic_vector(7 downto 0) := "11111111";
 
 --attribute mark_debug : string;
@@ -503,7 +505,7 @@ port map
 	i_Sync_nRst => sync_nRst_lu,
 	i_Give_Ctrl_Logic_Unit => give_ctrl_logic_unit,
 	i_Take_Ctrl_Logic_Unit => take_ctrl_logic_unit,
-	o_Return_Ctrl_Logic_Unit => open,
+	o_Return_Ctrl_Logic_Unit => get_ctrl_logic_unit,
 	o_PM_Addr => progRam_addr_lu,
 	i_PM_Data => progRam_Data_Out,
 	i_PM_DV => progRam_dv,
@@ -523,10 +525,20 @@ begin
 		give_ctrl_logic_unit <= '0';
 		sync_nRst_lu <= '1';
 		uart_fifo_srst <= '0';
+		wait_setup_pm <= '0';
+		
+		if (wait_peripheral_access_finish = '1' and uart_fifo_empty = '1') then
+			ctrl_logic_unit <= '0';
+			wait_peripheral_access_finish <= '0';
+		end if;
+		
+		if (wait_setup_pm = '1' and ctrl_logic_unit = '1') then
+			give_ctrl_logic_unit <= '1';
+		end if;
 		
 		if (get_ctrl_logic_unit = '1') then
-			ctrl_logic_unit <= '0';
-		end if;
+			wait_peripheral_access_finish <= '1';
+		end if;	
 		
 		if (btnReg(3)='0' and btnDeBnc(3)='1') then
 			uart_fifo_srst <= '1';
@@ -535,13 +547,15 @@ begin
 		
 		if (btnReg(2)='0' and btnDeBnc(2)='1') then
 			take_ctrl_logic_unit <= '1';
-			ctrl_logic_unit <= '0';
+			wait_peripheral_access_finish <= '1';
 		end if;
 		
 		if (btnReg(1)='0' and btnDeBnc(1)='1') then
-			give_ctrl_logic_unit <= '1';
+			wait_setup_pm <= '1';
 			ctrl_logic_unit <= '1';
 		end if;
+		
+		
 		
 	end if;
 end process;
@@ -630,7 +644,7 @@ begin
 				
 			end case;
 		else -- lu has control over pm
-			progRam_Addr <= progRam_addr_lu; -- this way it takes 1 extra clk cylcle to set the pm address 
+			progRam_Addr <= progRam_addr_lu; 
 			if (latched_progRam_addr_lu /= progRam_addr_lu) then
 				pm_lu_state <= pm_lu_state_pre_read;
 			else
@@ -647,7 +661,7 @@ begin
 				end case;
 			end if;
 			
-			if uart_fifo_valid = '1' and uart_TX_Active = '0' and uart_fifo_empty = '0' and uart_fifo_rd_en <= '0' then
+			if uart_fifo_valid = '1' and uart_TX_Active = '0' and uart_fifo_empty = '0' and uart_fifo_rd_en = '0' then
 				uart_TX_Data <= uart_fifo_dout;
 				uart_fifo_rd_en <= '1';
 				uart_TX_DV <= '1';

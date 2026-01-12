@@ -1,7 +1,7 @@
 Copyright 1986-2022 Xilinx, Inc. All Rights Reserved. Copyright 2022-2025 Advanced Micro Devices, Inc. All Rights Reserved.
 ---------------------------------------------------------------------------------------------------------------------------------------------
 | Tool Version : Vivado v.2025.1 (win64) Build 6140274 Thu May 22 00:12:29 MDT 2025
-| Date         : Tue Dec 16 14:01:14 2025
+| Date         : Mon Jan 12 19:38:33 2026
 | Host         : DESKTOP-E28LK6R running 64-bit major release  (build 9200)
 | Command      : report_control_sets -verbose -file GPIO_demo_control_sets_placed.rpt
 | Design       : GPIO_demo
@@ -23,11 +23,11 @@ Table of Contents
 +----------------------------------------------------------+-------+
 |                          Status                          | Count |
 +----------------------------------------------------------+-------+
-| Total control sets                                       |    77 |
-|    Minimum number of control sets                        |    77 |
+| Total control sets                                       |    80 |
+|    Minimum number of control sets                        |    80 |
 |    Addition due to synthesis replication                 |     0 |
 |    Addition due to physical synthesis replication        |     0 |
-| Unused register locations in slices containing registers |    59 |
+| Unused register locations in slices containing registers |    63 |
 +----------------------------------------------------------+-------+
 * Control sets can be merged at opt_design using control_set_merge or merge_equivalent_drivers
 ** Run report_qor_suggestions for automated merging and remapping suggestions
@@ -39,15 +39,15 @@ Table of Contents
 +--------------------+-------+
 |       Fanout       | Count |
 +--------------------+-------+
-| Total control sets |    77 |
+| Total control sets |    80 |
 | >= 0 to < 4        |     0 |
-| >= 4 to < 6        |     5 |
-| >= 6 to < 8        |     2 |
-| >= 8 to < 10       |    15 |
+| >= 4 to < 6        |     6 |
+| >= 6 to < 8        |     4 |
+| >= 8 to < 10       |    14 |
 | >= 10 to < 12      |     1 |
 | >= 12 to < 14      |     2 |
 | >= 14 to < 16      |     0 |
-| >= 16              |    52 |
+| >= 16              |    53 |
 +--------------------+-------+
 * Control sets can be remapped at either synth_design or opt_design
 
@@ -58,98 +58,101 @@ Table of Contents
 +--------------+-----------------------+------------------------+-----------------+--------------+
 | Clock Enable | Synchronous Set/Reset | Asynchronous Set/Reset | Total Registers | Total Slices |
 +--------------+-----------------------+------------------------+-----------------+--------------+
-| No           | No                    | No                     |              96 |           42 |
+| No           | No                    | No                     |             104 |           43 |
 | No           | No                    | Yes                    |               0 |            0 |
-| No           | Yes                   | No                     |             123 |           47 |
-| Yes          | No                    | No                     |            1398 |          672 |
+| No           | Yes                   | No                     |             115 |           41 |
+| Yes          | No                    | No                     |            1514 |          828 |
 | Yes          | No                    | Yes                    |               0 |            0 |
-| Yes          | Yes                   | No                     |             412 |          135 |
+| Yes          | Yes                   | No                     |             412 |          139 |
 +--------------+-----------------------+------------------------+-----------------+--------------+
 
 
 4. Detailed Control Set Information
 -----------------------------------
 
-+----------------+-------------------------------------------------------------------------------------------------------------------------------------+------------------------------------------------------+------------------+----------------+--------------+
-|  Clock Signal  |                                                            Enable Signal                                                            |                   Set/Reset Signal                   | Slice Load Count | Bel Load Count | Bels / Slice |
-+----------------+-------------------------------------------------------------------------------------------------------------------------------------+------------------------------------------------------+------------------+----------------+--------------+
-|  CLK_IBUF_BUFG | inst_LogicUnit/dm_addr_reg[2]_0[0]                                                                                                  | inst_LogicUnit/SR[0]                                 |                2 |              4 |         2.00 |
-|  CLK_IBUF_BUFG | RGB_Core1/eqOp                                                                                                                      | RGB_Core1/valcount                                   |                2 |              4 |         2.00 |
-|  CLK_IBUF_BUFG |                                                                                                                                     | srst                                                 |                2 |              4 |         2.00 |
-|  CLK_IBUF_BUFG | RGB_Core1/eqOp                                                                                                                      |                                                      |                2 |              5 |         2.50 |
-|  CLK_IBUF_BUFG |                                                                                                                                     | inst_LogicUnit/o_DM_Wr_En[3]_i_1_n_0                 |                3 |              5 |         1.67 |
-|  CLK_IBUF_BUFG |                                                                                                                                     | RGB_Core1/windowcount[7]                             |                3 |              6 |         2.00 |
-|  CLK_IBUF_BUFG | Inst_UART_RX_CTRL/r_Clk_Count[9]_i_2__0_n_0                                                                                         | Inst_UART_RX_CTRL/r_Clk_Count[9]_i_1__0_n_0          |                3 |              7 |         2.33 |
-|  CLK_IBUF_BUFG | progRam_Data_In_Bytes[4][7]_i_1_n_0                                                                                                 |                                                      |                2 |              8 |         4.00 |
-|  CLK_IBUF_BUFG | progRam_Data_In_Bytes[0][7]_i_1_n_0                                                                                                 |                                                      |                1 |              8 |         8.00 |
-|  CLK_IBUF_BUFG | progRam_Data_In_Bytes[7][7]_i_1_n_0                                                                                                 |                                                      |                2 |              8 |         4.00 |
-|  CLK_IBUF_BUFG | Inst_UART_Fifo/U0/inst_fifo_gen/gconvfifo.rf/grf.rf/gntv_or_sync_fifo.gl0.rd/gr1.gr1_int.rfwft/E[0]                                 | srst                                                 |                1 |              8 |         8.00 |
-|  CLK_IBUF_BUFG |                                                                                                                                     | ctrl_logic_unit                                      |                4 |              8 |         2.00 |
-|  CLK_IBUF_BUFG |                                                                                                                                     | inst_LogicUnit/FSM_sequential_fetch_state[1]_i_1_n_0 |                4 |              8 |         2.00 |
-|  CLK_IBUF_BUFG | progRam_Data_In_Bytes[1][7]_i_1_n_0                                                                                                 |                                                      |                1 |              8 |         8.00 |
-|  CLK_IBUF_BUFG |                                                                                                                                     | RGB_Core1/windowcount[7]_i_1_n_0                     |                5 |              8 |         1.60 |
-|  CLK_IBUF_BUFG | Inst_UART_TX_CTRL/r_TX_Data_0                                                                                                       |                                                      |                2 |              8 |         4.00 |
-|  CLK_IBUF_BUFG | Inst_UART_TX_CTRL/FSM_sequential_progRam_Uart_State_reg[1]_0[0]                                                                     |                                                      |                5 |              8 |         1.60 |
-|  CLK_IBUF_BUFG | progRam_Data_In_Bytes[2][7]_i_1_n_0                                                                                                 |                                                      |                2 |              8 |         4.00 |
-|  CLK_IBUF_BUFG | inst_LogicUnit/E[0]                                                                                                                 |                                                      |                2 |              8 |         4.00 |
-|  CLK_IBUF_BUFG | progRam_Data_In_Bytes[5][7]_i_1_n_0                                                                                                 |                                                      |                1 |              8 |         8.00 |
-|  CLK_IBUF_BUFG | progRam_Data_In_Bytes[6][7]_i_1_n_0                                                                                                 |                                                      |                2 |              8 |         4.00 |
-|  CLK_IBUF_BUFG | progRam_Data_In_Bytes[3][7]_i_1_n_0                                                                                                 |                                                      |                2 |              8 |         4.00 |
-|  CLK_IBUF_BUFG | Inst_UART_TX_CTRL/r_Clk_Count                                                                                                       | Inst_UART_TX_CTRL/r_Clk_Count0                       |                4 |             10 |         2.50 |
-|  CLK_IBUF_BUFG | progRam_Addr[12]_i_1_n_0                                                                                                            |                                                      |                4 |             13 |         3.25 |
-|  CLK_IBUF_BUFG | inst_LogicUnit/o_PM_Addr[12]_i_1_n_0                                                                                                | inst_LogicUnit/SR[0]                                 |                5 |             13 |         2.60 |
-|  CLK_IBUF_BUFG |                                                                                                                                     | Inst_btn_debounce/sig_cntrs_ary[2][15]_i_1_n_0       |                5 |             16 |         3.20 |
-|  CLK_IBUF_BUFG |                                                                                                                                     | Inst_btn_debounce/sig_cntrs_ary[3][15]_i_1_n_0       |                5 |             16 |         3.20 |
-|  CLK_IBUF_BUFG |                                                                                                                                     | Inst_btn_debounce/sig_cntrs_ary[1][15]_i_1_n_0       |                5 |             16 |         3.20 |
-|  CLK_IBUF_BUFG |                                                                                                                                     | Inst_btn_debounce/sig_cntrs_ary[0][15]_i_1_n_0       |                5 |             16 |         3.20 |
-|  CLK_IBUF_BUFG | Inst_UART_Fifo/U0/inst_fifo_gen/gconvfifo.rf/grf.rf/gntv_or_sync_fifo.gl0.wr/gwss.wsts/E[0]                                         | srst                                                 |                4 |             16 |         4.00 |
-|  CLK_IBUF_BUFG | Inst_UART_TX_CTRL/E[0]                                                                                                              |                                                      |                6 |             16 |         2.67 |
-|  CLK_IBUF_BUFG | Inst_UART_TX_CTRL/ctrl_logic_unit_reg                                                                                               | Inst_btn_debounce/ctrl_logic_unit_reg                |                5 |             16 |         3.20 |
-|  CLK_IBUF_BUFG | Inst_UART_Fifo/U0/inst_fifo_gen/gconvfifo.rf/grf.rf/gntv_or_sync_fifo.gl0.rd/gr1.gr1_int.rfwft/gpregsm1.curr_fwft_state_reg[1]_0[0] | srst                                                 |                6 |             16 |         2.67 |
-|  CLK_IBUF_BUFG | inst_LogicUnit/dm_addr[31]_i_1_n_0                                                                                                  |                                                      |                8 |             17 |         2.12 |
-|  CLK_IBUF_BUFG |                                                                                                                                     | RGB_Core1/deltacount[19]_i_1_n_0                     |                6 |             20 |         3.33 |
-|  CLK_IBUF_BUFG | inst_LogicUnit/registers[9][30]_i_1_n_0                                                                                             |                                                      |               17 |             31 |         1.82 |
-|  CLK_IBUF_BUFG | inst_LogicUnit/registers[8][30]_i_1_n_0                                                                                             |                                                      |               19 |             31 |         1.63 |
-|  CLK_IBUF_BUFG | inst_LogicUnit/p_0_in__0__0[30]                                                                                                     |                                                      |               15 |             31 |         2.07 |
-|  CLK_IBUF_BUFG | inst_LogicUnit/registers[23][30]_i_1_n_0                                                                                            |                                                      |               14 |             31 |         2.21 |
-|  CLK_IBUF_BUFG | inst_LogicUnit/registers[10][30]_i_1_n_0                                                                                            |                                                      |               17 |             31 |         1.82 |
-|  CLK_IBUF_BUFG | inst_LogicUnit/registers[28][30]_i_1_n_0                                                                                            |                                                      |               14 |             31 |         2.21 |
-|  CLK_IBUF_BUFG | inst_LogicUnit/registers[25][31]_i_1_n_0                                                                                            |                                                      |               14 |             32 |         2.29 |
-|  CLK_IBUF_BUFG | inst_LogicUnit/Instructions_Proc.v_dm_write_data_2bytes[0][15]_i_1_n_0                                                              |                                                      |               13 |             32 |         2.46 |
-|  CLK_IBUF_BUFG | inst_LogicUnit/Instructions_Proc.v_dm_write_data_bytes[3][7]_i_1_n_0                                                                |                                                      |               10 |             32 |         3.20 |
-|  CLK_IBUF_BUFG | inst_LogicUnit/registers[14][31]_i_1_n_0                                                                                            |                                                      |               16 |             32 |         2.00 |
-|  CLK_IBUF_BUFG | inst_LogicUnit/registers[15][31]_i_1_n_0                                                                                            |                                                      |               20 |             32 |         1.60 |
-|  CLK_IBUF_BUFG | inst_LogicUnit/registers[11][31]_i_1_n_0                                                                                            |                                                      |               20 |             32 |         1.60 |
-|  CLK_IBUF_BUFG | inst_LogicUnit/jmp_addr[31]_i_1_n_0                                                                                                 |                                                      |               11 |             32 |         2.91 |
-|  CLK_IBUF_BUFG | inst_LogicUnit/registers[17][31]_i_1_n_0                                                                                            |                                                      |               15 |             32 |         2.13 |
-|  CLK_IBUF_BUFG | inst_LogicUnit/registers[19][31]_i_1_n_0                                                                                            |                                                      |               14 |             32 |         2.29 |
-|  CLK_IBUF_BUFG | inst_LogicUnit/registers[18][31]_i_1_n_0                                                                                            |                                                      |               19 |             32 |         1.68 |
-|  CLK_IBUF_BUFG | inst_LogicUnit/registers[1][31]_i_1_n_0                                                                                             |                                                      |               18 |             32 |         1.78 |
-|  CLK_IBUF_BUFG | inst_LogicUnit/registers[22][31]_i_1_n_0                                                                                            |                                                      |               18 |             32 |         1.78 |
-|  CLK_IBUF_BUFG | inst_LogicUnit/registers[20][31]_i_1_n_0                                                                                            |                                                      |               21 |             32 |         1.52 |
-|  CLK_IBUF_BUFG | inst_LogicUnit/registers[26][31]_i_1_n_0                                                                                            |                                                      |               16 |             32 |         2.00 |
-|  CLK_IBUF_BUFG | inst_LogicUnit/registers[27][31]_i_1_n_0                                                                                            |                                                      |               17 |             32 |         1.88 |
-|  CLK_IBUF_BUFG | inst_LogicUnit/registers[24][31]_i_1_n_0                                                                                            |                                                      |               15 |             32 |         2.13 |
-|  CLK_IBUF_BUFG | inst_LogicUnit/registers[12][31]_i_1_n_0                                                                                            |                                                      |               17 |             32 |         1.88 |
-|  CLK_IBUF_BUFG | inst_LogicUnit/o_DM_Data[31]_i_1_n_0                                                                                                |                                                      |               15 |             32 |         2.13 |
-|  CLK_IBUF_BUFG | inst_LogicUnit/registers[4][31]_i_1_n_0                                                                                             |                                                      |               18 |             32 |         1.78 |
-|  CLK_IBUF_BUFG | inst_LogicUnit/registers[29][31]_i_1_n_0                                                                                            |                                                      |               14 |             32 |         2.29 |
-|  CLK_IBUF_BUFG | inst_LogicUnit/registers[31][31]_i_1_n_0                                                                                            |                                                      |               18 |             32 |         1.78 |
-|  CLK_IBUF_BUFG | inst_LogicUnit/registers[2][31]_i_1_n_0                                                                                             |                                                      |               15 |             32 |         2.13 |
-|  CLK_IBUF_BUFG | inst_LogicUnit/registers[30][31]_i_1_n_0                                                                                            |                                                      |               19 |             32 |         1.68 |
-|  CLK_IBUF_BUFG | inst_LogicUnit/registers[3][31]_i_1_n_0                                                                                             |                                                      |               17 |             32 |         1.88 |
-|  CLK_IBUF_BUFG | inst_LogicUnit/registers[7][31]_i_1_n_0                                                                                             |                                                      |               17 |             32 |         1.88 |
-|  CLK_IBUF_BUFG | inst_LogicUnit/registers[16][31]_i_1_n_0                                                                                            |                                                      |               17 |             32 |         1.88 |
-|  CLK_IBUF_BUFG | inst_LogicUnit/registers[5][31]_i_1_n_0                                                                                             |                                                      |               16 |             32 |         2.00 |
-|  CLK_IBUF_BUFG | inst_LogicUnit/registers[6][31]_i_1_n_0                                                                                             |                                                      |               20 |             32 |         1.60 |
-|  CLK_IBUF_BUFG | inst_LogicUnit/registers[13][31]_i_1_n_0                                                                                            |                                                      |               19 |             32 |         1.68 |
-|  CLK_IBUF_BUFG | inst_LogicUnit/pc_fetch[0][31]_i_2_n_0                                                                                              | inst_LogicUnit/SR[0]                                 |               20 |             62 |         3.10 |
-|  CLK_IBUF_BUFG | inst_LogicUnit/pc_fetch[2][31]_i_1_n_0                                                                                              | inst_LogicUnit/SR[0]                                 |               19 |             64 |         3.37 |
-|  CLK_IBUF_BUFG | inst_LogicUnit/instruction_fetch[3][31]_i_1_n_0                                                                                     | inst_LogicUnit/SR[0]                                 |               19 |             64 |         3.37 |
-|  CLK_IBUF_BUFG | inst_LogicUnit/b_add[31]_i_1_n_0                                                                                                    |                                                      |               20 |             64 |         3.20 |
-|  CLK_IBUF_BUFG | inst_LogicUnit/current_instruction[31]_i_1_n_0                                                                                      |                                                      |               35 |             81 |         2.31 |
-|  CLK_IBUF_BUFG |                                                                                                                                     |                                                      |               42 |             96 |         2.29 |
-|  CLK_IBUF_BUFG | inst_LogicUnit/pc[1][31]_i_1_n_0                                                                                                    | inst_LogicUnit/SR[0]                                 |               45 |            128 |         2.84 |
-+----------------+-------------------------------------------------------------------------------------------------------------------------------------+------------------------------------------------------+------------------+----------------+--------------+
++----------------+-------------------------------------------------------------------------------------------------------------------------------------+------------------------------------------------+------------------+----------------+--------------+
+|  Clock Signal  |                                                            Enable Signal                                                            |                Set/Reset Signal                | Slice Load Count | Bel Load Count | Bels / Slice |
++----------------+-------------------------------------------------------------------------------------------------------------------------------------+------------------------------------------------+------------------+----------------+--------------+
+|  CLK_IBUF_BUFG | RGB_Core1/eqOp                                                                                                                      | RGB_Core1/valcount                             |                1 |              4 |         4.00 |
+|  CLK_IBUF_BUFG | inst_LogicUnit/dm_addr_reg[2]_0[0]                                                                                                  | inst_LogicUnit/SR[0]                           |                3 |              4 |         1.33 |
+|  CLK_IBUF_BUFG |                                                                                                                                     | srst                                           |                2 |              4 |         2.00 |
+|  CLK_IBUF_BUFG |                                                                                                                                     | inst_LogicUnit/o_DM_Wr_En[3]_i_1_n_0           |                3 |              5 |         1.67 |
+|  CLK_IBUF_BUFG | RGB_Core1/eqOp                                                                                                                      |                                                |                3 |              5 |         1.67 |
+|  CLK_IBUF_BUFG | inst_LogicUnit/immediate[11]_i_1_n_0                                                                                                |                                                |                3 |              5 |         1.67 |
+|  CLK_IBUF_BUFG |                                                                                                                                     | RGB_Core1/windowcount[7]                       |                2 |              6 |         3.00 |
+|  CLK_IBUF_BUFG | Inst_UART_RX_CTRL/r_Clk_Count[9]_i_2__0_n_0                                                                                         | Inst_UART_RX_CTRL/r_Clk_Count[9]_i_1__0_n_0    |                3 |              7 |         2.33 |
+|  CLK_IBUF_BUFG | inst_LogicUnit/immediate[19]_i_1_n_0                                                                                                |                                                |                4 |              7 |         1.75 |
+|  CLK_IBUF_BUFG | inst_LogicUnit/immediate[6]_i_1_n_0                                                                                                 |                                                |                2 |              7 |         3.50 |
+|  CLK_IBUF_BUFG | progRam_Data_In_Bytes[6][7]_i_1_n_0                                                                                                 |                                                |                1 |              8 |         8.00 |
+|  CLK_IBUF_BUFG |                                                                                                                                     | RGB_Core1/windowcount[7]_i_1_n_0               |                4 |              8 |         2.00 |
+|  CLK_IBUF_BUFG | Inst_UART_TX_CTRL/r_TX_Data_0                                                                                                       |                                                |                2 |              8 |         4.00 |
+|  CLK_IBUF_BUFG | progRam_Data_In_Bytes[5][7]_i_1_n_0                                                                                                 |                                                |                2 |              8 |         4.00 |
+|  CLK_IBUF_BUFG | progRam_Data_In_Bytes[7][7]_i_1_n_0                                                                                                 |                                                |                2 |              8 |         4.00 |
+|  CLK_IBUF_BUFG | Inst_UART_TX_CTRL/FSM_sequential_progRam_Uart_State_reg[1]_0[0]                                                                     |                                                |                5 |              8 |         1.60 |
+|  CLK_IBUF_BUFG |                                                                                                                                     | ctrl_logic_unit                                |                4 |              8 |         2.00 |
+|  CLK_IBUF_BUFG | Inst_UART_Fifo/U0/inst_fifo_gen/gconvfifo.rf/grf.rf/gntv_or_sync_fifo.gl0.rd/gr1.gr1_int.rfwft/E[0]                                 | srst                                           |                2 |              8 |         4.00 |
+|  CLK_IBUF_BUFG | progRam_Data_In_Bytes[0][7]_i_1_n_0                                                                                                 |                                                |                2 |              8 |         4.00 |
+|  CLK_IBUF_BUFG | progRam_Data_In_Bytes[1][7]_i_1_n_0                                                                                                 |                                                |                1 |              8 |         8.00 |
+|  CLK_IBUF_BUFG | progRam_Data_In_Bytes[2][7]_i_1_n_0                                                                                                 |                                                |                2 |              8 |         4.00 |
+|  CLK_IBUF_BUFG | inst_LogicUnit/E[0]                                                                                                                 |                                                |                1 |              8 |         8.00 |
+|  CLK_IBUF_BUFG | progRam_Data_In_Bytes[3][7]_i_1_n_0                                                                                                 |                                                |                3 |              8 |         2.67 |
+|  CLK_IBUF_BUFG | progRam_Data_In_Bytes[4][7]_i_1_n_0                                                                                                 |                                                |                2 |              8 |         4.00 |
+|  CLK_IBUF_BUFG | Inst_UART_TX_CTRL/r_Clk_Count                                                                                                       | Inst_UART_TX_CTRL/r_Clk_Count0                 |                4 |             10 |         2.50 |
+|  CLK_IBUF_BUFG | inst_LogicUnit/o_PM_Addr[12]_i_1_n_0                                                                                                | inst_LogicUnit/SR[0]                           |                5 |             13 |         2.60 |
+|  CLK_IBUF_BUFG | progRam_Addr[12]_i_1_n_0                                                                                                            |                                                |                4 |             13 |         3.25 |
+|  CLK_IBUF_BUFG |                                                                                                                                     | Inst_btn_debounce/sig_cntrs_ary[3][15]_i_1_n_0 |                5 |             16 |         3.20 |
+|  CLK_IBUF_BUFG |                                                                                                                                     | Inst_btn_debounce/sig_cntrs_ary[0][15]_i_1_n_0 |                5 |             16 |         3.20 |
+|  CLK_IBUF_BUFG |                                                                                                                                     | Inst_btn_debounce/sig_cntrs_ary[1][15]_i_1_n_0 |                5 |             16 |         3.20 |
+|  CLK_IBUF_BUFG |                                                                                                                                     | Inst_btn_debounce/sig_cntrs_ary[2][15]_i_1_n_0 |                5 |             16 |         3.20 |
+|  CLK_IBUF_BUFG | Inst_UART_Fifo/U0/inst_fifo_gen/gconvfifo.rf/grf.rf/gntv_or_sync_fifo.gl0.rd/gr1.gr1_int.rfwft/gpregsm1.curr_fwft_state_reg[1]_0[0] | srst                                           |                4 |             16 |         4.00 |
+|  CLK_IBUF_BUFG | Inst_UART_Fifo/U0/inst_fifo_gen/gconvfifo.rf/grf.rf/gntv_or_sync_fifo.gl0.wr/gwss.wsts/E[0]                                         | srst                                           |                4 |             16 |         4.00 |
+|  CLK_IBUF_BUFG | Inst_UART_TX_CTRL/ctrl_logic_unit_reg                                                                                               | Inst_btn_debounce/ctrl_logic_unit_reg          |                5 |             16 |         3.20 |
+|  CLK_IBUF_BUFG | Inst_UART_TX_CTRL/E[0]                                                                                                              |                                                |                6 |             16 |         2.67 |
+|  CLK_IBUF_BUFG | inst_LogicUnit/dm_addr[31]_i_1_n_0                                                                                                  |                                                |                5 |             17 |         3.40 |
+|  CLK_IBUF_BUFG |                                                                                                                                     | RGB_Core1/deltacount[19]_i_1_n_0               |                6 |             20 |         3.33 |
+|  CLK_IBUF_BUFG | inst_LogicUnit/registers[12][31]_i_1_n_0                                                                                            |                                                |               19 |             31 |         1.63 |
+|  CLK_IBUF_BUFG | inst_LogicUnit/v_current_instruction                                                                                                |                                                |               12 |             32 |         2.67 |
+|  CLK_IBUF_BUFG | inst_LogicUnit/registers[31]1_out[31]                                                                                               |                                                |               20 |             32 |         1.60 |
+|  CLK_IBUF_BUFG | inst_LogicUnit/registers[4][31]_i_1_n_0                                                                                             |                                                |               17 |             32 |         1.88 |
+|  CLK_IBUF_BUFG | inst_LogicUnit/registers[13][31]_i_1_n_0                                                                                            |                                                |               19 |             32 |         1.68 |
+|  CLK_IBUF_BUFG | inst_LogicUnit/Instructions_Execute_Proc.v_dm_write_data_2bytes[0][15]_i_1_n_0                                                      |                                                |               11 |             32 |         2.91 |
+|  CLK_IBUF_BUFG | inst_LogicUnit/Instructions_Execute_Proc.v_dm_write_data_bytes[0][7]_i_1_n_0                                                        |                                                |                9 |             32 |         3.56 |
+|  CLK_IBUF_BUFG | inst_LogicUnit/registers[5][31]_i_1_n_0                                                                                             |                                                |               20 |             32 |         1.60 |
+|  CLK_IBUF_BUFG | inst_LogicUnit/registers[6][31]_i_1_n_0                                                                                             |                                                |               25 |             32 |         1.28 |
+|  CLK_IBUF_BUFG | inst_LogicUnit/registers[7][31]_i_1_n_0                                                                                             |                                                |               17 |             32 |         1.88 |
+|  CLK_IBUF_BUFG | inst_LogicUnit/jmp_addr[31]_i_1_n_0                                                                                                 |                                                |               15 |             32 |         2.13 |
+|  CLK_IBUF_BUFG | inst_LogicUnit/registers[8][31]_i_1_n_0                                                                                             |                                                |               16 |             32 |         2.00 |
+|  CLK_IBUF_BUFG | inst_LogicUnit/o_DM_Data[31]_i_1_n_0                                                                                                |                                                |               14 |             32 |         2.29 |
+|  CLK_IBUF_BUFG | inst_LogicUnit/registers[9][31]_i_1_n_0                                                                                             |                                                |               12 |             32 |         2.67 |
+|  CLK_IBUF_BUFG | inst_LogicUnit/registers[10][31]_i_1_n_0                                                                                            |                                                |               20 |             32 |         1.60 |
+|  CLK_IBUF_BUFG | inst_LogicUnit/registers[11][31]_i_1_n_0                                                                                            |                                                |               19 |             32 |         1.68 |
+|  CLK_IBUF_BUFG | inst_LogicUnit/registers[14][31]_i_1_n_0                                                                                            |                                                |               20 |             32 |         1.60 |
+|  CLK_IBUF_BUFG | inst_LogicUnit/registers[15][31]_i_1_n_0                                                                                            |                                                |               18 |             32 |         1.78 |
+|  CLK_IBUF_BUFG | inst_LogicUnit/registers[16][31]_i_1_n_0                                                                                            |                                                |               22 |             32 |         1.45 |
+|  CLK_IBUF_BUFG | inst_LogicUnit/registers[17][31]_i_1_n_0                                                                                            |                                                |               21 |             32 |         1.52 |
+|  CLK_IBUF_BUFG | inst_LogicUnit/registers[18][31]_i_1_n_0                                                                                            |                                                |               24 |             32 |         1.33 |
+|  CLK_IBUF_BUFG | inst_LogicUnit/registers[19][31]_i_1_n_0                                                                                            |                                                |               25 |             32 |         1.28 |
+|  CLK_IBUF_BUFG | inst_LogicUnit/registers[1][31]_i_1_n_0                                                                                             |                                                |               17 |             32 |         1.88 |
+|  CLK_IBUF_BUFG | inst_LogicUnit/registers[20][31]_i_1_n_0                                                                                            |                                                |               23 |             32 |         1.39 |
+|  CLK_IBUF_BUFG | inst_LogicUnit/registers[21][31]_i_1_n_0                                                                                            |                                                |               25 |             32 |         1.28 |
+|  CLK_IBUF_BUFG | inst_LogicUnit/registers[22][31]_i_1_n_0                                                                                            |                                                |               21 |             32 |         1.52 |
+|  CLK_IBUF_BUFG | inst_LogicUnit/registers[23][31]_i_1_n_0                                                                                            |                                                |               24 |             32 |         1.33 |
+|  CLK_IBUF_BUFG | inst_LogicUnit/registers[24][31]_i_1_n_0                                                                                            |                                                |               25 |             32 |         1.28 |
+|  CLK_IBUF_BUFG | inst_LogicUnit/registers[25][31]_i_1_n_0                                                                                            |                                                |               17 |             32 |         1.88 |
+|  CLK_IBUF_BUFG | inst_LogicUnit/registers[26][31]_i_1_n_0                                                                                            |                                                |               20 |             32 |         1.60 |
+|  CLK_IBUF_BUFG | inst_LogicUnit/registers[28][31]_i_1_n_0                                                                                            |                                                |               23 |             32 |         1.39 |
+|  CLK_IBUF_BUFG | inst_LogicUnit/registers[27][31]_i_1_n_0                                                                                            |                                                |               19 |             32 |         1.68 |
+|  CLK_IBUF_BUFG | inst_LogicUnit/registers[29][31]_i_1_n_0                                                                                            |                                                |               19 |             32 |         1.68 |
+|  CLK_IBUF_BUFG | inst_LogicUnit/registers[30][31]_i_1_n_0                                                                                            |                                                |               14 |             32 |         2.29 |
+|  CLK_IBUF_BUFG | inst_LogicUnit/registers[2][31]_i_1_n_0                                                                                             |                                                |               16 |             32 |         2.00 |
+|  CLK_IBUF_BUFG | inst_LogicUnit/registers[3][31]_i_1_n_0                                                                                             |                                                |               18 |             32 |         1.78 |
+|  CLK_IBUF_BUFG | inst_LogicUnit/pc_fetch[1][31]_i_1_n_0                                                                                              | inst_LogicUnit/SR[0]                           |               21 |             62 |         2.95 |
+|  CLK_IBUF_BUFG | inst_LogicUnit/instruction_fetch[3][31]_i_1_n_0                                                                                     | inst_LogicUnit/SR[0]                           |               15 |             64 |         4.27 |
+|  CLK_IBUF_BUFG | inst_LogicUnit/pc_fetch[3][31]_i_1_n_0                                                                                              | inst_LogicUnit/SR[0]                           |               21 |             64 |         3.05 |
+|  CLK_IBUF_BUFG | inst_LogicUnit/o_DM_DV1                                                                                                             |                                                |               39 |             91 |         2.33 |
+|  CLK_IBUF_BUFG |                                                                                                                                     |                                                |               43 |            104 |         2.42 |
+|  CLK_IBUF_BUFG | inst_LogicUnit/current_pc                                                                                                           |                                                |               63 |            114 |         1.81 |
+|  CLK_IBUF_BUFG | inst_LogicUnit/instruction_fetch[1][31]_i_1_n_0                                                                                     | inst_LogicUnit/SR[0]                           |               51 |            128 |         2.51 |
++----------------+-------------------------------------------------------------------------------------------------------------------------------------+------------------------------------------------+------------------+----------------+--------------+
 
 

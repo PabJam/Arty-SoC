@@ -53,29 +53,9 @@ end LogicUnit;
 
 architecture Behavioral of LogicUnit is
 
---component Add
---	port
---	(
---		CLK : in std_logic;
---		A : in std_logic_vector(31 downto 0);
---		B : in std_logic_vector(31 downto 0);
---		S : out std_logic_vector(31 downto 0)
---	);
---end component;
---
---component Sub
---	port 
---	(
---		CLK : in std_logic;
---		A : in std_logic_vector(31 downto 0);
---		B : in std_logic_vector(31 downto 0);
---		S : out std_logic_vector(31 downto 0)
---	);
---end component;
-
 signal ctrl_logic_unit : std_logic := '0';
 
-type t_reg_array is array(0 to 31) of unsigned(31 downto 0);
+type t_reg_array is array(natural range 0 to 31) of unsigned(31 downto 0);
 signal registers : t_reg_array;
 
 type t_fetch_states is (fetch_state_idle, fetch_state_next, fetch_state_next_2);
@@ -89,11 +69,32 @@ signal dm_addr : std_logic_vector(31 downto 0);
 
 type t_pm_fetch_array is array(0 to 3) of unsigned(31 downto 0);
 type t_2_u32 is array(0 to 1) of unsigned(31 downto 0);
+--type t_2_u21 is array(0 to 1) of unsigned(20 downto 0);
+--type t_2_u5 is array(0 to 1) of unsigned(4 downto 0) 
 
 signal pc : t_2_u32;
 signal jmp_addr : unsigned(31 downto 0);
 signal pc_fetch : t_pm_fetch_array;
 --signal instruction : t_2_u32;
+signal immediate : unsigned(20 downto 0) := (others => '0');
+signal rs1 : natural range 0 to 31 := 0;
+signal rs2 : natural range 0 to 31 := 0;
+signal rd : natural range 0 to 31 := 0;
+signal rs1_val : unsigned(31 downto 0) := (others => '0');
+signal rs2_val : unsigned(31 downto 0) := (others => '0');
+signal opcode : unsigned(6 downto 0) := (others => '0');
+signal func3 : unsigned(2 downto 0) := (others => '0');
+signal write_operation : std_logic := '0';
+signal wait_finish_write_operation : std_logic := '0';
+signal latched_immediate : unsigned(20 downto 0) := (others => '0');
+signal latched_rs1 : natural range 0 to 31 := 0;
+signal latched_rs2 : natural range 0 to 31 := 0;
+signal latched_rs1_val : unsigned(31 downto 0) := (others => '0');
+signal latched_rs2_val : unsigned(31 downto 0) := (others => '0');
+signal latched_rd : natural range 0 to 31 := 0;
+signal latched_opcode : unsigned(6 downto 0) := (others => '0');
+signal latched_func3 : unsigned(2 downto 0) := (others => '0');
+signal instruction_decoded : std_logic;
 signal instruction_fetch : t_pm_fetch_array;
 signal instruction_jump : std_logic := '0';
 signal instruction_ready : std_logic := '0';
@@ -105,14 +106,11 @@ signal instruction_upper_latch : unsigned(0 downto 0) := (others => '0');
 signal instruction_multicycle : std_logic := '0';
 signal current_instruction : unsigned(31 downto 0) := (others => '0');
 signal current_pc : unsigned(31 downto 0) := (others => '0');
+signal latched_current_pc : unsigned(31 downto 0) := (others => '0');
 signal instruction_valid : std_logic := '0';
 
-signal a_add : unsigned(31 downto 0);
-signal b_add : unsigned(31 downto 0);
-signal result_add : std_logic_vector(31 downto 0);
-signal a_sub : std_logic_vector(31 downto 0);
-signal b_sub : std_logic_vector(31 downto 0);
-signal result_sub : std_logic_vector(31 downto 0);
+
+
 
 --attribute mark_debug : string;
 --attribute mark_debug of i_Take_Ctrl_Logic_Unit : signal is "true";
@@ -120,6 +118,9 @@ signal result_sub : std_logic_vector(31 downto 0);
 --attribute mark_debug of instruction_valid : signal is "true";
 --attribute mark_debug of current_instruction : signal is "true";
 --attribute mark_debug of current_pc : signal is "true";
+--attribute mark_debug of i_PM_DV : signal is "true";
+--attribute mark_debug of i_PM_Data : signal is "true";
+--attribute mark_debug of instruction_ready : signal is "true";
 --attribute mark_debug of fetch_state : signal is "true";
 --attribute mark_debug of pc_fetch : signal is "true";
 --attribute mark_debug of instruction_fetch : signal is "true";
@@ -129,25 +130,6 @@ signal result_sub : std_logic_vector(31 downto 0);
 
 begin
 
-
-
---inst_add: Add
---port map
---(
---	CLK => i_Clk, 
---	A => a_add,
---	B => b_add,
---	S => result_add
---);
---
---inst_sub: Sub
---port map
---(
---	CLK => i_Clk,
---	A => a_sub,
---	B => b_sub,
---	S => result_sub
---);
 
 dm_read_data_bytes(0) <= i_DM_Data(7 downto 0);
 dm_read_data_bytes(1) <= i_DM_Data(15 downto 8);
@@ -176,6 +158,7 @@ begin
 			instruction_fetch(3) <= (others => '0'); 
 			o_PM_Addr <= (others => '0');
 			fetch_state <= fetch_state_next;
+			instruction_ready <= '0';
 		elsif ctrl_logic_unit = '1' and i_Take_Ctrl_Logic_Unit = '0' then
 			if (instruction_jump = '1') then
 				o_PM_Addr <= std_logic_vector(jmp_addr(15 downto 3)); -- jmp_addr(2) decides if lower or upper 32bit 
@@ -268,7 +251,115 @@ begin
 	end if;
 end process;
 
-Instructions_Proc : process (i_Clk)
+instruction_Decode_Proc : process (i_Clk)
+		variable v_current_instruction : unsigned(31 downto 0) := (others => '0');
+		variable v_instruction_ready : std_logic := '0';
+begin
+	if rising_edge(i_Clk) then
+		instruction_upper_latch <= instruction_upper;
+		v_instruction_ready := '0';
+		
+		if (i_Sync_nRst = '0') then
+			instruction_upper <= (others => '0');
+			instruction_upper_latch <= (others => '0');
+			instruction_decoded <= '0';
+			write_operation <= '0';
+			wait_finish_write_operation <= '0';
+		elsif ctrl_logic_unit = '1' and i_Take_Ctrl_Logic_Unit = '0' then
+		
+			if instruction_ready = '1' and instruction_jump = '0' and instruction_multicycle = '0' then
+				--current_instruction <= instruction_fetch(to_integer(instruction_upper));
+				v_current_instruction := instruction_fetch(to_integer(instruction_upper));
+				current_pc <= pc(to_integer(instruction_upper));
+				instruction_upper <= not instruction_upper;
+				v_instruction_ready := '1';
+			elsif instruction_jump = '1' then
+				instruction_upper(0) <= jmp_addr(2);
+				instruction_decoded <= '0';
+			end if;
+			
+			if v_instruction_ready = '1' then
+				opcode <= v_current_instruction(6 downto 0);
+				func3 <= v_current_instruction(14 downto 12);
+				rs1 <= to_integer(v_current_instruction(19 downto 15));
+				rs2 <= to_integer(v_current_instruction(24 downto 20));
+				rd <= to_integer(v_current_instruction(11 downto 7));
+				rs1_val <= registers(to_integer(v_current_instruction(19 downto 15)));
+				rs2_val <= registers(to_integer(v_current_instruction(24 downto 20)));
+				instruction_decoded <= '1';
+				wait_finish_write_operation <= '0';
+				case v_current_instruction(6 downto 0) is --opcode
+					
+					when ("0110111" or "0010111") => -- lui / auipc
+						immediate(19 downto 0) <= v_current_instruction(31 downto 12);
+						write_operation <= '1';
+						
+					when "1101111" => -- jal
+						immediate(20 downto 0) <= v_current_instruction(31) & v_current_instruction(19 downto 12) & v_current_instruction(20) & v_current_instruction(30 downto 21) & '0';
+						write_operation <= '1';
+						
+					when "1100111" => -- jalr
+						immediate(11 downto 0) <= v_current_instruction(31 downto 20);
+						if (to_integer(v_current_instruction(19 downto 15)) = rd and write_operation = '1') then -- current read is previous write => wait
+							instruction_decoded <= '0';
+							wait_finish_write_operation <= '1';
+						end if;
+						write_operation <= '1';
+						
+					when "1100011" => -- B-type
+						immediate(12 downto 0) <= v_current_instruction(31) & v_current_instruction(7) & v_current_instruction(30 downto 25) & v_current_instruction(11 downto 8) & '0';
+						if ((to_integer(v_current_instruction(19 downto 15)) = rd or to_integer(v_current_instruction(24 downto 20)) = rd) and write_operation = '1') then -- current read is previous write => wait
+							instruction_decoded <= '0';
+							wait_finish_write_operation <= '1';
+						end if;
+						write_operation <= '0';
+						
+					when "0000011" => -- I-type
+						immediate(11 downto 0) <= v_current_instruction(31 downto 20);
+						if (to_integer(v_current_instruction(19 downto 15)) = rd and write_operation = '1') then -- current read is previous write => wait
+							instruction_decoded <= '0';
+							wait_finish_write_operation <= '1';
+						end if;
+						write_operation <= '1';
+						
+					when "0100011" => -- S-type
+						immediate(11 downto 0) <= v_current_instruction(31 downto 25) & v_current_instruction(11 downto 7); 
+						if ((to_integer(v_current_instruction(19 downto 15)) = rd or to_integer(v_current_instruction(24 downto 20)) = rd) and write_operation = '1') then -- current read is previous write => wait
+							instruction_decoded <= '0';
+							wait_finish_write_operation <= '1';
+						end if;
+						write_operation <= '0';
+					
+					when "0010011" => -- I-type
+						immediate(11 downto 0) <= v_current_instruction(31 downto 20);
+						if (to_integer(v_current_instruction(19 downto 15)) = rd and write_operation = '1') then -- current read is previous write => wait
+							instruction_decoded <= '0';
+							wait_finish_write_operation <= '1';
+						end if;
+						write_operation <= '1';
+					
+					when "0110011" => -- R-type
+						immediate(6 downto 0) <= v_current_instruction(31 downto 25);
+						if ((to_integer(v_current_instruction(19 downto 15)) = rd or to_integer(v_current_instruction(24 downto 20)) = rd) and write_operation = '1') then -- current read is previous write => wait
+							instruction_decoded <= '0';
+							wait_finish_write_operation <= '1';
+						end if;
+						write_operation <= '1';
+					
+					when "1110011" => -- I-type
+						immediate(11 downto 0) <= v_current_instruction(31 downto 20);
+						write_operation <= '0';
+					
+					when others =>
+						-- maybe should set instruction decoded to '0' or return control? 
+						null;
+				end case;
+			end if; -- current_instruction valid
+		end if; -- reset
+	end if; -- clk'rising_edge
+end process;
+
+Instructions_Execute_Proc : process (i_Clk)
 	variable v_dm_addr : std_logic_vector(31 downto 0) := (others => '0');
 	variable v_instruction_done : std_logic := '0';
 	--variable v_instruction_new : std_logic := '0';
@@ -283,522 +374,504 @@ begin
 		--v_instruction_new := '0';
 		instruction_jump <= '0';
 		v_instruction_done := '0';
-		instruction_upper_latch <= instruction_upper;
 		v_return_ctrl_logic_unit := '0';
 		o_Return_Ctrl_Logic_Unit <= '0';
 		instruction_multicycle <= '0';
-		instruction_valid <= '0';
 		
-		if (i_Sync_nRst = '0') then
-			instruction_upper <= (others => '0');
-			instruction_upper_latch <= (others => '0');
-			wait_instruction_ready <= '1';
-		elsif ctrl_logic_unit = '1' and i_Take_Ctrl_Logic_Unit = '0' then
-		
-			if instruction_ready = '1' and wait_instruction_ready = '1' and instruction_jump = '0' then
-				current_instruction <= instruction_fetch(to_integer(instruction_upper));
-				current_pc <= pc(to_integer(instruction_upper));
-				instruction_upper <= not instruction_upper;
-				instruction_valid <= '1';
-				--v_instruction_new := '1';
-				wait_instruction_ready <= '0';
-			elsif instruction_jump = '1' then
-				instruction_upper(0) <= jmp_addr(2);
-			end if;
+		if instruction_decoded = '1' and instruction_multicycle = '0' and instruction_jump = '0' then
+			latched_opcode <= opcode;
+			latched_func3 <= func3;
+			latched_immediate <= immediate;
+			latched_rd <= rd;
+			latched_rs2 <= rs2;
+			latched_rs1 <= rs1;
+			latched_rs1_val <= rs1_val;
+			latched_rs2_val <= rs2_val;
+			latched_current_pc <= current_pc;
 			
-			if instruction_valid = '1' then
+			case opcode is --opcode
 				
-				case current_instruction(6 downto 0) is --opcode
-					
-					when "0110111" => -- lui
-						registers(to_integer(current_instruction(11 downto 7))) <= current_instruction(31 downto 12) & "000000000000";
-						v_instruction_done := '1';
-					
-					when "0010111" => -- auipc
-						registers(to_integer(current_instruction(11 downto 7))) <= current_pc + (current_instruction(31 downto 12) & "000000000000");
-						v_instruction_done := '1';
-					
-					when "1101111" => -- jal
-						registers(to_integer(current_instruction(11 downto 7))) <= current_pc + 4;
-						jmp_addr <= unsigned(resize(signed(current_instruction(31) & current_instruction(19 downto 12) & current_instruction(20) & current_instruction(30 downto 21) & '0'), current_pc'length));
-						instruction_multicycle <= '1';
-					
-					when "1100111" => -- jalr
-						registers(to_integer(current_instruction(11 downto 7))) <= current_pc + 4;
-						jmp_addr <= unsigned(resize(signed(current_instruction(31 downto 20)), current_pc'length));
-						instruction_multicycle <= '1';
-					
-					when "1100011" => -- B-type
-						case current_instruction(14 downto 12) is -- funct3
-							
-							when "000" => -- beq
-								if registers(to_integer(current_instruction(19 downto 15))) = registers(to_integer(current_instruction(24 downto 20))) then
-									jmp_addr <= unsigned(resize(signed(current_instruction(31) & current_instruction(7) & current_instruction(30 downto 25) & current_instruction(11 downto 8) & '0'), current_pc'length));
-									instruction_multicycle <= '1';
-								else
-									v_instruction_done := '1';
-								end if;
-								
-									
-							when "001" => -- bne
-								if registers(to_integer(current_instruction(19 downto 15))) /= registers(to_integer(current_instruction(24 downto 20))) then
-									jmp_addr <= unsigned(resize(signed(current_instruction(31) & current_instruction(7) & current_instruction(30 downto 25) & current_instruction(11 downto 8) & '0'), current_pc'length));
-									instruction_multicycle <= '1';
-								else
-									v_instruction_done := '1';
-								end if;
-							
-							when "100" => -- blt
-								if signed(registers(to_integer(current_instruction(19 downto 15)))) < signed(registers(to_integer(current_instruction(24 downto 20)))) then
-									jmp_addr <= unsigned(resize(signed(current_instruction(31) & current_instruction(7) & current_instruction(30 downto 25) & current_instruction(11 downto 8) & '0'), current_pc'length));
-									instruction_multicycle <= '1';
-								else
-									v_instruction_done := '1';
-								end if;
-							
-							when "101" => -- bge
-								if signed(registers(to_integer(current_instruction(19 downto 15)))) >= signed(registers(to_integer(current_instruction(24 downto 20)))) then
-									jmp_addr <= unsigned(resize(signed(current_instruction(31) & current_instruction(7) & current_instruction(30 downto 25) & current_instruction(11 downto 8) & '0'), current_pc'length));
-									instruction_multicycle <= '1';
-								else
-									v_instruction_done := '1';
-								end if;
-								
-							when "110" => -- bltu
-								if unsigned(registers(to_integer(current_instruction(19 downto 15)))) < unsigned(registers(to_integer(current_instruction(24 downto 20)))) then
-									jmp_addr <= unsigned(resize(signed(current_instruction(31) & current_instruction(7) & current_instruction(30 downto 25) & current_instruction(11 downto 8) & '0'), current_pc'length));
-									instruction_multicycle <= '1';
-								else
-									v_instruction_done := '1';
-								end if;
-							
-							when "111" => -- bgeu
-								if unsigned(registers(to_integer(current_instruction(19 downto 15)))) >= unsigned(registers(to_integer(current_instruction(24 downto 20)))) then
-									jmp_addr <= unsigned(resize(signed(current_instruction(31) & current_instruction(7) & current_instruction(30 downto 25) & current_instruction(11 downto 8) & '0'), current_pc'length));
-									instruction_multicycle <= '1';
-								else
-									v_instruction_done := '1';
-								end if;
-							
-							when others =>
-								null;
-								v_instruction_done := '1';
-								
-						end case;
-					
-					--TODO important in memory access all writes must have completed bevore a read access can occur
-					when "0000011" => -- I-type
-						case current_instruction(14 downto 12) is -- funct3
-							
-							when "000" => -- lb
-								v_immediate := unsigned(resize(signed(current_instruction(31 downto 20)), dm_addr'length));
-								dm_addr <= std_logic_vector(registers(to_integer(current_instruction(19 downto 15))) + v_immediate);
-								o_DM_DV <= '1';
-								instruction_multicycle <= '1';
-							
-							when "001" => -- lh
-								v_immediate := unsigned(resize(signed(current_instruction(31 downto 20)), dm_addr'length));
-								dm_addr <= std_logic_vector(registers(to_integer(current_instruction(19 downto 15))) + v_immediate);
-								o_DM_DV <= '1';
-								instruction_multicycle <= '1';
-								
-							when "010" => -- lw
-								v_immediate := unsigned(resize(signed(current_instruction(31 downto 20)), dm_addr'length));
-								dm_addr <= std_logic_vector(registers(to_integer(current_instruction(19 downto 15))) + v_immediate);
-								o_DM_DV <= '1';
-								instruction_multicycle <= '1';
-							
-							when "100" => -- lbu
-								v_immediate := unsigned(resize(signed(current_instruction(31 downto 20)), dm_addr'length));
-								dm_addr <= std_logic_vector(registers(to_integer(current_instruction(19 downto 15))) + v_immediate);
-								o_DM_DV <= '1';
-								instruction_multicycle <= '1';
-							
-							when "101" => -- lhu
-								v_immediate := unsigned(resize(signed(current_instruction(31 downto 20)), dm_addr'length));
-								dm_addr <= std_logic_vector(registers(to_integer(current_instruction(19 downto 15))) + v_immediate);
-								o_DM_DV <= '1';
-								instruction_multicycle <= '1';
-							
-							when others =>
-								null;
-								v_instruction_done := '1';
-						end case;
+				when "0110111" => -- lui
+					registers(rd) <= immediate(19 downto 0) & "000000000000";
+					v_instruction_done := '1';
+				
+				when "0010111" => -- auipc
+					registers(rd) <= current_pc + (immediate(19 downto 0) & "000000000000");
+					v_instruction_done := '1';
+				
+				when "1101111" => -- jal
+					registers(rd) <= current_pc + 4;
+					jmp_addr <= unsigned(resize(signed(immediate(20 downto 0)), current_pc'length));
+					instruction_multicycle <= '1';
+				
+				when "1100111" => -- jalr
+					registers(rd) <= current_pc + 4;
+					jmp_addr <= unsigned(resize(signed(immediate(11 downto 0)), current_pc'length));
+					instruction_multicycle <= '1';
+				
+				when "1100011" => -- B-type
+					case func3 is -- funct3
 						
-					when "0100011" => -- S-type
-						case current_instruction(14 downto 12) is -- funct3
-							
-							when "000" => -- sb
-								v_immediate(11 downto 0) := current_instruction(31 downto 25) & current_instruction(11 downto 7);
-								v_immediate := unsigned(resize(signed(v_immediate(11 downto 0)), dm_addr'length));
-								v_dm_addr := std_logic_vector(v_immediate + registers(to_integer(current_instruction(19 downto 15))));
-								dm_addr <= v_dm_addr;
-								v_dm_write_data_bytes(to_integer(unsigned(v_dm_addr(1 downto 0))))(7 downto 0) := std_logic_vector(registers(to_integer(current_instruction(24 downto 20)))(7 downto 0));  
-								o_DM_Data(7 downto 0) <= v_dm_write_data_bytes(0); 
-								o_DM_Data(15 downto 8) <= v_dm_write_data_bytes(1); 
-								o_DM_Data(23 downto 16) <= v_dm_write_data_bytes(2); 
-								o_DM_Data(31 downto 24) <= v_dm_write_data_bytes(3);
-								o_DM_Wr_En(to_integer(unsigned(v_dm_addr(1 downto 0)))) <= '1';
-								o_DM_DV <= '1';	
-								v_instruction_done := '1';
-								
-							when "001" => -- sh
-								v_immediate(11 downto 0) := current_instruction(31 downto 25) & current_instruction(11 downto 7);
-								v_immediate := unsigned(resize(signed(v_immediate(11 downto 0)), dm_addr'length));
-								v_dm_addr := std_logic_vector(v_immediate + registers(to_integer(current_instruction(19 downto 15))));
-								dm_addr <= v_dm_addr;
-								v_dm_write_data_2bytes(to_integer(unsigned(v_dm_addr(1 downto 1))))(15 downto 0) := std_logic_vector(registers(to_integer(current_instruction(24 downto 20)))(15 downto 0));  
-								o_DM_Data(15 downto 0) <= v_dm_write_data_2bytes(0);
-								o_DM_Data(31 downto 16) <= v_dm_write_data_2bytes(1);
-								if (v_dm_addr(1) = '1') then
-									o_DM_Wr_En <= "1100";
-								else
-									o_DM_Wr_En <= "0011";
-								end if;
-								o_DM_DV <= '1';	
-								v_instruction_done := '1';
-								
-							when "010" => -- sw
-								v_immediate(11 downto 0) := current_instruction(31 downto 25) & current_instruction(11 downto 7);
-								v_immediate := unsigned(resize(signed(v_immediate(11 downto 0)), dm_addr'length));
-								v_dm_addr := std_logic_vector(v_immediate + registers(to_integer(current_instruction(19 downto 15))));
-								dm_addr <= v_dm_addr;
-								o_DM_Data <= std_logic_vector(registers(to_integer(current_instruction(24 downto 20)))(31 downto 0));  
-								o_DM_Wr_En(3 downto 0) <= "1111";
-								o_DM_DV <= '1';	
-								v_instruction_done := '1';
-							
-							when others =>
-								null;
-								v_instruction_done := '1';
-						end case;
-					
-					when "0010011" => -- I-type
-						case current_instruction(14 downto 12) is -- funct3
-							
-							when "000" => -- addi
-								v_immediate := unsigned(resize(signed(current_instruction(31 downto 20)), registers(0)'length));
-								registers(to_integer(current_instruction(11 downto 7))) <= v_immediate + registers(to_integer(current_instruction(19 downto 15)));
-								v_instruction_done := '1';
-								
-							when "010" => -- slti
-								registers(to_integer(current_instruction(11 downto 7)))(31 downto 0) <= (others => '0');
-								if signed(registers(to_integer(current_instruction(19 downto 15)))) < signed(current_instruction(31 downto 20)) then
-									registers(to_integer(current_instruction(11 downto 7)))(0) <= '1'; 
-								end if;
-								v_instruction_done := '1';
-								
-							when "011" => -- sltiu
-								registers(to_integer(current_instruction(11 downto 7)))(31 downto 0) <= (others => '0');
-								if registers(to_integer(current_instruction(19 downto 15))) < current_instruction(31 downto 20) then
-									registers(to_integer(current_instruction(11 downto 7)))(0) <= '1'; 
-								end if;
-								v_instruction_done := '1';
-								
-							when "100" => -- xori
-								v_immediate := unsigned(resize(signed(current_instruction(31 downto 20)), registers(0)'length));
-								registers(to_integer(current_instruction(11 downto 7))) <= registers(to_integer(current_instruction(19 downto 15))) xor v_immediate;
-								v_instruction_done := '1';
-							
-							when "110" => -- ori
-								v_immediate := unsigned(resize(signed(current_instruction(31 downto 20)), registers(0)'length));
-								registers(to_integer(current_instruction(11 downto 7))) <= registers(to_integer(current_instruction(19 downto 15))) or v_immediate;
-								v_instruction_done := '1';
-							
-							when "111" => -- andi
-								v_immediate := unsigned(resize(signed(current_instruction(31 downto 20)), registers(0)'length));
-								registers(to_integer(current_instruction(11 downto 7))) <= registers(to_integer(current_instruction(19 downto 15))) and v_immediate;
-								v_instruction_done := '1';
-							
-							when "001" => -- slli
-								registers(to_integer(current_instruction(11 downto 7)))(31 downto 0) <= shift_left(registers(to_integer(current_instruction(19 downto 15))), to_integer(current_instruction(24 downto 20)));
-								v_instruction_done := '1';
-							
-							when "101" => -- srli/srai
-								if current_instruction(30) = '0' then -- srli
-									registers(to_integer(current_instruction(11 downto 7)))(31 downto 0) <= shift_right(registers(to_integer(current_instruction(19 downto 15))), to_integer(current_instruction(24 downto 20)));	
-								else	-- srai
-									registers(to_integer(current_instruction(11 downto 7)))(31 downto 0) <= unsigned(shift_right(signed(registers(to_integer(current_instruction(19 downto 15)))), to_integer(current_instruction(24 downto 20))));
-								end if;			
-								v_instruction_done := '1';
-								
-							when others =>
-								null;
-								v_instruction_done := '1';
-						
-						end case;
-							
-					when "0110011" => -- R-type
-						case current_instruction(14 downto 12) is -- funct3
-							
-							when "000" => -- add/sub
-								a_add <= registers(to_integer(current_instruction(19 downto 15)));
-								b_add <= registers(to_integer(current_instruction(24 downto 20)));
-								
+						when "000" => -- beq
+							if rs1_val = rs2_val then
+								jmp_addr <= unsigned(resize(signed(immediate(12 downto 0)), current_pc'length));
 								instruction_multicycle <= '1';
-								
-							when "001" => -- sll
-								registers(to_integer(current_instruction(11 downto 7)))(31 downto 0) <= shift_left(registers(to_integer(current_instruction(19 downto 15))), to_integer(registers(to_integer(current_instruction(24 downto 20)))(4 downto 0)));
+							else
 								v_instruction_done := '1';
+							end if;
 							
-							when "010" => -- slt
-								registers(to_integer(current_instruction(11 downto 7)))(31 downto 0) <= (others => '0');
-								if signed(registers(to_integer(current_instruction(19 downto 15)))) < signed(registers(to_integer(current_instruction(24 downto 20)))) then
-									registers(to_integer(current_instruction(11 downto 7)))(0) <= '1'; 
-								end if;
-								v_instruction_done := '1';
 								
-							when "011" => -- sltu
-								registers(to_integer(current_instruction(11 downto 7)))(31 downto 0) <= (others => '0');
-								if unsigned(registers(to_integer(current_instruction(19 downto 15)))) < unsigned(registers(to_integer(current_instruction(24 downto 20)))) then
-									registers(to_integer(current_instruction(11 downto 7)))(0) <= '1'; 
-								end if;
+						when "001" => -- bne
+							if rs1_val /= rs2_val then
+								jmp_addr <= unsigned(resize(signed(immediate(12 downto 0)), current_pc'length));
+								instruction_multicycle <= '1';
+							else
 								v_instruction_done := '1';
-								
-							when "100" => -- xor
-								registers(to_integer(current_instruction(11 downto 7))) <= registers(to_integer(current_instruction(19 downto 15))) xor registers(to_integer(current_instruction(24 downto 20)));
+							end if;
+						
+						when "100" => -- blt
+							if signed(rs1_val) < signed(rs2_val) then
+								jmp_addr <= unsigned(resize(signed(immediate(12 downto 0)), current_pc'length));
+								instruction_multicycle <= '1';
+							else
 								v_instruction_done := '1';
-								
-							when "101" => -- srl/sra
-								if current_instruction(30) = '0' then -- srl
-									registers(to_integer(current_instruction(11 downto 7)))(31 downto 0) <= shift_right(registers(to_integer(current_instruction(19 downto 15))), to_integer(registers(to_integer(current_instruction(24 downto 20)))(4 downto 0)));
-								else	-- sra
-									registers(to_integer(current_instruction(11 downto 7)))(31 downto 0) <= unsigned(shift_right(signed(registers(to_integer(current_instruction(19 downto 15)))), to_integer(registers(to_integer(current_instruction(24 downto 20)))(4 downto 0))));	
-								end if;
+							end if;
+						
+						when "101" => -- bge
+							if signed(rs1_val) >= signed(rs2_val) then
+								jmp_addr <= unsigned(resize(signed(immediate(12 downto 0)), current_pc'length));
+								instruction_multicycle <= '1';
+							else
 								v_instruction_done := '1';
-								
-							when "110" => -- or
-								registers(to_integer(current_instruction(11 downto 7))) <= registers(to_integer(current_instruction(19 downto 15))) or registers(to_integer(current_instruction(24 downto 20)));
-								v_instruction_done := '1';
-								
-							when "111" => -- and
-								registers(to_integer(current_instruction(11 downto 7))) <= registers(to_integer(current_instruction(19 downto 15))) and registers(to_integer(current_instruction(24 downto 20)));
-								v_instruction_done := '1';
-								
-							when others => 
-								null;
-								v_instruction_done := '1';
+							end if;
 							
-						end case;
-					
-					when "1110011" => -- I-type
-						if current_instruction = "00000000000100000000000001110011" then -- ebreak;
-							v_return_ctrl_logic_unit := '1';
-							v_instruction_done := '1';
-						else
+						when "110" => -- bltu
+							if unsigned(rs1_val) < unsigned(rs2_val) then
+								jmp_addr <= unsigned(resize(signed(immediate(12 downto 0)), current_pc'length));
+								instruction_multicycle <= '1';
+							else
+								v_instruction_done := '1';
+							end if;
+						
+						when "111" => -- bgeu
+							if unsigned(rs1_val) >= unsigned(rs2_val) then
+								jmp_addr <= unsigned(resize(signed(immediate(12 downto 0)), current_pc'length));
+								instruction_multicycle <= '1';
+							else
+								v_instruction_done := '1';
+							end if;
+						
+						when others =>
 							null;
 							v_instruction_done := '1';
-						end if;
-					when others => 
-						null;
-						v_instruction_done := '1';
-				end case;
-			end if; -- current_instruction valid
-		
-			if instruction_multicycle = '1' then
+							
+					end case;
 				
-				case current_instruction(6 downto 0) is --opcode
-					
-					when "0110111" => -- lui
-						null;
-					
-					when "0010111" => -- auipc
-						null;
-					
-					when "1101111" => -- jal
-						jmp_addr <= jmp_addr + current_pc;
-						instruction_jump <= '1';
-						v_instruction_done := '1';
-					
-					when "1100111" => -- jalr
-						jmp_addr <= jmp_addr + registers(to_integer(current_instruction(19 downto 15)));
-						-- current_pc(0) has to be 0
-						jmp_addr(0) <= '0';
-						instruction_jump <= '1';
-						v_instruction_done := '1';
-					
-					when "1100011" => -- B-type
-						--all B-type jmp instructions are built the same
-						jmp_addr <= current_pc + jmp_addr;
-						instruction_jump <= '1';
-						v_instruction_done := '1';
-						--case current_instruction(14 downto 12) is -- funct3
-						--	
-						--	when "000" => -- beq
-						--		null;
-						--			
-						--	when "001" => -- bne
-						--		null;
-						--	
-						--	when "100" => -- blt
-						--		null;
-						--	
-						--	when "101" => -- bge
-						--		null;
-						--		
-						--	when "110" => -- bltu
-						--		null;
-						--	
-						--	when "111" => -- bgeu
-						--		null;
-						--	
-						--	when others =>
-						--		null;
-						--		--v_instruction_done := '1';
-						--		
-						--end case;
-					
-					--TODO important in memory access all writes must have completed bevore a read access can occur
-					when "0000011" => -- I-type
-						case current_instruction(14 downto 12) is -- funct3
-							
-							when "000" => -- lb
-								if i_DM_DV = '1' then
-									registers(to_integer(current_instruction(11 downto 7))) <= unsigned(resize(signed(dm_read_data_bytes(to_integer(unsigned(dm_addr(1 downto 0))))), registers(0)'length));
-									v_instruction_done := '1';
-								else
-									instruction_multicycle <= '1'; -- wait until load complete
-								end if;
-							
-							when "001" => -- lh
-								if i_DM_DV = '1' then
-									registers(to_integer(current_instruction(11 downto 7))) <= unsigned(resize(signed(dm_read_data_2bytes(to_integer(unsigned(dm_addr(1 downto 1))))), registers(0)'length));
-									v_instruction_done := '1';
-								else
-									instruction_multicycle <= '1'; -- wait until load complete
-								end if;
-								
-							when "010" => -- lw
-								if i_DM_DV = '1' then
-									registers(to_integer(current_instruction(11 downto 7))) <= unsigned(i_DM_Data);
-									v_instruction_done := '1';
-								else
-									instruction_multicycle <= '1'; -- wait until load complete
-								end if;
-							
-							when "100" => -- lbu
-								if i_DM_DV = '1' then
-									registers(to_integer(current_instruction(11 downto 7))) <= resize(unsigned(dm_read_data_bytes(to_integer(unsigned(dm_addr(1 downto 0))))), registers(0)'length);
-									v_instruction_done := '1';
-								else
-									instruction_multicycle <= '1'; -- wait until load complete
-								end if;
-							
-							when "101" => -- lhu
-								if i_DM_DV = '1' then
-									registers(to_integer(current_instruction(11 downto 7))) <= resize(unsigned(dm_read_data_2bytes(to_integer(unsigned(dm_addr(1 downto 1))))), registers(0)'length);
-									v_instruction_done := '1';
-								else
-									instruction_multicycle <= '1'; -- wait until load complete
-								end if;
-							
-							when others =>
-								null;
-								--v_instruction_done := '1';
-						end case;
+				--TODO important in memory access all writes must have completed bevore a read access can occur
+				when "0000011" => -- I-type
+					case func3 is -- funct3
 						
-					when "0100011" => -- S-type
-						case current_instruction(14 downto 12) is -- funct3
-							
-							when "000" => -- sb
-								null;
-								
-							when "001" => -- sh
-								null;
-								
-							when "010" => -- sw
-								null;
-							
-							when others =>
-								null;
-								--v_instruction_done := '1';
-						end case;
-					
-					when "0010011" => -- I-type
-						case current_instruction(14 downto 12) is -- funct3
-							
-							when "000" => -- addi
-								null;
-								
-							when "010" => -- slti
-								null;
-								
-							when "011" => -- sltiu
-								null;
-								
-							when "100" => -- xori
-								null;
-							
-							when "110" => -- ori
-								null;
-							
-							when "111" => -- andi
-								null;
-							
-							when "001" => -- slli
-								null;
-							
-							when "101" => -- srli/srai
-								null;
-								
-							when others =>
-								null;
-								--v_instruction_done := '1';
+						when "000" => -- lb
+							v_immediate := unsigned(resize(signed(immediate(11 downto 0)), dm_addr'length));
+							dm_addr <= std_logic_vector(rs1_val + v_immediate);
+							o_DM_DV <= '1';
+							instruction_multicycle <= '1';
 						
-						end case;
+						when "001" => -- lh
+							v_immediate := unsigned(resize(signed(immediate(11 downto 0)), dm_addr'length));
+							dm_addr <= std_logic_vector(rs1_val + v_immediate);
+							o_DM_DV <= '1';
+							instruction_multicycle <= '1';
 							
-					when "0110011" => -- R-type
-						case current_instruction(14 downto 12) is -- funct3
-							
-							when "000" => -- add/sub
-								if current_instruction(30) = '0' then --add
-									registers(to_integer(current_instruction(11 downto 7))) <= a_add + b_add;
-								else -- sub
-									registers(to_integer(current_instruction(11 downto 7))) <= a_add - b_add;
-								end if;
-								v_instruction_done := '1';
-							
-							when "001" => -- sll
-								null;
-							
-							when "010" => -- slt
-								null;
-								
-							when "011" => -- sltu
-								null;
-								
-							when "100" => -- xor
-								null;
-								
-							when "101" => -- srl/sra
-								null;
-								
-							when "110" => -- or
-								null;
-								
-							when "111" => -- and
-								null;
-								
-							when others => 
-								null;
-								--v_instruction_done := '1';
-							
-						end case;
+						when "010" => -- lw
+							v_immediate := unsigned(resize(signed(immediate(11 downto 0)), dm_addr'length));
+							dm_addr <= std_logic_vector(rs1_val + v_immediate);
+							o_DM_DV <= '1';
+							instruction_multicycle <= '1';
+						
+						when "100" => -- lbu
+							v_immediate := unsigned(resize(signed(immediate(11 downto 0)), dm_addr'length));
+							dm_addr <= std_logic_vector(rs1_val + v_immediate);
+							o_DM_DV <= '1';
+							instruction_multicycle <= '1';
+						
+						when "101" => -- lhu
+							v_immediate := unsigned(resize(signed(immediate(11 downto 0)), dm_addr'length));
+							dm_addr <= std_logic_vector(rs1_val + v_immediate);
+							o_DM_DV <= '1';
+							instruction_multicycle <= '1';
+						
+						when others =>
+							null;
+							v_instruction_done := '1';
+					end case;
 					
-					when "1110011" => -- I-type
+				when "0100011" => -- S-type
+					case func3 is -- funct3
+						
+						when "000" => -- sb
+							v_immediate := unsigned(resize(signed(immediate(11 downto 0)), dm_addr'length));
+							v_dm_addr := std_logic_vector(v_immediate + rs1_val);
+							dm_addr <= v_dm_addr;
+							v_dm_write_data_bytes(to_integer(unsigned(v_dm_addr(1 downto 0))))(7 downto 0) := std_logic_vector(rs2_val(7 downto 0));  
+							o_DM_Data(7 downto 0) <= v_dm_write_data_bytes(0); 
+							o_DM_Data(15 downto 8) <= v_dm_write_data_bytes(1); 
+							o_DM_Data(23 downto 16) <= v_dm_write_data_bytes(2); 
+							o_DM_Data(31 downto 24) <= v_dm_write_data_bytes(3);
+							o_DM_Wr_En(to_integer(unsigned(v_dm_addr(1 downto 0)))) <= '1';
+							o_DM_DV <= '1';	
+							v_instruction_done := '1';
+							
+						when "001" => -- sh
+							v_immediate := unsigned(resize(signed(immediate(11 downto 0)), dm_addr'length));
+							v_dm_addr := std_logic_vector(v_immediate + rs1_val);
+							dm_addr <= v_dm_addr;
+							v_dm_write_data_2bytes(to_integer(unsigned(v_dm_addr(1 downto 1))))(15 downto 0) := std_logic_vector(rs2_val(15 downto 0));  
+							o_DM_Data(15 downto 0) <= v_dm_write_data_2bytes(0);
+							o_DM_Data(31 downto 16) <= v_dm_write_data_2bytes(1);
+							if (v_dm_addr(1) = '1') then
+								o_DM_Wr_En <= "1100";
+							else
+								o_DM_Wr_En <= "0011";
+							end if;
+							o_DM_DV <= '1';	
+							v_instruction_done := '1';
+							
+						when "010" => -- sw
+							v_immediate := unsigned(resize(signed(immediate(11 downto 0)), dm_addr'length));
+							dm_addr <= std_logic_vector(v_immediate + rs1_val);
+							o_DM_Data <= std_logic_vector(rs2_val(31 downto 0));  
+							o_DM_Wr_En(3 downto 0) <= "1111";
+							o_DM_DV <= '1';	
+							v_instruction_done := '1';
+						
+						when others =>
+							null;
+							v_instruction_done := '1';
+					end case;
+				
+				when "0010011" => -- I-type
+					case func3 is -- funct3
+						
+						when "000" => -- addi
+							v_immediate := unsigned(resize(signed(immediate(11 downto 0)), registers(0)'length));
+							registers(rd) <= v_immediate + rs1_val;
+							v_instruction_done := '1';
+							
+						when "010" => -- slti
+							registers(rd)(31 downto 0) <= (others => '0');
+							if signed(rs1_val) < signed(immediate(11 downto 0)) then
+								registers(rd)(0) <= '1'; 
+							end if;
+							v_instruction_done := '1';
+							
+						when "011" => -- sltiu
+							registers(rd)(31 downto 0) <= (others => '0');
+							if rs1_val < immediate(11 downto 0) then
+								registers(rd)(0) <= '1'; 
+							end if;
+							v_instruction_done := '1';
+							
+						when "100" => -- xori
+							v_immediate := unsigned(resize(signed(immediate(11 downto 0)), registers(0)'length));
+							registers(rd) <= rs1_val xor v_immediate;
+							v_instruction_done := '1';
+						
+						when "110" => -- ori
+							v_immediate := unsigned(resize(signed(immediate(11 downto 0)), registers(0)'length));
+							registers(rd) <= rs1_val or v_immediate;
+							v_instruction_done := '1';
+						
+						when "111" => -- andi
+							v_immediate := unsigned(resize(signed(immediate(11 downto 0)), registers(0)'length));
+							registers(rd) <= rs1_val and v_immediate;
+							v_instruction_done := '1';
+						
+						when "001" => -- slli
+							registers(rd)(31 downto 0) <= shift_left(rs1_val, to_integer(immediate(4 downto 0)));
+							v_instruction_done := '1';
+						
+						when "101" => -- srli/srai
+							if immediate(10) = '0' then -- srli
+								registers(rd)(31 downto 0) <= shift_right(rs1_val, to_integer(immediate(4 downto 0)));	
+							else	-- srai
+								registers(rd)(31 downto 0) <= unsigned(shift_right(signed(rs1_val), to_integer(immediate(4 downto 0))));
+							end if;			
+							v_instruction_done := '1';
+							
+						when others =>
+							null;
+							v_instruction_done := '1';
+					
+					end case;
+						
+				when "0110011" => -- R-type
+					case func3 is -- funct3
+						
+						when "000" => -- add/sub
+							if immediate(5) = '0' then
+								registers(rd) <= rs1_val + rs2_val;
+							else
+								registers(rd) <= rs1_val - rs2_val;
+							end if;
+							--b_add <= std_logic_vector(rs2_val);
+							
+							v_instruction_done := '1';
+							
+						when "001" => -- sll
+							registers(rd)(31 downto 0) <= shift_left(rs1_val, to_integer(rs2_val(4 downto 0)));
+							v_instruction_done := '1';
+						
+						when "010" => -- slt
+							registers(rd)(31 downto 0) <= (others => '0');
+							if signed(rs1_val) < signed(rs2_val) then
+								registers(rd)(0) <= '1'; 
+							end if;
+							v_instruction_done := '1';
+							
+						when "011" => -- sltu
+							registers(rd)(31 downto 0) <= (others => '0');
+							if unsigned(rs1_val) < unsigned(rs2_val) then
+								registers(rd)(0) <= '1'; 
+							end if;
+							v_instruction_done := '1';
+							
+						when "100" => -- xor
+							registers(rd) <= rs1_val xor rs2_val;
+							v_instruction_done := '1';
+							
+						when "101" => -- srl/sra
+							if immediate(5) = '0' then -- srl
+								registers(rd)(31 downto 0) <= shift_right(rs1_val, to_integer(rs2_val(4 downto 0)));
+							else	-- sra
+								registers(rd)(31 downto 0) <= unsigned(shift_right(signed(rs1_val), to_integer(rs2_val(4 downto 0))));	
+							end if;
+							v_instruction_done := '1';
+							
+						when "110" => -- or
+							registers(rd) <= rs1_val or rs2_val;
+							v_instruction_done := '1';
+							
+						when "111" => -- and
+							registers(rd) <= rs1_val and rs2_val;
+							v_instruction_done := '1';
+							
+						when others => 
+							null;
+							v_instruction_done := '1';
+						
+					end case;
+				
+				when "1110011" => -- I-type
+					if immediate(0) = '1' then -- ebreak;
+						v_return_ctrl_logic_unit := '1';
+						v_instruction_done := '1';
+					else -- ecall
 						null;
-					when others => 
-						null;
-						--v_instruction_done := '1';
-				end case;
-			end if; -- instruction_multicycle
+						v_instruction_done := '1';
+					end if;
+				when others => 
+					null;
+					v_instruction_done := '1';
+			end case;
+		end if; -- current_instruction valid
 		
-			if v_instruction_done = '1' then
-				wait_instruction_ready <= '1';
-			end if;
-		else
-			null; -- Logic Unit does not have control
-		end if; -- ctrl_logic_unit
+		if instruction_multicycle = '1' then
+			
+			case latched_opcode is --opcode
+				
+				when "0110111" => -- lui
+					null;
+				
+				when "0010111" => -- auipc
+					null;
+				
+				when "1101111" => -- jal
+					jmp_addr <= jmp_addr + latched_current_pc;
+					instruction_jump <= '1';
+					v_instruction_done := '1';
+				
+				when "1100111" => -- jalr
+					jmp_addr <= jmp_addr + latched_rs1_val;
+					-- current_pc(0) has to be 0
+					jmp_addr(0) <= '0';
+					instruction_jump <= '1';
+					v_instruction_done := '1';
+				
+				when "1100011" => -- B-type
+					--all B-type jmp instructions are built the same
+					jmp_addr <= latched_current_pc + jmp_addr;
+					instruction_jump <= '1';
+					v_instruction_done := '1';
+					--case func3 is -- funct3
+					--	
+					--	when "000" => -- beq
+					--		null;
+					--			
+					--	when "001" => -- bne
+					--		null;
+					--	
+					--	when "100" => -- blt
+					--		null;
+					--	
+					--	when "101" => -- bge
+					--		null;
+					--		
+					--	when "110" => -- bltu
+					--		null;
+					--	
+					--	when "111" => -- bgeu
+					--		null;
+					--	
+					--	when others =>
+					--		null;
+					--		--v_instruction_done := '1';
+					--		
+					--end case;
+				
+				when "0000011" => -- I-type
+					case latched_func3 is -- funct3
+						
+						when "000" => -- lb
+							if i_DM_DV = '1' then
+								registers(latched_rd) <= unsigned(resize(signed(dm_read_data_bytes(to_integer(unsigned(dm_addr(1 downto 0))))), registers(0)'length));
+								v_instruction_done := '1';
+							else
+								instruction_multicycle <= '1'; -- wait until load complete
+							end if;
+						
+						when "001" => -- lh
+							if i_DM_DV = '1' then
+								registers(latched_rd) <= unsigned(resize(signed(dm_read_data_2bytes(to_integer(unsigned(dm_addr(1 downto 1))))), registers(0)'length));
+								v_instruction_done := '1';
+							else
+								instruction_multicycle <= '1'; -- wait until load complete
+							end if;
+							
+						when "010" => -- lw
+							if i_DM_DV = '1' then
+								registers(latched_rd) <= unsigned(i_DM_Data);
+								v_instruction_done := '1';
+							else
+								instruction_multicycle <= '1'; -- wait until load complete
+							end if;
+						
+						when "100" => -- lbu
+							if i_DM_DV = '1' then
+								registers(latched_rd) <= resize(unsigned(dm_read_data_bytes(to_integer(unsigned(dm_addr(1 downto 0))))), registers(0)'length);
+								v_instruction_done := '1';
+							else
+								instruction_multicycle <= '1'; -- wait until load complete
+							end if;
+						
+						when "101" => -- lhu
+							if i_DM_DV = '1' then
+								registers(latched_rd) <= resize(unsigned(dm_read_data_2bytes(to_integer(unsigned(dm_addr(1 downto 1))))), registers(0)'length);
+								v_instruction_done := '1';
+							else
+								instruction_multicycle <= '1'; -- wait until load complete
+							end if;
+						
+						when others =>
+							null;
+							--v_instruction_done := '1';
+					end case;
+					
+				when "0100011" => -- S-type
+					case latched_func3 is -- funct3
+						
+						when "000" => -- sb
+							null;
+							
+						when "001" => -- sh
+							null;
+							
+						when "010" => -- sw
+							null;
+						
+						when others =>
+							null;
+							--v_instruction_done := '1';
+					end case;
+				
+				when "0010011" => -- I-type
+					case latched_func3 is -- funct3
+						
+						when "000" => -- addi
+							null;
+							
+						when "010" => -- slti
+							null;
+							
+						when "011" => -- sltiu
+							null;
+							
+						when "100" => -- xori
+							null;
+						
+						when "110" => -- ori
+							null;
+						
+						when "111" => -- andi
+							null;
+						
+						when "001" => -- slli
+							null;
+						
+						when "101" => -- srli/srai
+							null;
+							
+						when others =>
+							null;
+							--v_instruction_done := '1';
+					
+					end case;
+						
+				when "0110011" => -- R-type
+					case latched_func3 is -- funct3
+						
+						when "000" => -- add/sub
+							null;
+							
+						
+						when "001" => -- sll
+							null;
+						
+						when "010" => -- slt
+							null;
+							
+						when "011" => -- sltu
+							null;
+							
+						when "100" => -- xor
+							null;
+							
+						when "101" => -- srl/sra
+							null;
+							
+						when "110" => -- or
+							null;
+							
+						when "111" => -- and
+							null;
+							
+						when others => 
+							null;
+							--v_instruction_done := '1';
+						
+					end case;
+				
+				when "1110011" => -- I-type
+					null;
+				when others => 
+					null;
+					--v_instruction_done := '1';
+			end case;
+		end if; -- instruction_multicycle
+		
+		--if v_instruction_done = '1' then
+		--	wait_instruction_ready <= '1';
+		--end if;
 		
 		if i_Give_Ctrl_Logic_Unit = '1' then
 			ctrl_logic_unit <= '1';

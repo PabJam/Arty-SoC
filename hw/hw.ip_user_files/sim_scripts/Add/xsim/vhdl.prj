@@ -1,5 +1,0 @@
-vhdl xil_defaultlib  \
-"../../../../hw.gen/sources_1/ip/Add/sim/Add.vhd" \
-
-# Do not sort compile order
-nosort

@@ -3,8 +3,8 @@
 # SW Build 6140274 on Thu May 22 00:12:29 MDT 2025
 # IP Build 6138677 on Thu May 22 03:10:11 MDT 2025
 # SharedData Build 6139179 on Tue May 20 17:58:58 MDT 2025
-# Start of session at: Thu Dec  4 17:39:41 2025
-# Process ID         : 20108
+# Start of session at: Mon Jan 12 19:36:18 2026
+# Process ID         : 18680
 # Current directory  : D:/Projekte/Arty/hw/hw.runs/ProgRam_synth_1
 # Command line       : vivado.exe -log ProgRam.vds -product Vivado -mode batch -messageDb vivado.pb -notrace -source ProgRam.tcl
 # Log file           : D:/Projekte/Arty/hw/hw.runs/ProgRam_synth_1/ProgRam.vds
@@ -19,6 +19,6 @@
 # Host memory        : 34257 MB
 # Swap memory        : 5100 MB
 # Total Virtual      : 39358 MB
-# Available Virtual  : 20259 MB
+# Available Virtual  : 27256 MB
 #-----------------------------------------------------------
 source ProgRam.tcl -notrace

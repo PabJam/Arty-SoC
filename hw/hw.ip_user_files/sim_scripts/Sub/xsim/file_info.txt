@@ -1,1 +1,0 @@
-Sub.vhd,vhdl,xil_defaultlib,../../../../hw.gen/sources_1/ip/Sub/sim/Sub.vhd,incdir="C:/Xilinx/2025.1/Vivado/data/rsb/busdef"
