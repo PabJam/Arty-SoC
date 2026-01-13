@@ -1,0 +1,2 @@
+UART_Fifo.v,verilog,xil_defaultlib,../../../../ALU.gen/sources_1/ip/UART_Fifo/sim/UART_Fifo.v,incdir="C:/Xilinx/2025.1/Vivado/data/rsb/busdef"
+glbl.v,Verilog,xil_defaultlib,glbl.v
