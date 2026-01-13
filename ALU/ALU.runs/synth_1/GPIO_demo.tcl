@@ -56,10 +56,8 @@ if {$::dispatch::connected} {
 }
 
 OPTRACE "synth_1" START { ROLLUP_AUTO }
-set_param tcl.collectionResultDisplayLimit 0
 set_param chipscope.maxJobs 6
 set_param general.usePosixSpawnForFork 1
-set_param xicom.use_bs_reader 1
 OPTRACE "Creating in-memory project" START { }
 create_project -in_memory -part xc7s25csga324-1
 
@@ -86,11 +84,11 @@ read_vhdl -library xil_defaultlib {
   D:/Projekte/Arty/ALU/ALU.srcs/sources_1/debouncer.vhd
   D:/Projekte/Arty/ALU/ALU.srcs/sources_1/GPIO_Demo.vhd
 }
-read_ip -quiet d:/Projekte/Arty/ALU/ALU.srcs/sources_1/ip/UART_Fifo/UART_Fifo.xci
+read_ip -quiet D:/Projekte/Arty/ALU/ALU.srcs/sources_1/ip/UART_Fifo/UART_Fifo.xci
 set_property used_in_implementation false [get_files -all d:/Projekte/Arty/ALU/ALU.gen/sources_1/ip/UART_Fifo/UART_Fifo.xdc]
 set_property used_in_implementation false [get_files -all d:/Projekte/Arty/ALU/ALU.gen/sources_1/ip/UART_Fifo/UART_Fifo_ooc.xdc]
 
-read_ip -quiet d:/Projekte/Arty/ALU/ALU.srcs/sources_1/ip/ProgRam/ProgRam.xci
+read_ip -quiet D:/Projekte/Arty/ALU/ALU.srcs/sources_1/ip/ProgRam/ProgRam.xci
 set_property used_in_implementation false [get_files -all d:/Projekte/Arty/ALU/ALU.gen/sources_1/ip/ProgRam/ProgRam_ooc.xdc]
 
 OPTRACE "Adding files" END { }
@@ -109,8 +107,6 @@ read_xdc D:/Projekte/Arty/ALU/ALU.srcs/constrs_1/Arty-S7-25-Master.xdc
 set_property used_in_implementation false [get_files D:/Projekte/Arty/ALU/ALU.srcs/constrs_1/Arty-S7-25-Master.xdc]
 
 set_param ips.enableIPCacheLiteLoad 1
-
-read_checkpoint -auto_incremental -incremental D:/Projekte/Arty/ALU/ALU.srcs/utils_1/imports/synth_1/GPIO_demo.dcp
 close [open __synthesis_is_running__ w]
 
 OPTRACE "synth_design" START { }

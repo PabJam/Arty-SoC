@@ -9,15 +9,15 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="0"></ZoomStartTime>
-      <ZoomEndTime time="1,025"></ZoomEndTime>
-      <Cursor1Time time="550"></Cursor1Time>
+      <ZoomStartTime time="511"></ZoomStartTime>
+      <ZoomEndTime time="525"></ZoomEndTime>
+      <Cursor1Time time="515"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="275"></NameColumnWidth>
-      <ValueColumnWidth column_width="278"></ValueColumnWidth>
+      <ValueColumnWidth column_width="258"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="16" />
+   <WVObjectSize size="17" />
    <wave_markers>
    </wave_markers>
    <wvobject fp_name="inst_LogicUnit/opcode" type="array">
@@ -40,7 +40,7 @@
       <obj_property name="DisplayName">FullPathName</obj_property>
       <obj_property name="ElementShortName">inst_LogicUnit/func3[2:0]</obj_property>
       <obj_property name="ObjectShortName">func3[2:0]</obj_property>
-      <obj_property name="Radix">HEXRADIX</obj_property>
+      <obj_property name="Radix">BINARYRADIX</obj_property>
       <obj_property name="LABELRADIX">true</obj_property>
       <obj_property name="WaveformStyle">STYLE_DIGITAL</obj_property>
    </wvobject>
@@ -48,7 +48,14 @@
       <obj_property name="DisplayName">FullPathName</obj_property>
       <obj_property name="ElementShortName">inst_LogicUnit/immediate[20:0]</obj_property>
       <obj_property name="ObjectShortName">immediate[20:0]</obj_property>
-      <obj_property name="Radix">HEXRADIX</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      <obj_property name="LABELRADIX">true</obj_property>
+      <obj_property name="WaveformStyle">STYLE_DIGITAL</obj_property>
+   </wvobject>
+   <wvobject fp_name="inst_LogicUnit/instruction_done" type="logic">
+      <obj_property name="DisplayName">FullPathName</obj_property>
+      <obj_property name="ElementShortName">inst_LogicUnit/instruction_done</obj_property>
+      <obj_property name="ObjectShortName">instruction_done</obj_property>
       <obj_property name="LABELRADIX">true</obj_property>
       <obj_property name="WaveformStyle">STYLE_DIGITAL</obj_property>
    </wvobject>
@@ -59,10 +66,50 @@
       <obj_property name="LABELRADIX">true</obj_property>
       <obj_property name="WaveformStyle">STYLE_DIGITAL</obj_property>
    </wvobject>
-   <wvobject fp_name="inst_LogicUnit/instruction_done" type="logic">
+   <wvobject fp_name="inst_LogicUnit/instruction_ready" type="logic">
       <obj_property name="DisplayName">FullPathName</obj_property>
-      <obj_property name="ElementShortName">inst_LogicUnit/instruction_done</obj_property>
-      <obj_property name="ObjectShortName">instruction_done</obj_property>
+      <obj_property name="ElementShortName">inst_LogicUnit/instruction_ready</obj_property>
+      <obj_property name="ObjectShortName">instruction_ready</obj_property>
+      <obj_property name="LABELRADIX">true</obj_property>
+      <obj_property name="WaveformStyle">STYLE_DIGITAL</obj_property>
+   </wvobject>
+   <wvobject fp_name="inst_LogicUnit/fetch_state" type="array">
+      <obj_property name="DisplayName">FullPathName</obj_property>
+      <obj_property name="ElementShortName">inst_LogicUnit/fetch_state[1:0]</obj_property>
+      <obj_property name="ObjectShortName">fetch_state[1:0]</obj_property>
+      <obj_property name="Radix">HEXRADIX</obj_property>
+      <obj_property name="LABELRADIX">true</obj_property>
+      <obj_property name="WaveformStyle">STYLE_DIGITAL</obj_property>
+   </wvobject>
+   <wvobject fp_name="inst_LogicUnit/instruction_fetch[0]_1" type="array">
+      <obj_property name="DisplayName">FullPathName</obj_property>
+      <obj_property name="ElementShortName">inst_LogicUnit/instruction_fetch[0]_1[31:0]</obj_property>
+      <obj_property name="ObjectShortName">instruction_fetch[0]_1[31:0]</obj_property>
+      <obj_property name="Radix">HEXRADIX</obj_property>
+      <obj_property name="LABELRADIX">true</obj_property>
+      <obj_property name="WaveformStyle">STYLE_DIGITAL</obj_property>
+   </wvobject>
+   <wvobject fp_name="inst_LogicUnit/instruction_fetch[1]_2" type="array">
+      <obj_property name="DisplayName">FullPathName</obj_property>
+      <obj_property name="ElementShortName">inst_LogicUnit/instruction_fetch[1]_2[31:0]</obj_property>
+      <obj_property name="ObjectShortName">instruction_fetch[1]_2[31:0]</obj_property>
+      <obj_property name="Radix">HEXRADIX</obj_property>
+      <obj_property name="LABELRADIX">true</obj_property>
+      <obj_property name="WaveformStyle">STYLE_DIGITAL</obj_property>
+   </wvobject>
+   <wvobject fp_name="inst_LogicUnit/instruction_fetch[2]_3" type="array">
+      <obj_property name="DisplayName">FullPathName</obj_property>
+      <obj_property name="ElementShortName">inst_LogicUnit/instruction_fetch[2]_3[31:0]</obj_property>
+      <obj_property name="ObjectShortName">instruction_fetch[2]_3[31:0]</obj_property>
+      <obj_property name="Radix">HEXRADIX</obj_property>
+      <obj_property name="LABELRADIX">true</obj_property>
+      <obj_property name="WaveformStyle">STYLE_DIGITAL</obj_property>
+   </wvobject>
+   <wvobject fp_name="inst_LogicUnit/instruction_fetch[3]_0" type="array">
+      <obj_property name="DisplayName">FullPathName</obj_property>
+      <obj_property name="ElementShortName">inst_LogicUnit/instruction_fetch[3]_0[31:0]</obj_property>
+      <obj_property name="ObjectShortName">instruction_fetch[3]_0[31:0]</obj_property>
+      <obj_property name="Radix">HEXRADIX</obj_property>
       <obj_property name="LABELRADIX">true</obj_property>
       <obj_property name="WaveformStyle">STYLE_DIGITAL</obj_property>
    </wvobject>
@@ -80,50 +127,10 @@
       <obj_property name="LABELRADIX">true</obj_property>
       <obj_property name="WaveformStyle">STYLE_DIGITAL</obj_property>
    </wvobject>
-   <wvobject fp_name="inst_LogicUnit/instruction_ready" type="logic">
+   <wvobject fp_name="inst_LogicUnit/instruction_upper" type="logic">
       <obj_property name="DisplayName">FullPathName</obj_property>
-      <obj_property name="ElementShortName">inst_LogicUnit/instruction_ready</obj_property>
-      <obj_property name="ObjectShortName">instruction_ready</obj_property>
-      <obj_property name="LABELRADIX">true</obj_property>
-      <obj_property name="WaveformStyle">STYLE_DIGITAL</obj_property>
-   </wvobject>
-   <wvobject fp_name="inst_LogicUnit/rd" type="array">
-      <obj_property name="DisplayName">FullPathName</obj_property>
-      <obj_property name="ElementShortName">inst_LogicUnit/rd[4:0]</obj_property>
-      <obj_property name="ObjectShortName">rd[4:0]</obj_property>
-      <obj_property name="Radix">HEXRADIX</obj_property>
-      <obj_property name="LABELRADIX">true</obj_property>
-      <obj_property name="WaveformStyle">STYLE_DIGITAL</obj_property>
-   </wvobject>
-   <wvobject fp_name="inst_LogicUnit/rs1" type="array">
-      <obj_property name="DisplayName">FullPathName</obj_property>
-      <obj_property name="ElementShortName">inst_LogicUnit/rs1[4:0]</obj_property>
-      <obj_property name="ObjectShortName">rs1[4:0]</obj_property>
-      <obj_property name="Radix">HEXRADIX</obj_property>
-      <obj_property name="LABELRADIX">true</obj_property>
-      <obj_property name="WaveformStyle">STYLE_DIGITAL</obj_property>
-   </wvobject>
-   <wvobject fp_name="inst_LogicUnit/rs1_val" type="array">
-      <obj_property name="DisplayName">FullPathName</obj_property>
-      <obj_property name="ElementShortName">inst_LogicUnit/rs1_val[31:0]</obj_property>
-      <obj_property name="ObjectShortName">rs1_val[31:0]</obj_property>
-      <obj_property name="Radix">HEXRADIX</obj_property>
-      <obj_property name="LABELRADIX">true</obj_property>
-      <obj_property name="WaveformStyle">STYLE_DIGITAL</obj_property>
-   </wvobject>
-   <wvobject fp_name="inst_LogicUnit/rs2" type="array">
-      <obj_property name="DisplayName">FullPathName</obj_property>
-      <obj_property name="ElementShortName">inst_LogicUnit/rs2[4:0]</obj_property>
-      <obj_property name="ObjectShortName">rs2[4:0]</obj_property>
-      <obj_property name="Radix">HEXRADIX</obj_property>
-      <obj_property name="LABELRADIX">true</obj_property>
-      <obj_property name="WaveformStyle">STYLE_DIGITAL</obj_property>
-   </wvobject>
-   <wvobject fp_name="inst_LogicUnit/rs2_val" type="array">
-      <obj_property name="DisplayName">FullPathName</obj_property>
-      <obj_property name="ElementShortName">inst_LogicUnit/rs2_val[31:0]</obj_property>
-      <obj_property name="ObjectShortName">rs2_val[31:0]</obj_property>
-      <obj_property name="Radix">HEXRADIX</obj_property>
+      <obj_property name="ElementShortName">inst_LogicUnit/instruction_upper</obj_property>
+      <obj_property name="ObjectShortName">instruction_upper</obj_property>
       <obj_property name="LABELRADIX">true</obj_property>
       <obj_property name="WaveformStyle">STYLE_DIGITAL</obj_property>
    </wvobject>
@@ -134,10 +141,10 @@
       <obj_property name="LABELRADIX">true</obj_property>
       <obj_property name="WaveformStyle">STYLE_DIGITAL</obj_property>
    </wvobject>
-   <wvobject fp_name="inst_LogicUnit/ctrl_logic_unit" type="logic">
+   <wvobject fp_name="inst_LogicUnit/write_operation" type="logic">
       <obj_property name="DisplayName">FullPathName</obj_property>
-      <obj_property name="ElementShortName">inst_LogicUnit/ctrl_logic_unit</obj_property>
-      <obj_property name="ObjectShortName">ctrl_logic_unit</obj_property>
+      <obj_property name="ElementShortName">inst_LogicUnit/write_operation</obj_property>
+      <obj_property name="ObjectShortName">write_operation</obj_property>
       <obj_property name="LABELRADIX">true</obj_property>
       <obj_property name="WaveformStyle">STYLE_DIGITAL</obj_property>
    </wvobject>

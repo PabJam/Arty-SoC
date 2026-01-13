@@ -59,7 +59,7 @@ type t_reg_array is array(natural range 0 to 31) of unsigned(31 downto 0);
 signal registers : t_reg_array;
 
 type t_fetch_states is (fetch_state_idle, fetch_state_next, fetch_state_next_2);
-signal fetch_state : t_fetch_states;
+signal fetch_state : t_fetch_states := fetch_state_next;
 
 type t_byte_array_32 is array(0 to 3) of std_logic_vector(7 downto 0);
 type t_2byte_array_32 is array(0 to 1) of std_logic_vector(15 downto 0);
@@ -112,6 +112,9 @@ signal instruction_done : std_logic := '0';
 
 
 attribute mark_debug : string;
+attribute dont_touch : string;
+attribute dont_touch of instruction_fetch : signal is "true";
+attribute dont_touch of write_operation : signal is "true";
 attribute mark_debug of ctrl_logic_unit : signal is "true";
 attribute mark_debug of opcode : signal is "true";
 attribute mark_debug of current_pc : signal is "true";
@@ -129,9 +132,9 @@ attribute mark_debug of wait_finish_write_operation : signal is "true";
 attribute mark_debug of instruction_jump : signal is "true";
 attribute mark_debug of immediate : signal is "true";
 attribute mark_debug of write_operation : signal is "true";
-
-
-
+attribute mark_debug of instruction_fetch : signal is "true";
+attribute mark_debug of instruction_upper : signal is "true";
+attribute mark_debug of fetch_state : signal is "true";
 
 begin
 
@@ -201,7 +204,7 @@ begin
 						instruction_ready <= '1';
 						o_PM_Addr <= std_logic_vector(pc_fetch(2)(15 downto 3));
 						if i_PM_DV = '1' then
-							if instruction_upper = "0" and instruction_upper_latch = "1" then
+							if instruction_upper = "1" and instruction_upper_latch = "0" then
 								instruction_fetch(0) <= unsigned(i_PM_Data(31 downto 0));
 								instruction_fetch(1) <= unsigned(i_PM_Data(63 downto 32));
 								pc_fetch(0) <= pc_fetch(2);
@@ -218,7 +221,7 @@ begin
 								instruction_fetch(3) <= unsigned(i_PM_Data(63 downto 32));
 								fetch_state <= fetch_state_idle;
 							end if;
-						elsif instruction_upper = "0" and instruction_upper_latch = "1" then
+						elsif instruction_upper = "1" and instruction_upper_latch = "0" then
 							instruction_ready <= '0';
 							pc_fetch(0) <= pc_fetch(2);
 							pc_fetch(1) <= pc_fetch(3);
@@ -229,7 +232,7 @@ begin
 						
 					when fetch_state_idle =>
 						instruction_ready <= '1';
-						if instruction_upper = "0" and instruction_upper_latch = "1" then
+						if instruction_upper = "1" and instruction_upper_latch = "0" then -- todo da decode nicht immer mindestens zwei cycle benötigt um die nächste instruction auszulesen muss die logik überarbeitet werden
 							pc_fetch(0) <= pc_fetch(2);
 							pc_fetch(1) <= pc_fetch(3);
 							pc(0) <= pc_fetch(2);
