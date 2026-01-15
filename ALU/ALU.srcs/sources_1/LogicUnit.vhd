@@ -40,6 +40,7 @@ entity LogicUnit is
 		i_Take_Ctrl_Logic_Unit : in std_logic;
 		o_Return_Ctrl_Logic_Unit : out std_logic;
 		o_PM_Addr : out std_logic_vector(12 downto 0);
+		o_PM_DV : out std_logic;
 		i_PM_Data : in std_logic_vector(63 downto 0);
 		i_PM_DV : in std_logic;
 		o_DM_Addr : out std_logic_vector(31 downto 0);
@@ -102,39 +103,48 @@ signal instruction_loaded : std_logic := '0';
 signal instruction_p4_ready : std_logic := '0';
 signal wait_instruction_ready : std_logic := '1';
 signal instruction_upper : unsigned(0 downto 0) := (others => '0');
-signal instruction_upper_latch : unsigned(0 downto 0) := (others => '0');
 signal instruction_multicycle : std_logic := '0';
-signal current_instruction : unsigned(31 downto 0) := (others => '0');
+signal next_instruction : unsigned(31 downto 0) := (others => '0');
+signal next_instruction_valid : std_logic := '0';
 signal current_pc : unsigned(31 downto 0) := (others => '0');
+signal next_pc : unsigned(31 downto 0) := (others => '0');
 signal latched_current_pc : unsigned(31 downto 0) := (others => '0');
 signal instruction_done : std_logic := '0';
+signal instruction_read : std_logic := '0';
+signal instruction_jumped : std_logic := '0';
 
 
-
-attribute mark_debug : string;
-attribute dont_touch : string;
-attribute dont_touch of instruction_fetch : signal is "true";
-attribute dont_touch of write_operation : signal is "true";
-attribute mark_debug of ctrl_logic_unit : signal is "true";
-attribute mark_debug of opcode : signal is "true";
-attribute mark_debug of current_pc : signal is "true";
-attribute mark_debug of func3 : signal is "true";
-attribute mark_debug of rd : signal is "true";
-attribute mark_debug of rs1 : signal is "true";
-attribute mark_debug of rs2 : signal is "true";
-attribute mark_debug of rs1_val : signal is "true";
-attribute mark_debug of rs2_val : signal is "true";
-attribute mark_debug of instruction_ready : signal is "true";
-attribute mark_debug of instruction_decoded : signal is "true";
-attribute mark_debug of instruction_done : signal is "true";
-attribute mark_debug of instruction_multicycle : signal is "true";
-attribute mark_debug of wait_finish_write_operation : signal is "true";
-attribute mark_debug of instruction_jump : signal is "true";
-attribute mark_debug of immediate : signal is "true";
-attribute mark_debug of write_operation : signal is "true";
-attribute mark_debug of instruction_fetch : signal is "true";
-attribute mark_debug of instruction_upper : signal is "true";
-attribute mark_debug of fetch_state : signal is "true";
+--attribute mark_debug : string;
+--attribute dont_touch : string;
+--attribute dont_touch of instruction_fetch : signal is "true";
+--attribute dont_touch of pc_fetch : signal is "true";
+--attribute dont_touch of pc : signal is "true";
+--attribute mark_debug of ctrl_logic_unit : signal is "true";
+--attribute mark_debug of pc_fetch : signal is "true";
+--attribute mark_debug of pc : signal is "true";
+--attribute mark_debug of opcode : signal is "true";
+--attribute mark_debug of current_pc : signal is "true";
+--attribute mark_debug of func3 : signal is "true";
+--attribute mark_debug of rd : signal is "true";
+--attribute mark_debug of rs1 : signal is "true";
+--attribute mark_debug of rs2 : signal is "true";
+--attribute mark_debug of rs1_val : signal is "true";
+--attribute mark_debug of rs2_val : signal is "true";
+--attribute mark_debug of instruction_ready : signal is "true";
+--attribute mark_debug of instruction_decoded : signal is "true";
+--attribute mark_debug of instruction_done : signal is "true";
+--attribute mark_debug of instruction_multicycle : signal is "true";
+--attribute mark_debug of wait_finish_write_operation : signal is "true";
+--attribute mark_debug of instruction_jump : signal is "true";
+--attribute mark_debug of immediate : signal is "true";
+--attribute mark_debug of write_operation : signal is "true";
+--attribute mark_debug of instruction_fetch : signal is "true";
+--attribute mark_debug of instruction_upper : signal is "true";
+--attribute mark_debug of fetch_state : signal is "true";
+--attribute mark_debug of instruction_read : signal is "true";
+--attribute mark_debug of i_PM_DV : signal is "true";
+--attribute mark_debug of o_PM_Addr : signal is "true";
+--attribute mark_debug of wait_instruction_ready : signal is "true";
 
 begin
 
@@ -153,6 +163,7 @@ Instruction_Fetch_Proc : process(i_Clk)
 	variable v_addr_p8 : unsigned(31 downto 0);
 begin
 	if rising_edge(i_Clk) then
+		o_PM_DV <= '0';
 		if (i_Sync_nRst = '0') then
 			pc_fetch(0) <= x"0000000" & "0000";
 			pc_fetch(1) <= x"0000000" & "0100";
@@ -167,8 +178,11 @@ begin
 			o_PM_Addr <= (others => '0');
 			fetch_state <= fetch_state_next;
 			instruction_ready <= '0';
+		elsif i_Give_Ctrl_Logic_Unit = '1' then
+			o_PM_DV <= '1';
 		elsif ctrl_logic_unit = '1' and i_Take_Ctrl_Logic_Unit = '0' then
 			if (instruction_jump = '1') then
+				o_PM_DV <= '1';
 				o_PM_Addr <= std_logic_vector(jmp_addr(15 downto 3)); -- jmp_addr(2) decides if lower or upper 32bit 
 				pc_fetch(0) <= jmp_addr(31 downto 3) & '0' & jmp_addr(1 downto 0);
 				pc_fetch(1) <= jmp_addr(31 downto 3) & '1' & jmp_addr(1 downto 0);
@@ -187,7 +201,8 @@ begin
 							instruction_ready <= '1';
 							v_addr_p8 := pc_fetch(0) + 8;
 							o_PM_Addr <= std_logic_vector(v_addr_p8(15 downto 3));
-							if (instruction_upper = "0") then
+							o_PM_DV <= '1';
+							if wait_instruction_ready = '0' then
 								fetch_state <= fetch_state_next_2;
 								pc_fetch(2) <= v_addr_p8;
 								pc_fetch(3) <= pc_fetch(1) + 8;
@@ -204,7 +219,7 @@ begin
 						instruction_ready <= '1';
 						o_PM_Addr <= std_logic_vector(pc_fetch(2)(15 downto 3));
 						if i_PM_DV = '1' then
-							if instruction_upper = "1" and instruction_upper_latch = "0" then
+							if instruction_read = '1' then
 								instruction_fetch(0) <= unsigned(i_PM_Data(31 downto 0));
 								instruction_fetch(1) <= unsigned(i_PM_Data(63 downto 32));
 								pc_fetch(0) <= pc_fetch(2);
@@ -214,6 +229,7 @@ begin
 								v_addr_p8 := pc_fetch(2) + 8;
 								pc_fetch(2) <= v_addr_p8;
 								pc_fetch(3) <= pc_fetch(3) + 8;
+								o_PM_DV <= '1';
 								o_PM_Addr <= std_logic_vector(v_addr_p8(15 downto 3));
 								fetch_state <= fetch_state_next_2;
 							else
@@ -221,7 +237,7 @@ begin
 								instruction_fetch(3) <= unsigned(i_PM_Data(63 downto 32));
 								fetch_state <= fetch_state_idle;
 							end if;
-						elsif instruction_upper = "1" and instruction_upper_latch = "0" then
+						elsif instruction_read = '1' then
 							instruction_ready <= '0';
 							pc_fetch(0) <= pc_fetch(2);
 							pc_fetch(1) <= pc_fetch(3);
@@ -232,7 +248,7 @@ begin
 						
 					when fetch_state_idle =>
 						instruction_ready <= '1';
-						if instruction_upper = "1" and instruction_upper_latch = "0" then -- todo da decode nicht immer mindestens zwei cycle benötigt um die nächste instruction auszulesen muss die logik überarbeitet werden
+						if instruction_read = '1' then 
 							pc_fetch(0) <= pc_fetch(2);
 							pc_fetch(1) <= pc_fetch(3);
 							pc(0) <= pc_fetch(2);
@@ -243,6 +259,7 @@ begin
 							v_addr_p8 := pc_fetch(2) + 8;
 							pc_fetch(2) <= v_addr_p8;
 							pc_fetch(3) <= pc_fetch(3) + 8;
+							o_PM_DV <= '1';
 							o_PM_Addr <= std_logic_vector(v_addr_p8(15 downto 3));
 						else
 							fetch_state <= fetch_state_idle;
@@ -263,20 +280,41 @@ instruction_Decode_Proc : process (i_Clk)
 		variable v_current_instruction : unsigned(31 downto 0) := (others => '0');
 begin
 	if rising_edge(i_Clk) then
-		instruction_upper_latch <= instruction_upper;
-		
+		instruction_read <= '0';
+
 		if (i_Sync_nRst = '0') then
 			instruction_upper <= (others => '0');
-			instruction_upper_latch <= (others => '0');
 			instruction_decoded <= '0';
 			write_operation <= '0';
 			wait_finish_write_operation <= '0';
+			wait_instruction_ready <= '1';
+			next_instruction_valid <= '0';
 		elsif ctrl_logic_unit = '1' and i_Take_Ctrl_Logic_Unit = '0' then
 		
-			if instruction_ready = '1' and instruction_jump = '0' and instruction_multicycle = '0' and wait_finish_write_operation = '0' then
-				--current_instruction <= instruction_fetch(to_integer(instruction_upper));
-				v_current_instruction := instruction_fetch(to_integer(instruction_upper));
-				current_pc <= pc(to_integer(instruction_upper));
+			if (instruction_ready = '1' or next_instruction_valid = '1') and instruction_jump = '0' and instruction_multicycle = '0' and wait_finish_write_operation = '0' then
+				wait_instruction_ready <= '0';
+				
+				if instruction_upper(0) = '0' then
+					v_current_instruction := instruction_fetch(0);
+					next_instruction <= instruction_fetch(1);
+					current_pc <= pc(0);
+					next_pc <= pc(1);
+					instruction_read <= '1';
+					next_instruction_valid <= '1';
+				else
+					if instruction_jumped = '1' then -- after a jump the next instruction could be on the upper address but we need to turn on instruction_read for the fetch process
+						v_current_instruction := instruction_fetch(1);
+						current_pc <= pc(1);
+						instruction_read <= '1';
+						
+					else
+						v_current_instruction := next_instruction;
+						current_pc <= next_pc;
+					end if;
+					next_instruction_valid <= '0';
+				end if;
+				
+				instruction_jumped <= '0';
 				instruction_upper <= not instruction_upper;
 				
 				
@@ -289,6 +327,7 @@ begin
 				rs2_val <= registers(to_integer(v_current_instruction(24 downto 20)));
 				instruction_decoded <= '1';
 				wait_finish_write_operation <= '0';
+				
 				case v_current_instruction(6 downto 0) is --opcode
 					
 					when ("0110111" or "0010111") => -- lui / auipc
@@ -360,7 +399,7 @@ begin
 			elsif instruction_jump = '1' then
 				instruction_upper(0) <= jmp_addr(2);
 				instruction_decoded <= '0';
-			
+				instruction_jumped <= '1';
 			elsif wait_finish_write_operation = '1' then
 				rs1_val <= registers(to_integer(v_current_instruction(19 downto 15)));
 				rs2_val <= registers(to_integer(v_current_instruction(24 downto 20)));
@@ -369,8 +408,12 @@ begin
 					instruction_decoded <= '1';
 					wait_finish_write_operation <= '0';
 				end if;
+				
+			elsif instruction_ready = '0' and instruction_multicycle = '0' then -- actually waiting on fetch process
+				wait_instruction_ready <= '1';
 			end if;
-			
+		else 
+			instruction_decoded <= '0';
 		end if; -- reset
 	end if; -- clk'rising_edge
 end process;
@@ -688,9 +731,8 @@ begin
 					null;
 					instruction_done <= '1';
 			end case;
-		end if; -- current_instruction valid
 		
-		if instruction_multicycle = '1' then
+		elsif instruction_multicycle = '1' then
 			
 			case latched_opcode is --opcode
 				
@@ -881,11 +923,7 @@ begin
 					null;
 					--instruction_done <= '1';
 			end case;
-		end if; -- instruction_multicycle
-		
-		--if v_instruction_done = '1' then
-		--	wait_instruction_ready <= '1';
-		--end if;
+		end if; -- instruction_multicycle / instruction_decoded
 		
 		if i_Give_Ctrl_Logic_Unit = '1' then
 			ctrl_logic_unit <= '1';

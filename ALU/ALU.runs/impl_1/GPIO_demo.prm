@@ -8,4 +8,4 @@ Start Address      0x00000000
 End Address        0x00FFFFFF
 
 Addr1         Addr2         Date                    File(s)
-0x00000000    0x0012F2CB    Jan 13 16:00:07 2026    D:/Projekte/Arty/ALU/ALU.runs/impl_1/GPIO_demo.bit
+0x00000000    0x0012F2CB    Jan 15 14:28:21 2026    D:/Projekte/Arty/ALU/ALU.runs/impl_1/GPIO_demo.bit

@@ -79,6 +79,7 @@ component LogicUnit
 		i_Take_Ctrl_Logic_Unit : in std_logic;
 		o_Return_Ctrl_Logic_Unit : out std_logic;
 		o_PM_Addr : out std_logic_vector(12 downto 0);
+		o_PM_DV : out std_logic;
 		i_PM_Data : in std_logic_vector(63 downto 0);
 		i_PM_DV : in std_logic;
 		o_DM_Addr : out std_logic_vector(31 downto 0);
@@ -324,7 +325,7 @@ signal uart_fifo_srst : std_logic;
 type t_progRam_Uart_States is (progRam_Uart_Idle, progRam_Uart_Write, progRam_Uart_PreRead, progRam_Uart_ReadWait, ProgRam_Uart_Read);
 signal progRam_Uart_State : t_progRam_Uart_States := progRam_Uart_Idle;
 
-type t_pm_lu_states is (pm_lu_state_pre_read, pm_lu_state_read);
+type t_pm_lu_states is (pm_lu_state_idle, pm_lu_state_pre_read, pm_lu_state_read);
 signal pm_lu_state : t_pm_lu_states := pm_lu_state_pre_read;
 
 signal progRam_Addr : std_logic_vector(12 downto 0) := (others => '0');
@@ -337,6 +338,8 @@ signal progRam_Wr_En : std_logic_vector(7 downto 0) := (others => '0'); -- can a
 signal progRam_Data_In : std_logic_vector(63 downto 0); 
 signal progRam_Data_Out : std_logic_vector(63 downto 0); 
 signal progRam_dv : std_logic := '0';
+signal progRam_addr_valid : std_logic;
+
 
 type t_8byte_array is array (0 to 7) of std_logic_vector(7 downto 0);
 signal progRam_Data_In_Bytes : t_8byte_array;
@@ -507,6 +510,7 @@ port map
 	i_Take_Ctrl_Logic_Unit => take_ctrl_logic_unit,
 	o_Return_Ctrl_Logic_Unit => get_ctrl_logic_unit,
 	o_PM_Addr => progRam_addr_lu,
+	o_PM_DV => progRam_addr_valid,
 	i_PM_Data => progRam_Data_Out,
 	i_PM_DV => progRam_dv,
 	o_DM_Addr => dm_addr,
@@ -591,6 +595,8 @@ begin
 		latched_progRam_addr_lu <= progRam_addr_lu;
 		
 		if ctrl_logic_unit = '0' then
+			pm_lu_state <= pm_lu_state_pre_read;
+			
 			case progRam_Uart_State is
 				
 				when progRam_Uart_Idle =>
@@ -645,19 +651,25 @@ begin
 			end case;
 		else -- lu has control over pm
 			progRam_Addr <= progRam_addr_lu; 
-			if (latched_progRam_addr_lu /= progRam_addr_lu) then
-				pm_lu_state <= pm_lu_state_pre_read;
+			
+			if progRam_addr_valid = '1' then
+				if latched_progRam_addr_lu /= progRam_addr_lu then
+					pm_lu_state <= pm_lu_state_pre_read;
+				else
+					pm_lu_state <= pm_lu_state_read;
+				end if;
 			else
 				case pm_lu_state is
+					when pm_lu_state_idle =>
+						pm_lu_state <= pm_lu_state_idle;
 					when pm_lu_state_pre_read =>
 						pm_lu_state <= pm_lu_state_read;
 					when pm_lu_state_read =>
 						progRam_dv <= '1';
-						pm_lu_state <= pm_lu_state_read;
-						--pm_lu_state <= pm_lu_state_idle;
+						pm_lu_state <= pm_lu_state_idle;
 					when others =>
 						null;
-						pm_lu_state <= pm_lu_state_pre_read;
+						pm_lu_state <= pm_lu_state_idle;
 				end case;
 			end if;
 			

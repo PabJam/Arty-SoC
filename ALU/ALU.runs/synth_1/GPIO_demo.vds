@@ -3,8 +3,8 @@
 # SW Build 6140274 on Thu May 22 00:12:29 MDT 2025
 # IP Build 6138677 on Thu May 22 03:10:11 MDT 2025
 # SharedData Build 6139179 on Tue May 20 17:58:58 MDT 2025
-# Start of session at: Tue Jan 13 15:47:41 2026
-# Process ID         : 2348
+# Start of session at: Thu Jan 15 14:25:24 2026
+# Process ID         : 14536
 # Current directory  : D:/Projekte/Arty/ALU/ALU.runs/synth_1
 # Command line       : vivado.exe -log GPIO_demo.vds -product Vivado -mode batch -messageDb vivado.pb -notrace -source GPIO_demo.tcl
 # Log file           : D:/Projekte/Arty/ALU/ALU.runs/synth_1/GPIO_demo.vds
@@ -19,7 +19,7 @@
 # Host memory        : 34257 MB
 # Swap memory        : 5100 MB
 # Total Virtual      : 39358 MB
-# Available Virtual  : 19851 MB
+# Available Virtual  : 19839 MB
 #-----------------------------------------------------------
 source GPIO_demo.tcl -notrace
 Command: synth_design -top GPIO_demo -part xc7s25csga324-1 -directive FewerCarryChains -keep_equivalent_registers -resource_sharing off -no_lc
@@ -29,65 +29,66 @@ INFO: [Common 17-349] Got license for feature 'Synthesis' and/or device 'xc7s25'
 INFO: [Device 21-403] Loading part xc7s25csga324-1
 INFO: [Synth 8-7079] Multithreading enabled for synth_design using a maximum of 2 processes.
 INFO: [Synth 8-7078] Launching helper process for spawning children vivado processes
-INFO: [Synth 8-7075] Helper process launched with PID 32724
+INFO: [Synth 8-7075] Helper process launched with PID 10596
 ---------------------------------------------------------------------------------
-Starting RTL Elaboration : Time (s): cpu = 00:00:04 ; elapsed = 00:00:04 . Memory (MB): peak = 1159.270 ; gain = 490.855
+Starting RTL Elaboration : Time (s): cpu = 00:00:05 ; elapsed = 00:00:04 . Memory (MB): peak = 1159.664 ; gain = 491.711
 ---------------------------------------------------------------------------------
 INFO: [Synth 8-638] synthesizing module 'GPIO_demo' [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/GPIO_Demo.vhd:70]
 	Parameter DEBNC_CLOCKS bound to: 65536 - type: integer 
 	Parameter PORT_WIDTH bound to: 4 - type: integer 
-INFO: [Synth 8-3491] module 'debouncer' declared at 'D:/Projekte/Arty/ALU/ALU.srcs/sources_1/debouncer.vhd:42' bound to instance 'Inst_btn_debounce' of component 'debouncer' [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/GPIO_Demo.vhd:423]
+INFO: [Synth 8-3491] module 'debouncer' declared at 'D:/Projekte/Arty/ALU/ALU.srcs/sources_1/debouncer.vhd:42' bound to instance 'Inst_btn_debounce' of component 'debouncer' [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/GPIO_Demo.vhd:426]
 INFO: [Synth 8-638] synthesizing module 'debouncer' [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/debouncer.vhd:50]
 	Parameter DEBNC_CLOCKS bound to: 65536 - type: integer 
 	Parameter PORT_WIDTH bound to: 4 - type: integer 
 INFO: [Synth 8-256] done synthesizing module 'debouncer' (0#1) [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/debouncer.vhd:50]
 	Parameter g_CLKS_PER_BIT bound to: 868 - type: integer 
-INFO: [Synth 8-3491] module 'UART_TX_CTRL' declared at 'D:/Projekte/Arty/ALU/ALU.srcs/sources_1/UART_TX_CTRL.vhd:15' bound to instance 'Inst_UART_TX_CTRL' of component 'UART_TX_CTRL' [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/GPIO_Demo.vhd:455]
+INFO: [Synth 8-3491] module 'UART_TX_CTRL' declared at 'D:/Projekte/Arty/ALU/ALU.srcs/sources_1/UART_TX_CTRL.vhd:15' bound to instance 'Inst_UART_TX_CTRL' of component 'UART_TX_CTRL' [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/GPIO_Demo.vhd:458]
 INFO: [Synth 8-638] synthesizing module 'UART_TX_CTRL' [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/UART_TX_CTRL.vhd:32]
 	Parameter g_CLKS_PER_BIT bound to: 868 - type: integer 
 INFO: [Synth 8-256] done synthesizing module 'UART_TX_CTRL' (0#1) [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/UART_TX_CTRL.vhd:32]
 	Parameter g_CLKS_PER_BIT bound to: 868 - type: integer 
-INFO: [Synth 8-3491] module 'UART_RX_CTRL' declared at 'D:/Projekte/Arty/ALU/ALU.srcs/sources_1/UART_RX_CTRL.vhd:20' bound to instance 'Inst_UART_RX_CTRL' of component 'UART_RX_CTRL' [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/GPIO_Demo.vhd:470]
+INFO: [Synth 8-3491] module 'UART_RX_CTRL' declared at 'D:/Projekte/Arty/ALU/ALU.srcs/sources_1/UART_RX_CTRL.vhd:20' bound to instance 'Inst_UART_RX_CTRL' of component 'UART_RX_CTRL' [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/GPIO_Demo.vhd:473]
 INFO: [Synth 8-638] synthesizing module 'UART_RX_CTRL' [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/UART_RX_CTRL.vhd:34]
 	Parameter g_CLKS_PER_BIT bound to: 868 - type: integer 
 INFO: [Synth 8-256] done synthesizing module 'UART_RX_CTRL' (0#1) [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/UART_RX_CTRL.vhd:34]
-INFO: [Synth 8-3491] module 'UART_Fifo' declared at 'D:/Projekte/Arty/ALU/ALU.runs/synth_1/.Xil/Vivado-2348-DESKTOP-E28LK6R/realtime/UART_Fifo_stub.vhdl:6' bound to instance 'Inst_UART_Fifo' of component 'UART_Fifo' [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/GPIO_Demo.vhd:482]
-INFO: [Synth 8-638] synthesizing module 'UART_Fifo' [D:/Projekte/Arty/ALU/ALU.runs/synth_1/.Xil/Vivado-2348-DESKTOP-E28LK6R/realtime/UART_Fifo_stub.vhdl:27]
-INFO: [Synth 8-3491] module 'LogicUnit' declared at 'D:/Projekte/Arty/ALU/ALU.srcs/sources_1/LogicUnit.vhd:34' bound to instance 'inst_LogicUnit' of component 'LogicUnit' [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/GPIO_Demo.vhd:501]
-INFO: [Synth 8-638] synthesizing module 'LogicUnit' [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/LogicUnit.vhd:54]
-INFO: [Synth 8-226] default block is never used [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/LogicUnit.vhd:568]
-INFO: [Synth 8-226] default block is never used [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/LogicUnit.vhd:623]
-INFO: [Synth 8-226] default block is never used [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/LogicUnit.vhd:812]
-INFO: [Synth 8-226] default block is never used [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/LogicUnit.vhd:845]
-INFO: [Synth 8-256] done synthesizing module 'LogicUnit' (0#1) [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/LogicUnit.vhd:54]
-INFO: [Synth 8-3491] module 'ProgRam' declared at 'D:/Projekte/Arty/ALU/ALU.runs/synth_1/.Xil/Vivado-2348-DESKTOP-E28LK6R/realtime/ProgRam_stub.vhdl:6' bound to instance 'inst_ProgRam' of component 'ProgRam' [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/GPIO_Demo.vhd:568]
-INFO: [Synth 8-638] synthesizing module 'ProgRam' [D:/Projekte/Arty/ALU/ALU.runs/synth_1/.Xil/Vivado-2348-DESKTOP-E28LK6R/realtime/ProgRam_stub.vhdl:28]
-INFO: [Synth 8-226] default block is never used [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/GPIO_Demo.vhd:651]
-INFO: [Synth 8-3491] module 'RGB_controller' declared at 'D:/Projekte/Arty/ALU/ALU.srcs/sources_1/RGB_controller.vhd:20' bound to instance 'RGB_Core1' of component 'RGB_controller' [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/GPIO_Demo.vhd:759]
+INFO: [Synth 8-3491] module 'UART_Fifo' declared at 'D:/Projekte/Arty/ALU/ALU.runs/synth_1/.Xil/Vivado-14536-DESKTOP-E28LK6R/realtime/UART_Fifo_stub.vhdl:6' bound to instance 'Inst_UART_Fifo' of component 'UART_Fifo' [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/GPIO_Demo.vhd:485]
+INFO: [Synth 8-638] synthesizing module 'UART_Fifo' [D:/Projekte/Arty/ALU/ALU.runs/synth_1/.Xil/Vivado-14536-DESKTOP-E28LK6R/realtime/UART_Fifo_stub.vhdl:27]
+INFO: [Synth 8-3491] module 'LogicUnit' declared at 'D:/Projekte/Arty/ALU/ALU.srcs/sources_1/LogicUnit.vhd:34' bound to instance 'inst_LogicUnit' of component 'LogicUnit' [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/GPIO_Demo.vhd:504]
+INFO: [Synth 8-638] synthesizing module 'LogicUnit' [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/LogicUnit.vhd:55]
+INFO: [Synth 8-226] default block is never used [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/LogicUnit.vhd:611]
+INFO: [Synth 8-226] default block is never used [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/LogicUnit.vhd:666]
+INFO: [Synth 8-226] default block is never used [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/LogicUnit.vhd:854]
+INFO: [Synth 8-226] default block is never used [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/LogicUnit.vhd:887]
+INFO: [Synth 8-256] done synthesizing module 'LogicUnit' (0#1) [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/LogicUnit.vhd:55]
+INFO: [Synth 8-3491] module 'ProgRam' declared at 'D:/Projekte/Arty/ALU/ALU.runs/synth_1/.Xil/Vivado-14536-DESKTOP-E28LK6R/realtime/ProgRam_stub.vhdl:6' bound to instance 'inst_ProgRam' of component 'ProgRam' [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/GPIO_Demo.vhd:572]
+INFO: [Synth 8-638] synthesizing module 'ProgRam' [D:/Projekte/Arty/ALU/ALU.runs/synth_1/.Xil/Vivado-14536-DESKTOP-E28LK6R/realtime/ProgRam_stub.vhdl:28]
+INFO: [Synth 8-3491] module 'RGB_controller' declared at 'D:/Projekte/Arty/ALU/ALU.srcs/sources_1/RGB_controller.vhd:20' bound to instance 'RGB_Core1' of component 'RGB_controller' [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/GPIO_Demo.vhd:771]
 INFO: [Synth 8-638] synthesizing module 'RGB_controller' [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/RGB_controller.vhd:28]
 INFO: [Synth 8-256] done synthesizing module 'RGB_controller' (0#1) [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/RGB_controller.vhd:28]
 INFO: [Synth 8-256] done synthesizing module 'GPIO_demo' (0#1) [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/GPIO_Demo.vhd:70]
-WARNING: [Synth 8-6014] Unused sequential element latched_immediate_reg was removed.  [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/LogicUnit.vhd:398]
-WARNING: [Synth 8-6014] Unused sequential element latched_rs2_reg was removed.  [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/LogicUnit.vhd:400]
-WARNING: [Synth 8-6014] Unused sequential element latched_rs1_reg was removed.  [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/LogicUnit.vhd:401]
-WARNING: [Synth 8-6014] Unused sequential element latched_rs2_val_reg was removed.  [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/LogicUnit.vhd:403]
+WARNING: [Synth 8-6014] Unused sequential element rs1_reg was removed.  [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/LogicUnit.vhd:323]
+WARNING: [Synth 8-6014] Unused sequential element rs2_reg was removed.  [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/LogicUnit.vhd:324]
+WARNING: [Synth 8-6014] Unused sequential element latched_immediate_reg was removed.  [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/LogicUnit.vhd:441]
+WARNING: [Synth 8-6014] Unused sequential element latched_rs2_reg was removed.  [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/LogicUnit.vhd:443]
+WARNING: [Synth 8-6014] Unused sequential element latched_rs1_reg was removed.  [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/LogicUnit.vhd:444]
+WARNING: [Synth 8-6014] Unused sequential element latched_rs2_val_reg was removed.  [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/LogicUnit.vhd:446]
 WARNING: [Synth 8-7129] Port SW[3] in module GPIO_demo is either unconnected or has no load
 WARNING: [Synth 8-7129] Port SW[2] in module GPIO_demo is either unconnected or has no load
 WARNING: [Synth 8-7129] Port SW[1] in module GPIO_demo is either unconnected or has no load
 WARNING: [Synth 8-7129] Port SW[0] in module GPIO_demo is either unconnected or has no load
 ---------------------------------------------------------------------------------
-Finished RTL Elaboration : Time (s): cpu = 00:00:07 ; elapsed = 00:00:07 . Memory (MB): peak = 1373.602 ; gain = 705.188
+Finished RTL Elaboration : Time (s): cpu = 00:00:07 ; elapsed = 00:00:07 . Memory (MB): peak = 1359.027 ; gain = 691.074
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
 Start Handling Custom Attributes
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
-Finished Handling Custom Attributes : Time (s): cpu = 00:00:07 ; elapsed = 00:00:07 . Memory (MB): peak = 1373.602 ; gain = 705.188
+Finished Handling Custom Attributes : Time (s): cpu = 00:00:07 ; elapsed = 00:00:07 . Memory (MB): peak = 1359.027 ; gain = 691.074
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
-Finished RTL Optimization Phase 1 : Time (s): cpu = 00:00:07 ; elapsed = 00:00:07 . Memory (MB): peak = 1373.602 ; gain = 705.188
+Finished RTL Optimization Phase 1 : Time (s): cpu = 00:00:07 ; elapsed = 00:00:07 . Memory (MB): peak = 1359.027 ; gain = 691.074
 ---------------------------------------------------------------------------------
-Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.256 . Memory (MB): peak = 1373.602 ; gain = 0.000
+Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.207 . Memory (MB): peak = 1359.027 ; gain = 0.000
 INFO: [Project 1-570] Preparing netlist for logic optimization
 
 Processing XDC Constraints
@@ -104,30 +105,30 @@ INFO: [Project 1-236] Implementation specific constraints were found while readi
 Resolution: To avoid this warning, move constraints listed in [.Xil/GPIO_demo_propImpl.xdc] to another XDC file and exclude this new file from synthesis with the used_in_synthesis property (File Properties dialog in GUI) and re-run elaboration/synthesis.
 Completed Processing XDC Constraints
 
-Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.002 . Memory (MB): peak = 1461.441 ; gain = 0.000
+Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.001 . Memory (MB): peak = 1433.625 ; gain = 0.000
 INFO: [Project 1-111] Unisim Transformation Summary:
 No Unisim elements were transformed.
 
-Constraint Validation Runtime : Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.022 . Memory (MB): peak = 1461.441 ; gain = 0.000
+Constraint Validation Runtime : Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.016 . Memory (MB): peak = 1433.625 ; gain = 0.000
 WARNING: [Timing 38-316] Clock period '20.000' specified during out-of-context synthesis of instance 'inst_ProgRam' at clock pin 'clka' is different from the actual clock period '10.000', this can lead to different synthesis results.
 ---------------------------------------------------------------------------------
-Finished Constraint Validation : Time (s): cpu = 00:00:16 ; elapsed = 00:00:16 . Memory (MB): peak = 1462.289 ; gain = 793.875
+Finished Constraint Validation : Time (s): cpu = 00:00:15 ; elapsed = 00:00:15 . Memory (MB): peak = 1435.398 ; gain = 767.445
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
 Start Loading Part and Timing Information
 ---------------------------------------------------------------------------------
 Loading part: xc7s25csga324-1
 ---------------------------------------------------------------------------------
-Finished Loading Part and Timing Information : Time (s): cpu = 00:00:16 ; elapsed = 00:00:16 . Memory (MB): peak = 1462.289 ; gain = 793.875
+Finished Loading Part and Timing Information : Time (s): cpu = 00:00:15 ; elapsed = 00:00:15 . Memory (MB): peak = 1435.398 ; gain = 767.445
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
 Start Applying 'set_property' XDC Constraints
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
-Finished applying 'set_property' XDC Constraints : Time (s): cpu = 00:00:16 ; elapsed = 00:00:16 . Memory (MB): peak = 1462.289 ; gain = 793.875
+Finished applying 'set_property' XDC Constraints : Time (s): cpu = 00:00:15 ; elapsed = 00:00:15 . Memory (MB): peak = 1435.398 ; gain = 767.445
 ---------------------------------------------------------------------------------
 INFO: [Synth 8-802] inferred FSM for state register 'r_SM_Main_reg' in module 'UART_TX_CTRL'
-WARNING: [Synth 8-3936] Found unconnected internal register 'instruction_Decode_Proc.v_current_instruction_reg' and it is trimmed from '32' to '25' bits. [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/LogicUnit.vhd:278]
+WARNING: [Synth 8-3936] Found unconnected internal register 'instruction_Decode_Proc.v_current_instruction_reg' and it is trimmed from '32' to '25' bits. [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/LogicUnit.vhd:298]
 INFO: [Synth 8-802] inferred FSM for state register 'fetch_state_reg' in module 'LogicUnit'
 INFO: [Synth 8-802] inferred FSM for state register 'progRam_Uart_State_reg' in module 'GPIO_demo'
 INFO: [Synth 8-802] inferred FSM for state register 'dm_read_state_reg' in module 'GPIO_demo'
@@ -142,15 +143,14 @@ INFO: [Synth 8-802] inferred FSM for state register 'dm_read_state_reg' in modul
 ---------------------------------------------------------------------------------------------------
 INFO: [Synth 8-3354] encoded FSM with state register 'r_SM_Main_reg' using encoding 'one-hot' in module 'UART_TX_CTRL'
 WARNING: [Synth 8-12595] Onehot encoded FSM with state register 'r_SM_Main_reg' is not having reset. This may cause incorrect behavior. User should consider using FSM_SAFE_STATE attribute on the register
-INFO: [Synth 8-6159] Found Keep on FSM register 'fetch_state_reg' in module 'LogicUnit', re-encoding will not be performed
 ---------------------------------------------------------------------------------------------------
                    State |                     New Encoding |                Previous Encoding 
 ---------------------------------------------------------------------------------------------------
-*
-        fetch_state_next |                               01 |                               01
-      fetch_state_next_2 |                               10 |                               10
-        fetch_state_idle |                               00 |                               00
+        fetch_state_next |                               00 |                               01
+      fetch_state_next_2 |                               01 |                               10
+        fetch_state_idle |                               10 |                               00
 ---------------------------------------------------------------------------------------------------
+INFO: [Synth 8-3354] encoded FSM with state register 'fetch_state_reg' using encoding 'sequential' in module 'LogicUnit'
 ---------------------------------------------------------------------------------------------------
                    State |                     New Encoding |                Previous Encoding 
 ---------------------------------------------------------------------------------------------------
@@ -171,7 +171,7 @@ WARNING: [Synth 8-12595] Onehot encoded FSM with state register 'dm_read_state_r
 ---------------------------------------------------------------------------------------------------
 INFO: [Synth 8-3354] encoded FSM with state register 'progRam_Uart_State_reg' using encoding 'sequential' in module 'GPIO_demo'
 ---------------------------------------------------------------------------------
-Finished RTL Optimization Phase 2 : Time (s): cpu = 00:00:23 ; elapsed = 00:00:24 . Memory (MB): peak = 1462.289 ; gain = 793.875
+Finished RTL Optimization Phase 2 : Time (s): cpu = 00:00:19 ; elapsed = 00:00:19 . Memory (MB): peak = 1435.398 ; gain = 767.445
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
 Start RTL Component Statistics 
@@ -190,7 +190,7 @@ Detailed RTL Component Info :
 	   2 Input     32 Bit         XORs := 2     
 	   2 Input      1 Bit         XORs := 4     
 +---Registers : 
-	               32 Bit    Registers := 50    
+	               32 Bit    Registers := 52    
 	               25 Bit    Registers := 1     
 	               21 Bit    Registers := 1     
 	               20 Bit    Registers := 1     
@@ -200,43 +200,46 @@ Detailed RTL Component Info :
 	                9 Bit    Registers := 1     
 	                8 Bit    Registers := 18    
 	                7 Bit    Registers := 2     
-	                5 Bit    Registers := 3     
+	                5 Bit    Registers := 1     
 	                4 Bit    Registers := 5     
-	                3 Bit    Registers := 5     
-	                1 Bit    Registers := 35    
+	                3 Bit    Registers := 4     
+	                2 Bit    Registers := 1     
+	                1 Bit    Registers := 38    
 +---Muxes : 
-	   2 Input   32 Bit        Muxes := 438   
-	   6 Input   32 Bit        Muxes := 31    
-	   4 Input   32 Bit        Muxes := 11    
+	   2 Input   32 Bit        Muxes := 261   
+	   3 Input   32 Bit        Muxes := 8     
 	   8 Input   32 Bit        Muxes := 31    
-	   2 Input   21 Bit        Muxes := 2     
+	   6 Input   32 Bit        Muxes := 31    
+	   4 Input   32 Bit        Muxes := 1     
+	   2 Input   21 Bit        Muxes := 1     
+	  10 Input   21 Bit        Muxes := 1     
 	   2 Input   16 Bit        Muxes := 5     
 	   5 Input   16 Bit        Muxes := 2     
 	   2 Input   13 Bit        Muxes := 5     
-	   4 Input   13 Bit        Muxes := 1     
+	   3 Input   13 Bit        Muxes := 1     
 	   5 Input   13 Bit        Muxes := 1     
 	   2 Input   10 Bit        Muxes := 1     
 	   6 Input   10 Bit        Muxes := 1     
-	   2 Input    8 Bit        Muxes := 12    
 	   4 Input    8 Bit        Muxes := 1     
+	   2 Input    8 Bit        Muxes := 12    
 	   6 Input    8 Bit        Muxes := 1     
 	   5 Input    8 Bit        Muxes := 1     
-	   2 Input    7 Bit        Muxes := 2     
-	   2 Input    5 Bit        Muxes := 11    
 	   5 Input    5 Bit        Muxes := 1     
+	   2 Input    5 Bit        Muxes := 5     
 	   5 Input    4 Bit        Muxes := 1     
 	   2 Input    4 Bit        Muxes := 1     
-	   2 Input    3 Bit        Muxes := 10    
-	   3 Input    3 Bit        Muxes := 2     
+	   4 Input    3 Bit        Muxes := 1     
+	   2 Input    3 Bit        Muxes := 8     
+	   3 Input    3 Bit        Muxes := 1     
 	   5 Input    3 Bit        Muxes := 1     
+	   3 Input    2 Bit        Muxes := 2     
+	   2 Input    2 Bit        Muxes := 7     
 	   4 Input    2 Bit        Muxes := 1     
-	   2 Input    2 Bit        Muxes := 6     
-	   3 Input    2 Bit        Muxes := 1     
-	   2 Input    1 Bit        Muxes := 292   
-	   4 Input    1 Bit        Muxes := 8     
+	   2 Input    1 Bit        Muxes := 296   
+	   3 Input    1 Bit        Muxes := 11    
 	   6 Input    1 Bit        Muxes := 6     
+	   4 Input    1 Bit        Muxes := 4     
 	   5 Input    1 Bit        Muxes := 20    
-	   3 Input    1 Bit        Muxes := 3     
 ---------------------------------------------------------------------------------
 Finished RTL Component Statistics 
 ---------------------------------------------------------------------------------
@@ -252,65 +255,31 @@ Finished Part Resource Summary
 ---------------------------------------------------------------------------------
 Start Cross Boundary and Area Optimization
 ---------------------------------------------------------------------------------
+WARNING: [Synth 8-7080] Parallel synthesis criteria is not met
 WARNING: [Synth 8-7129] Port SW[3] in module GPIO_demo is either unconnected or has no load
 WARNING: [Synth 8-7129] Port SW[2] in module GPIO_demo is either unconnected or has no load
 WARNING: [Synth 8-7129] Port SW[1] in module GPIO_demo is either unconnected or has no load
 WARNING: [Synth 8-7129] Port SW[0] in module GPIO_demo is either unconnected or has no load
-INFO: [Synth 8-3333] propagating constant 0 across sequential element (\registers_reg[0][0] )
-INFO: [Synth 8-3333] propagating constant 0 across sequential element (\registers_reg[0][1] )
-INFO: [Synth 8-3333] propagating constant 0 across sequential element (\registers_reg[0][2] )
-INFO: [Synth 8-3333] propagating constant 0 across sequential element (\registers_reg[0][3] )
-INFO: [Synth 8-3333] propagating constant 0 across sequential element (\registers_reg[0][4] )
-INFO: [Synth 8-3333] propagating constant 0 across sequential element (\registers_reg[0][5] )
-INFO: [Synth 8-3333] propagating constant 0 across sequential element (\registers_reg[0][6] )
-INFO: [Synth 8-3333] propagating constant 0 across sequential element (\registers_reg[0][7] )
-INFO: [Synth 8-3333] propagating constant 0 across sequential element (\registers_reg[0][8] )
-INFO: [Synth 8-3333] propagating constant 0 across sequential element (\registers_reg[0][9] )
-INFO: [Synth 8-3333] propagating constant 0 across sequential element (\registers_reg[0][10] )
-INFO: [Synth 8-3333] propagating constant 0 across sequential element (\registers_reg[0][11] )
-INFO: [Synth 8-3333] propagating constant 0 across sequential element (\registers_reg[0][12] )
-INFO: [Synth 8-3333] propagating constant 0 across sequential element (\registers_reg[0][13] )
-INFO: [Synth 8-3333] propagating constant 0 across sequential element (\registers_reg[0][14] )
-INFO: [Synth 8-3333] propagating constant 0 across sequential element (\registers_reg[0][15] )
-INFO: [Synth 8-3333] propagating constant 0 across sequential element (\registers_reg[0][16] )
-INFO: [Synth 8-3333] propagating constant 0 across sequential element (\registers_reg[0][17] )
-INFO: [Synth 8-3333] propagating constant 0 across sequential element (\registers_reg[0][18] )
-INFO: [Synth 8-3333] propagating constant 0 across sequential element (\registers_reg[0][19] )
-INFO: [Synth 8-3333] propagating constant 0 across sequential element (\registers_reg[0][20] )
-INFO: [Synth 8-3333] propagating constant 0 across sequential element (\registers_reg[0][21] )
-INFO: [Synth 8-3333] propagating constant 0 across sequential element (\registers_reg[0][22] )
-INFO: [Synth 8-3333] propagating constant 0 across sequential element (\registers_reg[0][23] )
-INFO: [Synth 8-3333] propagating constant 0 across sequential element (\registers_reg[0][24] )
-INFO: [Synth 8-3333] propagating constant 0 across sequential element (\registers_reg[0][25] )
-INFO: [Synth 8-3333] propagating constant 0 across sequential element (\registers_reg[0][26] )
-INFO: [Synth 8-3333] propagating constant 0 across sequential element (\registers_reg[0][27] )
-INFO: [Synth 8-3333] propagating constant 0 across sequential element (\registers_reg[0][28] )
-INFO: [Synth 8-3333] propagating constant 0 across sequential element (\registers_reg[0][29] )
-INFO: [Synth 8-3333] propagating constant 0 across sequential element (\registers_reg[0][30] )
-INFO: [Synth 8-3333] propagating constant 0 across sequential element (\registers_reg[0][31] )
-INFO: [Synth 8-5587] ROM size for "instruction_jump" is below threshold of ROM address width. It will be mapped to LUTs
-INFO: [Synth 8-5587] ROM size for "instruction_jump" is below threshold of ROM address width. It will be mapped to LUTs
-INFO: [Synth 8-5587] ROM size for "instruction_jump" is below threshold of ROM address width. It will be mapped to LUTs
 ---------------------------------------------------------------------------------
-Finished Cross Boundary and Area Optimization : Time (s): cpu = 00:00:42 ; elapsed = 00:00:56 . Memory (MB): peak = 1462.289 ; gain = 793.875
+Finished Cross Boundary and Area Optimization : Time (s): cpu = 00:00:42 ; elapsed = 00:00:43 . Memory (MB): peak = 1607.840 ; gain = 939.887
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
 Start Applying XDC Timing Constraints
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
-Finished Applying XDC Timing Constraints : Time (s): cpu = 00:00:46 ; elapsed = 00:01:01 . Memory (MB): peak = 1546.660 ; gain = 878.246
+Finished Applying XDC Timing Constraints : Time (s): cpu = 00:00:46 ; elapsed = 00:00:47 . Memory (MB): peak = 1607.840 ; gain = 939.887
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
 Start Timing Optimization
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
-Finished Timing Optimization : Time (s): cpu = 00:01:47 ; elapsed = 00:02:02 . Memory (MB): peak = 2049.465 ; gain = 1381.051
+Finished Timing Optimization : Time (s): cpu = 00:01:10 ; elapsed = 00:01:11 . Memory (MB): peak = 1927.641 ; gain = 1259.688
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
 Start Technology Mapping
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
-Finished Technology Mapping : Time (s): cpu = 00:01:48 ; elapsed = 00:02:12 . Memory (MB): peak = 2049.465 ; gain = 1381.051
+Finished Technology Mapping : Time (s): cpu = 00:01:12 ; elapsed = 00:01:13 . Memory (MB): peak = 1927.641 ; gain = 1259.688
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
 Start IO Insertion
@@ -328,37 +297,37 @@ Start Final Netlist Cleanup
 Finished Final Netlist Cleanup
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
-Finished IO Insertion : Time (s): cpu = 00:01:51 ; elapsed = 00:02:16 . Memory (MB): peak = 2049.465 ; gain = 1381.051
+Finished IO Insertion : Time (s): cpu = 00:01:15 ; elapsed = 00:01:17 . Memory (MB): peak = 1927.641 ; gain = 1259.688
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
 Start Renaming Generated Instances
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
-Finished Renaming Generated Instances : Time (s): cpu = 00:01:52 ; elapsed = 00:02:16 . Memory (MB): peak = 2049.465 ; gain = 1381.051
+Finished Renaming Generated Instances : Time (s): cpu = 00:01:15 ; elapsed = 00:01:17 . Memory (MB): peak = 1927.641 ; gain = 1259.688
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
 Start Rebuilding User Hierarchy
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
-Finished Rebuilding User Hierarchy : Time (s): cpu = 00:01:52 ; elapsed = 00:02:16 . Memory (MB): peak = 2049.465 ; gain = 1381.051
+Finished Rebuilding User Hierarchy : Time (s): cpu = 00:01:16 ; elapsed = 00:01:17 . Memory (MB): peak = 1927.641 ; gain = 1259.688
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
 Start Renaming Generated Ports
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
-Finished Renaming Generated Ports : Time (s): cpu = 00:01:52 ; elapsed = 00:02:16 . Memory (MB): peak = 2049.465 ; gain = 1381.051
+Finished Renaming Generated Ports : Time (s): cpu = 00:01:16 ; elapsed = 00:01:17 . Memory (MB): peak = 1927.641 ; gain = 1259.688
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
 Start Handling Custom Attributes
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
-Finished Handling Custom Attributes : Time (s): cpu = 00:01:52 ; elapsed = 00:02:16 . Memory (MB): peak = 2049.465 ; gain = 1381.051
+Finished Handling Custom Attributes : Time (s): cpu = 00:01:16 ; elapsed = 00:01:17 . Memory (MB): peak = 1927.641 ; gain = 1259.688
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
 Start Renaming Generated Nets
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
-Finished Renaming Generated Nets : Time (s): cpu = 00:01:52 ; elapsed = 00:02:16 . Memory (MB): peak = 2049.465 ; gain = 1381.051
+Finished Renaming Generated Nets : Time (s): cpu = 00:01:16 ; elapsed = 00:01:17 . Memory (MB): peak = 1927.641 ; gain = 1259.688
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
 Start Writing Synthesis Report
@@ -381,41 +350,41 @@ Report Cell Usage:
 |3     |BUFG           |     1|
 |4     |CARRY4         |   151|
 |5     |LUT1           |    29|
-|6     |LUT2           |   343|
-|7     |LUT3           |   553|
-|8     |LUT4           |   556|
-|9     |LUT5           |  1191|
-|10    |LUT6           |  3243|
-|11    |MUXF7          |   360|
-|12    |MUXF8          |    73|
-|13    |FDRE           |  2071|
-|14    |FDSE           |     3|
+|6     |LUT2           |   256|
+|7     |LUT3           |   261|
+|8     |LUT4           |   335|
+|9     |LUT5           |   888|
+|10    |LUT6           |  1699|
+|11    |MUXF7          |   580|
+|12    |MUXF8          |   144|
+|13    |FDRE           |  2110|
+|14    |FDSE           |    16|
 |15    |IBUF           |     6|
 |16    |OBUF           |    11|
 +------+---------------+------+
 ---------------------------------------------------------------------------------
-Finished Writing Synthesis Report : Time (s): cpu = 00:01:52 ; elapsed = 00:02:16 . Memory (MB): peak = 2049.465 ; gain = 1381.051
+Finished Writing Synthesis Report : Time (s): cpu = 00:01:16 ; elapsed = 00:01:17 . Memory (MB): peak = 1927.641 ; gain = 1259.688
 ---------------------------------------------------------------------------------
-Synthesis finished with 0 errors, 0 critical warnings and 7 warnings.
-Synthesis Optimization Runtime : Time (s): cpu = 00:01:41 ; elapsed = 00:02:13 . Memory (MB): peak = 2049.465 ; gain = 1292.363
-Synthesis Optimization Complete : Time (s): cpu = 00:01:52 ; elapsed = 00:02:16 . Memory (MB): peak = 2049.465 ; gain = 1381.051
+Synthesis finished with 0 errors, 0 critical warnings and 8 warnings.
+Synthesis Optimization Runtime : Time (s): cpu = 00:01:06 ; elapsed = 00:01:14 . Memory (MB): peak = 1927.641 ; gain = 1183.316
+Synthesis Optimization Complete : Time (s): cpu = 00:01:16 ; elapsed = 00:01:17 . Memory (MB): peak = 1927.641 ; gain = 1259.688
 INFO: [Project 1-571] Translating synthesized netlist
-Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.063 . Memory (MB): peak = 2049.465 ; gain = 0.000
-INFO: [Netlist 29-17] Analyzing 584 Unisim elements for replacement
+Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.053 . Memory (MB): peak = 1927.641 ; gain = 0.000
+INFO: [Netlist 29-17] Analyzing 875 Unisim elements for replacement
 INFO: [Netlist 29-28] Unisim Transformation completed in 0 CPU seconds
 WARNING: [Netlist 29-101] Netlist 'GPIO_demo' is not ideal for floorplanning, since the cellview 'LogicUnit' contains a large number of primitives.  Please consider enabling hierarchy in synthesis if you want to do floorplanning.
 INFO: [Project 1-570] Preparing netlist for logic optimization
 INFO: [Opt 31-138] Pushed 0 inverter(s) to 0 load pin(s).
-Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.001 . Memory (MB): peak = 2049.465 ; gain = 0.000
+Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.001 . Memory (MB): peak = 1927.641 ; gain = 0.000
 INFO: [Project 1-111] Unisim Transformation Summary:
 No Unisim elements were transformed.
 
-Synth Design complete | Checksum: c16eb48b
+Synth Design complete | Checksum: 379aaf9a
 INFO: [Common 17-83] Releasing license: Synthesis
-84 Infos, 17 Warnings, 0 Critical Warnings and 0 Errors encountered.
+48 Infos, 20 Warnings, 0 Critical Warnings and 0 Errors encountered.
 synth_design completed successfully
-synth_design: Time (s): cpu = 00:01:55 ; elapsed = 00:02:21 . Memory (MB): peak = 2049.465 ; gain = 1542.258
-Write ShapeDB Complete: Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.006 . Memory (MB): peak = 2049.465 ; gain = 0.000
+synth_design: Time (s): cpu = 00:01:19 ; elapsed = 00:01:22 . Memory (MB): peak = 1927.641 ; gain = 1420.457
+Write ShapeDB Complete: Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.007 . Memory (MB): peak = 1927.641 ; gain = 0.000
 INFO: [Common 17-1381] The checkpoint 'D:/Projekte/Arty/ALU/ALU.runs/synth_1/GPIO_demo.dcp' has been generated.
 INFO: [Vivado 12-24828] Executing command : report_utilization -file GPIO_demo_utilization_synth.rpt -pb GPIO_demo_utilization_synth.pb
-INFO: [Common 17-206] Exiting Vivado at Tue Jan 13 15:50:12 2026...
+INFO: [Common 17-206] Exiting Vivado at Thu Jan 15 14:26:55 2026...
