@@ -352,6 +352,10 @@ signal dm_data_out : std_logic_vector(31 downto 0) := (others => '0');
 signal dm_wr_en : std_logic_vector(3 downto 0) := (others => '0');
 Signal dm_wr_ram_en : std_logic_vector(3 downto 0) := (others => '0');
 signal dm_read_dv : std_logic := '0';
+signal peripherals_read_dv : std_logic := '0';
+signal alu_read_dv : std_logic := '0';
+signal peripherals_read_data : std_logic_vector(31 downto 0) := (others => '0');
+signal alu_read_data : std_logic_vector(31 downto 0) := (others => '0');
 signal dm_lu_addr_dv : std_logic := '0';
 type t_dm_read_states is (state_dm_read_idle, state_dm_read_wait, state_dm_read);
 signal dm_read_state : t_dm_read_states := state_dm_read_idle;
@@ -364,7 +368,10 @@ signal sync_nRst_lu : std_logic := '0';
 Signal wait_peripheral_access_finish : std_logic := '0';
 Signal wait_setup_pm : std_logic := '0';
 signal wait_peripheral_access_finish_cntr : natural range 0 to 7 := 0; 
---Signal debug_flags : std_logic_vector(7 downto 0) := "11111111";
+
+
+-- Registers
+Signal cntr_100MHZ : unsigned(31 downto 0) := (others => '0');
 
 --attribute mark_debug : string;
 --attribute mark_debug of ctrl_logic_unit : signal is "true";
@@ -518,10 +525,12 @@ port map
 	o_DM_Data => dm_data_in,
 	o_DM_Wr_En => dm_wr_en,
 	o_DM_DV => dm_lu_addr_dv,
-	i_DM_Data => dm_data_out,
-	i_DM_DV => dm_read_dv
+	i_DM_Data => alu_read_data,
+	i_DM_DV => alu_read_dv
 );
 
+alu_read_dv <= '1' when (dm_read_dv = '1' or peripherals_read_dv = '1') else '0';
+alu_read_data <= peripherals_read_data when peripherals_read_dv = '1' else dm_data_out;
 
 Ctrl_Lu_Proc : process(clk)
 begin
@@ -691,25 +700,45 @@ end process;
 address_map_proc: process(clk)
 begin
 	if rising_edge(clk) then
-		--debug_flags <= (others => '0');
+	
 		uart_fifo_wr_en <= '0';
+		peripherals_read_data <= (others => '0');
+		peripherals_read_dv <= '0';
+		
 		if sync_nRst_lu = '0' then
 			saved_leds <= (others => '0');
+			cntr_100MHZ <= (others => '0');
 		else 
+			
+			cntr_100MHZ <= cntr_100MHZ + 1; 
 			if dm_lu_addr_dv = '1' and dm_addr(31) = '1' then -- peripherals
-				--debug_flags(0) <= '1';
-				case dm_addr(7 downto 0) is
-					when "00000100" =>	
-						saved_leds <= dm_data_in(3 downto 0);
-						--debug_flags(1) <= '1';
-					when "00001000" =>
-						uart_fifo_din(7 downto 0) <= dm_data_in(7 downto 0);
-						uart_fifo_wr_en <= '1';
-						--debug_flags(2) <= '1';
-					when others =>
-						--debug_flags(3) <= '1';
-						null;
-				end case;	
+				if dm_wr_en = "0000" then -- read 
+					case dm_addr(7 downto 0) is
+						
+						when "000000001" =>
+							peripherals_read_data <= std_logic_vector(cntr_100MHZ);
+							peripherals_read_dv <= '1';
+							
+						when others =>
+							peripherals_read_dv <= '1';
+							null;
+					
+					end case;
+				else -- write
+					case dm_addr(7 downto 0) is
+						when "00000100" =>	
+							saved_leds <= dm_data_in(3 downto 0);
+							
+						when "00001000" =>
+							uart_fifo_din(7 downto 0) <= dm_data_in(7 downto 0);
+							uart_fifo_wr_en <= '1';
+							
+						when others =>
+							null;
+							
+					end case;	
+				end if; 
+					
 			end if;
 		end if;
 		

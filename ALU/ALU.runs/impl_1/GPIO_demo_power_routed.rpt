@@ -1,7 +1,7 @@
 Copyright 1986-2022 Xilinx, Inc. All Rights Reserved. Copyright 2022-2025 Advanced Micro Devices, Inc. All Rights Reserved.
 -------------------------------------------------------------------------------------------------------------------------------------------------
 | Tool Version     : Vivado v.2025.1 (win64) Build 6140274 Thu May 22 00:12:29 MDT 2025
-| Date             : Tue Jan 20 13:55:58 2026
+| Date             : Tue Jan 20 17:59:12 2026
 | Host             : DESKTOP-E28LK6R running 64-bit major release  (build 9200)
 | Command          : report_power -file GPIO_demo_power_routed.rpt -pb GPIO_demo_power_summary_routed.pb -rpx GPIO_demo_power_routed.rpx
 | Design           : GPIO_demo
@@ -30,10 +30,10 @@ Table of Contents
 ----------
 
 +--------------------------+--------------+
-| Total On-Chip Power (W)  | 0.107        |
+| Total On-Chip Power (W)  | 0.109        |
 | Design Power Budget (W)  | Unspecified* |
 | Power Budget Margin (W)  | NA           |
-| Dynamic (W)              | 0.045        |
+| Dynamic (W)              | 0.047        |
 | Device Static (W)        | 0.062        |
 | Effective TJA (C/W)      | 5.3          |
 | Max Ambient (C)          | 84.4         |
@@ -52,18 +52,18 @@ Table of Contents
 +----------------+-----------+----------+-----------+-----------------+
 | On-Chip        | Power (W) | Used     | Available | Utilization (%) |
 +----------------+-----------+----------+-----------+-----------------+
-| Clocks         |     0.006 |        3 |       --- |             --- |
-| Slice Logic    |     0.007 |     5644 |       --- |             --- |
-|   LUT as Logic |     0.006 |     2703 |     14600 |           18.51 |
-|   CARRY4       |    <0.001 |      151 |      3650 |            4.14 |
+| Clocks         |     0.007 |        3 |       --- |             --- |
+| Slice Logic    |     0.007 |     5748 |       --- |             --- |
+|   LUT as Logic |     0.006 |     2714 |     14600 |           18.59 |
+|   CARRY4       |    <0.001 |      159 |      3650 |            4.36 |
 |   F7/F8 Muxes  |    <0.001 |      259 |     14600 |            1.77 |
-|   Register     |    <0.001 |     2170 |     29200 |            7.43 |
+|   Register     |    <0.001 |     2235 |     29200 |            7.65 |
 |   Others       |     0.000 |       71 |       --- |             --- |
-| Signals        |     0.012 |     4726 |       --- |             --- |
+| Signals        |     0.013 |     4828 |       --- |             --- |
 | Block RAM      |     0.016 |     16.5 |        45 |           36.67 |
 | I/O            |     0.004 |       17 |       150 |           11.33 |
 | Static Power   |     0.062 |          |           |                 |
-| Total          |     0.107 |          |           |                 |
+| Total          |     0.109 |          |           |                 |
 +----------------+-----------+----------+-----------+-----------------+
 
 
@@ -73,7 +73,7 @@ Table of Contents
 +-----------+-------------+-----------+-------------+------------+-------------+-------------+------------+
 | Source    | Voltage (V) | Total (A) | Dynamic (A) | Static (A) | Powerup (A) | Budget (A)  | Margin (A) |
 +-----------+-------------+-----------+-------------+------------+-------------+-------------+------------+
-| Vccint    |       1.000 |     0.045 |       0.040 |      0.005 |       NA    | Unspecified | NA         |
+| Vccint    |       1.000 |     0.047 |       0.042 |      0.005 |       NA    | Unspecified | NA         |
 | Vccaux    |       1.800 |     0.010 |       0.000 |      0.009 |       NA    | Unspecified | NA         |
 | Vcco33    |       3.300 |     0.002 |       0.001 |      0.001 |       NA    | Unspecified | NA         |
 | Vcco25    |       2.500 |     0.000 |       0.000 |      0.000 |       NA    | Unspecified | NA         |
@@ -140,8 +140,8 @@ Table of Contents
 +------------------------+-----------+
 | Name                   | Power (W) |
 +------------------------+-----------+
-| GPIO_demo              |     0.045 |
-|   inst_LogicUnit       |     0.020 |
+| GPIO_demo              |     0.047 |
+|   inst_LogicUnit       |     0.021 |
 |   inst_ProgRam         |     0.018 |
 |     U0                 |     0.018 |
 |       inst_blk_mem_gen |     0.018 |
