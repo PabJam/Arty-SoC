@@ -101,7 +101,6 @@ signal instruction_jump : std_logic := '0';
 signal instruction_ready : std_logic := '0';
 signal instruction_loaded : std_logic := '0';
 signal instruction_p4_ready : std_logic := '0';
-signal wait_instruction_ready : std_logic := '1';
 signal instruction_upper : unsigned(0 downto 0) := (others => '0');
 signal instruction_multicycle : std_logic := '0';
 signal next_instruction : unsigned(31 downto 0) := (others => '0');
@@ -119,7 +118,7 @@ attribute mark_debug : string;
 attribute mark_debug of ctrl_logic_unit : signal is "true";
 attribute mark_debug of instruction_decoded : signal is "true";
 attribute mark_debug of instruction_multicycle : signal is "true";
-attribute mark_debug of instruction_jump : signal is "true";
+--attribute mark_debug of instruction_jump : signal is "true";
 attribute mark_debug of opcode : signal is "true";
 attribute mark_debug of func3 : signal is "true";
 attribute mark_debug of rs1 : signal is "true";
@@ -129,14 +128,16 @@ attribute mark_debug of rs2_val : signal is "true";
 attribute mark_debug of immediate : signal is "true";
 attribute mark_debug of current_pc : signal is "true";
 attribute mark_debug of instruction_done : signal is "true";
+attribute mark_debug of i_DM_DV : signal is "true";
+attribute mark_debug of i_DM_Data : signal is "true";
 attribute mark_debug of o_DM_DV : signal is "true";
-attribute mark_debug of o_DM_Wr_En : signal is "true";
-attribute mark_debug of write_operation : signal is "true";
-attribute mark_debug of wait_finish_write_operation : signal is "true";
+attribute mark_debug of o_DM_Data : signal is "true";
+--attribute mark_debug of write_operation : signal is "true";
+--attribute mark_debug of wait_finish_write_operation : signal is "true";
 attribute mark_debug of instruction_ready : signal is "true";
 attribute mark_debug of next_instruction_valid : signal is "true";
-attribute mark_debug of latched_instruction_done : signal is "true";
-
+--attribute mark_debug of latched_instruction_done : signal is "true";
+--attribute mark_debug of fetch_state : signal is "true";
 
 begin
 
@@ -194,15 +195,10 @@ begin
 							v_addr_p8 := pc_fetch(0) + 8;
 							o_PM_Addr <= std_logic_vector(v_addr_p8(15 downto 3));
 							o_PM_DV <= '1';
-							if wait_instruction_ready = '0' then
-								fetch_state <= fetch_state_next_2;
-								pc_fetch(2) <= v_addr_p8;
-								pc_fetch(3) <= pc_fetch(1) + 8;
-							else
-								fetch_state <= fetch_state_next;
-								pc_fetch(0) <= v_addr_p8;
-								pc_fetch(1) <= pc_fetch(1) + 8;
-							end if;
+							
+							fetch_state <= fetch_state_next_2;
+							pc_fetch(2) <= v_addr_p8;
+							pc_fetch(3) <= pc_fetch(1) + 8;
 						else
 							fetch_state <= fetch_state_next;
 						end if;
@@ -268,30 +264,182 @@ begin
 	end if;
 end process;
 
+--instruction_Decode_Proc : process (i_Clk)
+--		variable v_current_instruction : unsigned(31 downto 0) := (others => '0');
+--begin
+--	if rising_edge(i_Clk) then
+--		instruction_read <= '0';
+--
+--		if (i_Sync_nRst = '0') then
+--			instruction_upper <= (others => '0');
+--			instruction_decoded <= '0';
+--			write_operation <= '0';
+--			wait_finish_write_operation <= '0';
+--			next_instruction_valid <= '0';
+--			latched_instruction_done <= '0';
+--		elsif ctrl_logic_unit = '1' and i_Take_Ctrl_Logic_Unit = '0' then
+--			
+--			if instruction_done = '1' then
+--				latched_instruction_done <= '1';
+--			end if;
+--			
+--			if (instruction_ready = '1' or next_instruction_valid = '1') and instruction_multicycle = '0' and wait_finish_write_operation = '0' then
+--				
+--				if instruction_upper(0) = '0' then
+--					v_current_instruction := instruction_fetch(0);
+--					next_instruction <= instruction_fetch(1);
+--					current_pc <= pc(0);
+--					next_pc <= pc(1);
+--					instruction_read <= '1';
+--					next_instruction_valid <= '1';
+--				else
+--					if instruction_jumped = '1' then -- after a jump the next instruction could be on the upper address but we need to turn on instruction_read for the fetch process
+--						v_current_instruction := instruction_fetch(1);
+--						current_pc <= pc(1);
+--						instruction_read <= '1';
+--						
+--					else
+--						v_current_instruction := next_instruction;
+--						current_pc <= next_pc;
+--					end if;
+--					next_instruction_valid <= '0';
+--				end if;
+--				
+--				latched_instruction_done <= '0';
+--				instruction_jumped <= '0';
+--				instruction_upper <= not instruction_upper;
+--				
+--				opcode <= v_current_instruction(6 downto 0);
+--				func3 <= v_current_instruction(14 downto 12);
+--				rs1 <= to_integer(v_current_instruction(19 downto 15));
+--				rs2 <= to_integer(v_current_instruction(24 downto 20));
+--				rd <= to_integer(v_current_instruction(11 downto 7));
+--				rs1_val <= registers(to_integer(v_current_instruction(19 downto 15)));
+--				rs2_val <= registers(to_integer(v_current_instruction(24 downto 20)));
+--				instruction_decoded <= '1';
+--				wait_finish_write_operation <= '0';
+--				
+--				case v_current_instruction(6 downto 0) is --opcode
+--					
+--					when ("0110111" or "0010111") => -- lui / auipc
+--						immediate(19 downto 0) <= v_current_instruction(31 downto 12);
+--						write_operation <= '1';
+--						
+--					when "1101111" => -- jal
+--						immediate(20 downto 0) <= v_current_instruction(31) & v_current_instruction(19 downto 12) & v_current_instruction(20) & v_current_instruction(30 downto 21) & '0';
+--						write_operation <= '1';
+--						
+--					when "1100111" => -- jalr
+--						immediate(11 downto 0) <= v_current_instruction(31 downto 20);
+--						if (to_integer(v_current_instruction(19 downto 15)) = rd and write_operation = '1') then -- current read is previous write => wait
+--							if (instruction_decoded = '1' or latched_instruction_done = '0') and instruction_done = '0' then -- if it didnt decode an operation last cycle and an instruction is done we dont need to wait
+--								instruction_decoded <= '0';
+--								wait_finish_write_operation <= '1';
+--							end if;
+--						end if;
+--						write_operation <= '1';
+--						
+--					when "1100011" => -- B-type
+--						immediate(12 downto 0) <= v_current_instruction(31) & v_current_instruction(7) & v_current_instruction(30 downto 25) & v_current_instruction(11 downto 8) & '0';
+--						if ((to_integer(v_current_instruction(19 downto 15)) = rd or to_integer(v_current_instruction(24 downto 20)) = rd) and write_operation = '1') then -- current read is previous write => wait
+--							if (instruction_decoded = '1' or latched_instruction_done = '0') and instruction_done = '0' then -- if it didnt decode an operation last cycle and an instruction is done we dont need to wait
+--								instruction_decoded <= '0';
+--								wait_finish_write_operation <= '1';
+--							end if;
+--						end if;
+--						write_operation <= '0';
+--						
+--					when "0000011" => -- I-type
+--						immediate(11 downto 0) <= v_current_instruction(31 downto 20);
+--						if (to_integer(v_current_instruction(19 downto 15)) = rd and write_operation = '1') then -- current read is previous write => wait
+--							if (instruction_decoded = '1' or latched_instruction_done = '0') and instruction_done = '0' then -- if it didnt decode an operation last cycle and an instruction is done we dont need to wait
+--								instruction_decoded <= '0';
+--								wait_finish_write_operation <= '1';
+--							end if;
+--						end if;
+--						write_operation <= '1';
+--						
+--					when "0100011" => -- S-type
+--						immediate(11 downto 0) <= v_current_instruction(31 downto 25) & v_current_instruction(11 downto 7); 
+--						if ((to_integer(v_current_instruction(19 downto 15)) = rd or to_integer(v_current_instruction(24 downto 20)) = rd) and write_operation = '1') then -- current read is previous write => wait
+--							if (instruction_decoded = '1' or latched_instruction_done = '0') and instruction_done = '0' then -- if it didnt decode an operation last cycle and an instruction is done we dont need to wait
+--								instruction_decoded <= '0';
+--								wait_finish_write_operation <= '1';
+--							end if;
+--						end if;
+--						write_operation <= '0';
+--					
+--					when "0010011" => -- I-type
+--						immediate(11 downto 0) <= v_current_instruction(31 downto 20);
+--						if (to_integer(v_current_instruction(19 downto 15)) = rd and write_operation = '1') then -- current read is previous write => wait
+--							if (instruction_decoded = '1' or latched_instruction_done = '0') and instruction_done = '0' then -- if it didnt decode an operation last cycle and an instruction is done we dont need to wait
+--								instruction_decoded <= '0';
+--								wait_finish_write_operation <= '1';
+--							end if;
+--						end if;
+--						write_operation <= '1';
+--					
+--					when "0110011" => -- R-type
+--						immediate(6 downto 0) <= v_current_instruction(31 downto 25);
+--						if ((to_integer(v_current_instruction(19 downto 15)) = rd or to_integer(v_current_instruction(24 downto 20)) = rd) and write_operation = '1') then -- current read is previous write => wait
+--							if (instruction_decoded = '1' or latched_instruction_done = '0') and instruction_done = '0' then -- if it didnt decode an operation last cycle and an instruction is done we dont need to wait
+--								instruction_decoded <= '0';
+--								wait_finish_write_operation <= '1';
+--							end if;
+--						end if;
+--						write_operation <= '1';
+--					
+--					when "1110011" => -- I-type
+--						immediate(11 downto 0) <= v_current_instruction(31 downto 20);
+--						write_operation <= '0';
+--					
+--					when others =>
+--						write_operation <= '0';
+--						-- maybe should set instruction decoded to '0' or return control? 
+--						null;
+--				end case;
+--						
+--			elsif instruction_jump = '1' then
+--				instruction_upper(0) <= jmp_addr(2);
+--				instruction_decoded <= '0';
+--				instruction_jumped <= '1';
+--				next_instruction_valid <= '0';
+--			elsif wait_finish_write_operation = '1' and instruction_multicycle = '0' then -- write is done after one cycle if multicycle is 0
+--			
+--				rs1_val <= registers(to_integer(v_current_instruction(19 downto 15)));
+--				rs2_val <= registers(to_integer(v_current_instruction(24 downto 20)));
+--				
+--				instruction_decoded <= '1';
+--				wait_finish_write_operation <= '0';
+--				
+--			else -- waiting cause of fetch or multi cycle
+--				instruction_decoded <= '0';
+--			end if;
+--		else 
+--			instruction_decoded <= '0';
+--		end if; -- reset
+--	end if; -- clk'rising_edge
+--end process;
+
 instruction_Decode_Proc : process (i_Clk)
 		variable v_current_instruction : unsigned(31 downto 0) := (others => '0');
+		variable v_latched_instruction_done : std_logic := '1';
 begin
 	if rising_edge(i_Clk) then
 		instruction_read <= '0';
-		-- TODO wait_instruction_ready should never be active longer then one cycle as long as instruction multicycle is not active 
-		-- because it will always be ready if at least one cycle has passed after the last instruction
-		-- but i can't just turn it off because it needs to send the last instruction it already got instead of overwriting it 
+
 		if (i_Sync_nRst = '0') then
 			instruction_upper <= (others => '0');
 			instruction_decoded <= '0';
-			write_operation <= '0';
-			wait_finish_write_operation <= '0';
-			wait_instruction_ready <= '1';
 			next_instruction_valid <= '0';
-			latched_instruction_done <= '0';
+			v_latched_instruction_done := '1';
 		elsif ctrl_logic_unit = '1' and i_Take_Ctrl_Logic_Unit = '0' then
 			
 			if instruction_done = '1' then
-				latched_instruction_done <= '1';
+				v_latched_instruction_done := '1';
 			end if;
 			
-			if (instruction_ready = '1' or next_instruction_valid = '1') and instruction_jump = '0' and instruction_multicycle = '0' and wait_finish_write_operation = '0' then
-				wait_instruction_ready <= '0';
+			if (instruction_ready = '1' or next_instruction_valid = '1') and v_latched_instruction_done = '1' then
 				
 				if instruction_upper(0) = '0' then
 					v_current_instruction := instruction_fetch(0);
@@ -313,7 +461,7 @@ begin
 					next_instruction_valid <= '0';
 				end if;
 				
-				latched_instruction_done <= '0';
+				v_latched_instruction_done := '0';
 				instruction_jumped <= '0';
 				instruction_upper <= not instruction_upper;
 				
@@ -325,85 +473,47 @@ begin
 				rs1_val <= registers(to_integer(v_current_instruction(19 downto 15)));
 				rs2_val <= registers(to_integer(v_current_instruction(24 downto 20)));
 				instruction_decoded <= '1';
-				wait_finish_write_operation <= '0';
 				
 				case v_current_instruction(6 downto 0) is --opcode
 					
 					when ("0110111" or "0010111") => -- lui / auipc
 						immediate(19 downto 0) <= v_current_instruction(31 downto 12);
-						write_operation <= '1';
+						
 						
 					when "1101111" => -- jal
 						immediate(20 downto 0) <= v_current_instruction(31) & v_current_instruction(19 downto 12) & v_current_instruction(20) & v_current_instruction(30 downto 21) & '0';
-						write_operation <= '1';
+						
 						
 					when "1100111" => -- jalr
 						immediate(11 downto 0) <= v_current_instruction(31 downto 20);
-						if (to_integer(v_current_instruction(19 downto 15)) = rd and write_operation = '1') then -- current read is previous write => wait
-							if (instruction_decoded = '1' or instruction_done = '0') and latched_instruction_done = '0' then -- if it didnt decode an operation last cycle and an instruction is done we dont need to wait
-								instruction_decoded <= '0';
-								wait_finish_write_operation <= '1';
-							end if;
-						end if;
-						write_operation <= '1';
+			
 						
 					when "1100011" => -- B-type
 						immediate(12 downto 0) <= v_current_instruction(31) & v_current_instruction(7) & v_current_instruction(30 downto 25) & v_current_instruction(11 downto 8) & '0';
-						if ((to_integer(v_current_instruction(19 downto 15)) = rd or to_integer(v_current_instruction(24 downto 20)) = rd) and write_operation = '1') then -- current read is previous write => wait
-							if (instruction_decoded = '1' or instruction_done = '0') and latched_instruction_done = '0' then -- if it didnt decode an operation last cycle and an instruction is done we dont need to wait
-								instruction_decoded <= '0';
-								wait_finish_write_operation <= '1';
-							end if;
-						end if;
-						write_operation <= '0';
+						
 						
 					when "0000011" => -- I-type
 						immediate(11 downto 0) <= v_current_instruction(31 downto 20);
-						if (to_integer(v_current_instruction(19 downto 15)) = rd and write_operation = '1') then -- current read is previous write => wait
-							if (instruction_decoded = '1' or instruction_done = '0') and latched_instruction_done = '0' then -- if it didnt decode an operation last cycle and an instruction is done we dont need to wait
-								instruction_decoded <= '0';
-								wait_finish_write_operation <= '1';
-							end if;
-						end if;
-						write_operation <= '1';
+						
 						
 					when "0100011" => -- S-type
 						immediate(11 downto 0) <= v_current_instruction(31 downto 25) & v_current_instruction(11 downto 7); 
-						if ((to_integer(v_current_instruction(19 downto 15)) = rd or to_integer(v_current_instruction(24 downto 20)) = rd) and write_operation = '1') then -- current read is previous write => wait
-							if (instruction_decoded = '1' or instruction_done = '0') and latched_instruction_done = '0' then -- if it didnt decode an operation last cycle and an instruction is done we dont need to wait
-								instruction_decoded <= '0';
-								wait_finish_write_operation <= '1';
-							end if;
-						end if;
-						write_operation <= '0';
+						
 					
 					when "0010011" => -- I-type
 						immediate(11 downto 0) <= v_current_instruction(31 downto 20);
-						if (to_integer(v_current_instruction(19 downto 15)) = rd and write_operation = '1') then -- current read is previous write => wait
-							if (instruction_decoded = '1' or instruction_done = '0') and latched_instruction_done = '0' then -- if it didnt decode an operation last cycle and an instruction is done we dont need to wait
-								instruction_decoded <= '0';
-								wait_finish_write_operation <= '1';
-							end if;
-						end if;
-						write_operation <= '1';
+						
 					
 					when "0110011" => -- R-type
 						immediate(6 downto 0) <= v_current_instruction(31 downto 25);
-						if ((to_integer(v_current_instruction(19 downto 15)) = rd or to_integer(v_current_instruction(24 downto 20)) = rd) and write_operation = '1') then -- current read is previous write => wait
-							if (instruction_decoded = '1' or instruction_done = '0') and latched_instruction_done = '0' then -- if it didnt decode an operation last cycle and an instruction is done we dont need to wait
-								instruction_decoded <= '0';
-								wait_finish_write_operation <= '1';
-							end if;
-						end if;
-						write_operation <= '1';
+						
 					
 					when "1110011" => -- I-type
 						immediate(11 downto 0) <= v_current_instruction(31 downto 20);
-						write_operation <= '0';
+						
 					
 					when others =>
-						write_operation <= '0';
-						-- maybe should set instruction decoded to '0' or return control? 
+						
 						null;
 				end case;
 						
@@ -411,20 +521,9 @@ begin
 				instruction_upper(0) <= jmp_addr(2);
 				instruction_decoded <= '0';
 				instruction_jumped <= '1';
-			elsif wait_finish_write_operation = '1' then
-				rs1_val <= registers(to_integer(v_current_instruction(19 downto 15)));
-				rs2_val <= registers(to_integer(v_current_instruction(24 downto 20)));
-				
-				if instruction_done = '1' then
-					instruction_decoded <= '1';
-					wait_finish_write_operation <= '0';
-				end if;
-				
+				next_instruction_valid <= '0';
 			else -- waiting cause of fetch or multi cycle
 				instruction_decoded <= '0';
-				if (next_instruction_valid = '0' and instruction_ready = '0') then -- waiting on fetch process
-					wait_instruction_ready <= '1';
-				end if;
 			end if;
 		else 
 			instruction_decoded <= '0';
@@ -538,7 +637,7 @@ begin
 							
 					end case;
 				
-				--TODO important in memory access all writes must have completed bevore a read access can occur
+				
 				when "0000011" => -- I-type
 					case func3 is -- func3
 						

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<GenRun Id="synth_1" LaunchPart="xc7s25csga324-1" LaunchTime="1768513992" LaunchWriteIncrSynthDcp="true">
+<GenRun Id="synth_1" LaunchPart="xc7s25csga324-1" LaunchTime="1768907023" LaunchWriteIncrSynthDcp="true">
   <File Type="PA-TCL" Name="GPIO_demo.tcl"/>
   <File Type="REPORTS-TCL" Name="GPIO_demo_reports.tcl"/>
   <File Type="RDS-RDS" Name="GPIO_demo.vds"/>
