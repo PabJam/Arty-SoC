@@ -1,0 +1,71 @@
+
+program.elf:     file format elf32-littleriscv
+
+
+Disassembly of section .text:
+
+00000000 <_start>:
+   0:	00010137          	lui	sp,0x10
+   4:	00010113          	mv	sp,sp
+   8:	0d800513          	li	a0,216
+   c:	0d800593          	li	a1,216
+
+00000010 <clear_bss>:
+  10:	00b50863          	beq	a0,a1,20 <bss_done>
+  14:	00052023          	sw	zero,0(a0)
+  18:	00450513          	addi	a0,a0,4
+  1c:	ff5ff06f          	j	10 <clear_bss>
+
+00000020 <bss_done>:
+  20:	034000ef          	jal	54 <main>
+
+00000024 <_halt>:
+  24:	0000006f          	j	24 <_halt>
+
+00000028 <delay>:
+  28:	ff010113          	addi	sp,sp,-16 # fff0 <_bss_end+0xff18>
+  2c:	00012623          	sw	zero,12(sp)
+  30:	00c12783          	lw	a5,12(sp)
+  34:	00a7dc63          	bge	a5,a0,4c <delay+0x24>
+  38:	00c12783          	lw	a5,12(sp)
+  3c:	00178793          	addi	a5,a5,1
+  40:	00f12623          	sw	a5,12(sp)
+  44:	00c12783          	lw	a5,12(sp)
+  48:	fea7c8e3          	blt	a5,a0,38 <delay+0x10>
+  4c:	01010113          	addi	sp,sp,16
+  50:	00008067          	ret
+
+00000054 <main>:
+  54:	80000637          	lui	a2,0x80000
+  58:	00018737          	lui	a4,0x18
+  5c:	ff010113          	addi	sp,sp,-16
+  60:	00860613          	addi	a2,a2,8 # 80000008 <_stack_top+0x7fff0008>
+  64:	69f70713          	addi	a4,a4,1695 # 1869f <_stack_top+0x869f>
+  68:	00000693          	li	a3,0
+  6c:	10000593          	li	a1,256
+  70:	00d62023          	sw	a3,0(a2)
+  74:	00168693          	addi	a3,a3,1
+  78:	02b68863          	beq	a3,a1,a8 <main+0x54>
+  7c:	00012623          	sw	zero,12(sp)
+  80:	00c12783          	lw	a5,12(sp)
+  84:	fef746e3          	blt	a4,a5,70 <main+0x1c>
+  88:	00c12783          	lw	a5,12(sp)
+  8c:	00178793          	addi	a5,a5,1
+  90:	00f12623          	sw	a5,12(sp)
+  94:	00c12783          	lw	a5,12(sp)
+  98:	fef758e3          	bge	a4,a5,88 <main+0x34>
+  9c:	00d62023          	sw	a3,0(a2)
+  a0:	00168693          	addi	a3,a3,1
+  a4:	fcb69ce3          	bne	a3,a1,7c <main+0x28>
+  a8:	00012623          	sw	zero,12(sp)
+  ac:	00c12783          	lw	a5,12(sp)
+  b0:	00000693          	li	a3,0
+  b4:	fcf75ae3          	bge	a4,a5,88 <main+0x34>
+  b8:	00062023          	sw	zero,0(a2)
+  bc:	00012623          	sw	zero,12(sp)
+  c0:	00c12783          	lw	a5,12(sp)
+  c4:	00100693          	li	a3,1
+  c8:	fcf750e3          	bge	a4,a5,88 <main+0x34>
+  cc:	00d62023          	sw	a3,0(a2)
+  d0:	00200693          	li	a3,2
+  d4:	fa9ff06f          	j	7c <main+0x28>

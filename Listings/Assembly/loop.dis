@@ -1,0 +1,19 @@
+
+loop.elf:     file format elf32-littleriscv
+
+
+Disassembly of section .text:
+
+00000000 <_start>:
+   0:	80000537          	lui	a0,0x80000
+   4:	00850513          	addi	a0,a0,8 # 80000008 <done+0x7fffffec>
+   8:	00000293          	li	t0,0
+   c:	00a00313          	li	t1,10
+
+00000010 <loop>:
+  10:	00128293          	addi	t0,t0,1
+  14:	fe62cee3          	blt	t0,t1,10 <loop>
+  18:	00550023          	sb	t0,0(a0)
+
+0000001c <done>:
+  1c:	00100073          	ebreak

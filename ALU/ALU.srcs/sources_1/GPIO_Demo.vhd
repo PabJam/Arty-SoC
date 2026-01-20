@@ -363,6 +363,7 @@ signal take_ctrl_logic_unit : std_logic := '0';
 signal sync_nRst_lu : std_logic := '0';
 Signal wait_peripheral_access_finish : std_logic := '0';
 Signal wait_setup_pm : std_logic := '0';
+signal wait_peripheral_access_finish_cntr : natural range 0 to 7 := 0; 
 --Signal debug_flags : std_logic_vector(7 downto 0) := "11111111";
 
 --attribute mark_debug : string;
@@ -531,9 +532,11 @@ begin
 		uart_fifo_srst <= '0';
 		wait_setup_pm <= '0';
 		
-		if (wait_peripheral_access_finish = '1' and uart_fifo_empty = '1') then
+		if (wait_peripheral_access_finish = '1' and uart_fifo_empty = '1' and wait_peripheral_access_finish_cntr = 0) then
 			ctrl_logic_unit <= '0';
 			wait_peripheral_access_finish <= '0';
+		elsif wait_peripheral_access_finish_cntr /= 0 then
+			wait_peripheral_access_finish_cntr <= wait_peripheral_access_finish_cntr - 1;
 		end if;
 		
 		if (wait_setup_pm = '1' and ctrl_logic_unit = '1') then
@@ -542,6 +545,7 @@ begin
 		
 		if (get_ctrl_logic_unit = '1') then
 			wait_peripheral_access_finish <= '1';
+			wait_peripheral_access_finish_cntr <= 7; -- just to ensure that the last uart fifo write has enough time to go through cntr value is arbitrary
 		end if;	
 		
 		if (btnReg(3)='0' and btnDeBnc(3)='1') then
@@ -552,6 +556,7 @@ begin
 		if (btnReg(2)='0' and btnDeBnc(2)='1') then
 			take_ctrl_logic_unit <= '1';
 			wait_peripheral_access_finish <= '1';
+			wait_peripheral_access_finish_cntr <= 7;
 		end if;
 		
 		if (btnReg(1)='0' and btnDeBnc(1)='1') then

@@ -115,27 +115,28 @@ signal latched_instruction_done : std_logic := '0';
 
 attribute mark_debug : string;
 
-attribute mark_debug of ctrl_logic_unit : signal is "true";
-attribute mark_debug of instruction_decoded : signal is "true";
-attribute mark_debug of instruction_multicycle : signal is "true";
+--attribute mark_debug of ctrl_logic_unit : signal is "true";
+--attribute mark_debug of instruction_decoded : signal is "true";
+--attribute mark_debug of instruction_multicycle : signal is "true";
 --attribute mark_debug of instruction_jump : signal is "true";
-attribute mark_debug of opcode : signal is "true";
-attribute mark_debug of func3 : signal is "true";
-attribute mark_debug of rs1 : signal is "true";
-attribute mark_debug of rs1_val : signal is "true";
-attribute mark_debug of rs2 : signal is "true";
-attribute mark_debug of rs2_val : signal is "true";
-attribute mark_debug of immediate : signal is "true";
-attribute mark_debug of current_pc : signal is "true";
-attribute mark_debug of instruction_done : signal is "true";
-attribute mark_debug of i_DM_DV : signal is "true";
-attribute mark_debug of i_DM_Data : signal is "true";
-attribute mark_debug of o_DM_DV : signal is "true";
-attribute mark_debug of o_DM_Data : signal is "true";
+--attribute mark_debug of instruction_jumped : signal is "true";
+--attribute mark_debug of opcode : signal is "true";
+--attribute mark_debug of func3 : signal is "true";
+--attribute mark_debug of rs1 : signal is "true";
+--attribute mark_debug of rs1_val : signal is "true";
+--attribute mark_debug of rs2 : signal is "true";
+--attribute mark_debug of rs2_val : signal is "true";
+--attribute mark_debug of immediate : signal is "true";
+--attribute mark_debug of current_pc : signal is "true";
+--attribute mark_debug of instruction_done : signal is "true";
+--attribute mark_debug of i_DM_DV : signal is "true";
+--attribute mark_debug of i_DM_Data : signal is "true";
+--attribute mark_debug of o_DM_DV : signal is "true";
+--attribute mark_debug of o_DM_Data : signal is "true";
 --attribute mark_debug of write_operation : signal is "true";
 --attribute mark_debug of wait_finish_write_operation : signal is "true";
-attribute mark_debug of instruction_ready : signal is "true";
-attribute mark_debug of next_instruction_valid : signal is "true";
+--attribute mark_debug of instruction_ready : signal is "true";
+--attribute mark_debug of next_instruction_valid : signal is "true";
 --attribute mark_debug of latched_instruction_done : signal is "true";
 --attribute mark_debug of fetch_state : signal is "true";
 
@@ -439,7 +440,7 @@ begin
 				v_latched_instruction_done := '1';
 			end if;
 			
-			if (instruction_ready = '1' or next_instruction_valid = '1') and v_latched_instruction_done = '1' then
+			if (instruction_ready = '1' or next_instruction_valid = '1') and v_latched_instruction_done = '1' and instruction_jump = '0' then
 				
 				if instruction_upper(0) = '0' then
 					v_current_instruction := instruction_fetch(0);
