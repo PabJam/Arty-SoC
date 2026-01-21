@@ -3,8 +3,8 @@
 # SW Build 6140274 on Thu May 22 00:12:29 MDT 2025
 # IP Build 6138677 on Thu May 22 03:10:11 MDT 2025
 # SharedData Build 6139179 on Tue May 20 17:58:58 MDT 2025
-# Start of session at: Wed Jan 21 10:30:54 2026
-# Process ID         : 29728
+# Start of session at: Wed Jan 21 16:17:08 2026
+# Process ID         : 30008
 # Current directory  : D:/Projekte/Arty/ALU/ALU.runs/synth_1
 # Command line       : vivado.exe -log GPIO_demo.vds -product Vivado -mode batch -messageDb vivado.pb -notrace -source GPIO_demo.tcl
 # Log file           : D:/Projekte/Arty/ALU/ALU.runs/synth_1/GPIO_demo.vds
@@ -19,7 +19,7 @@
 # Host memory        : 34257 MB
 # Swap memory        : 5100 MB
 # Total Virtual      : 39358 MB
-# Available Virtual  : 20587 MB
+# Available Virtual  : 22907 MB
 #-----------------------------------------------------------
 source GPIO_demo.tcl -notrace
 Command: synth_design -top GPIO_demo -part xc7s25csga324-1 -directive FewerCarryChains -keep_equivalent_registers -resource_sharing off -no_lc
@@ -29,65 +29,198 @@ INFO: [Common 17-349] Got license for feature 'Synthesis' and/or device 'xc7s25'
 INFO: [Device 21-403] Loading part xc7s25csga324-1
 INFO: [Synth 8-7079] Multithreading enabled for synth_design using a maximum of 2 processes.
 INFO: [Synth 8-7078] Launching helper process for spawning children vivado processes
-INFO: [Synth 8-7075] Helper process launched with PID 29448
+INFO: [Synth 8-7075] Helper process launched with PID 28276
 ---------------------------------------------------------------------------------
-Starting RTL Elaboration : Time (s): cpu = 00:00:05 ; elapsed = 00:00:04 . Memory (MB): peak = 1159.496 ; gain = 491.363
+Starting RTL Elaboration : Time (s): cpu = 00:00:03 ; elapsed = 00:00:04 . Memory (MB): peak = 1160.191 ; gain = 491.477
 ---------------------------------------------------------------------------------
-INFO: [Synth 8-638] synthesizing module 'GPIO_demo' [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/GPIO_Demo.vhd:70]
+INFO: [Synth 8-638] synthesizing module 'GPIO_demo' [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/GPIO_Demo.vhd:77]
 	Parameter DEBNC_CLOCKS bound to: 65536 - type: integer 
 	Parameter PORT_WIDTH bound to: 4 - type: integer 
-INFO: [Synth 8-3491] module 'debouncer' declared at 'D:/Projekte/Arty/ALU/ALU.srcs/sources_1/debouncer.vhd:42' bound to instance 'Inst_btn_debounce' of component 'debouncer' [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/GPIO_Demo.vhd:444]
+INFO: [Synth 8-3491] module 'debouncer' declared at 'D:/Projekte/Arty/ALU/ALU.srcs/sources_1/debouncer.vhd:42' bound to instance 'Inst_btn_debounce' of component 'debouncer' [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/GPIO_Demo.vhd:428]
 INFO: [Synth 8-638] synthesizing module 'debouncer' [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/debouncer.vhd:50]
 	Parameter DEBNC_CLOCKS bound to: 65536 - type: integer 
 	Parameter PORT_WIDTH bound to: 4 - type: integer 
 INFO: [Synth 8-256] done synthesizing module 'debouncer' (0#1) [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/debouncer.vhd:50]
 	Parameter g_CLKS_PER_BIT bound to: 868 - type: integer 
-INFO: [Synth 8-3491] module 'UART_TX_CTRL' declared at 'D:/Projekte/Arty/ALU/ALU.srcs/sources_1/UART_TX_CTRL.vhd:15' bound to instance 'Inst_UART_TX_CTRL' of component 'UART_TX_CTRL' [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/GPIO_Demo.vhd:476]
+INFO: [Synth 8-3491] module 'UART_TX_CTRL' declared at 'D:/Projekte/Arty/ALU/ALU.srcs/sources_1/UART_TX_CTRL.vhd:15' bound to instance 'Inst_UART_TX_CTRL' of component 'UART_TX_CTRL' [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/GPIO_Demo.vhd:460]
 INFO: [Synth 8-638] synthesizing module 'UART_TX_CTRL' [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/UART_TX_CTRL.vhd:32]
 	Parameter g_CLKS_PER_BIT bound to: 868 - type: integer 
 INFO: [Synth 8-256] done synthesizing module 'UART_TX_CTRL' (0#1) [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/UART_TX_CTRL.vhd:32]
 	Parameter g_CLKS_PER_BIT bound to: 868 - type: integer 
-INFO: [Synth 8-3491] module 'UART_RX_CTRL' declared at 'D:/Projekte/Arty/ALU/ALU.srcs/sources_1/UART_RX_CTRL.vhd:20' bound to instance 'Inst_UART_RX_CTRL' of component 'UART_RX_CTRL' [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/GPIO_Demo.vhd:491]
+INFO: [Synth 8-3491] module 'UART_RX_CTRL' declared at 'D:/Projekte/Arty/ALU/ALU.srcs/sources_1/UART_RX_CTRL.vhd:20' bound to instance 'Inst_UART_RX_CTRL' of component 'UART_RX_CTRL' [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/GPIO_Demo.vhd:475]
 INFO: [Synth 8-638] synthesizing module 'UART_RX_CTRL' [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/UART_RX_CTRL.vhd:34]
 	Parameter g_CLKS_PER_BIT bound to: 868 - type: integer 
 INFO: [Synth 8-256] done synthesizing module 'UART_RX_CTRL' (0#1) [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/UART_RX_CTRL.vhd:34]
-INFO: [Synth 8-3491] module 'UART_Fifo' declared at 'D:/Projekte/Arty/ALU/ALU.runs/synth_1/.Xil/Vivado-29728-DESKTOP-E28LK6R/realtime/UART_Fifo_stub.vhdl:6' bound to instance 'Inst_UART_Fifo' of component 'UART_Fifo' [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/GPIO_Demo.vhd:503]
-INFO: [Synth 8-638] synthesizing module 'UART_Fifo' [D:/Projekte/Arty/ALU/ALU.runs/synth_1/.Xil/Vivado-29728-DESKTOP-E28LK6R/realtime/UART_Fifo_stub.vhdl:27]
-INFO: [Synth 8-3491] module 'LogicUnit' declared at 'D:/Projekte/Arty/ALU/ALU.srcs/sources_1/LogicUnit.vhd:34' bound to instance 'inst_LogicUnit' of component 'LogicUnit' [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/GPIO_Demo.vhd:522]
+INFO: [Synth 8-3491] module 'UART_Fifo' declared at 'D:/Projekte/Arty/ALU/ALU.runs/synth_1/.Xil/Vivado-30008-DESKTOP-E28LK6R/realtime/UART_Fifo_stub.vhdl:6' bound to instance 'Inst_UART_Fifo' of component 'UART_Fifo' [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/GPIO_Demo.vhd:487]
+INFO: [Synth 8-638] synthesizing module 'UART_Fifo' [D:/Projekte/Arty/ALU/ALU.runs/synth_1/.Xil/Vivado-30008-DESKTOP-E28LK6R/realtime/UART_Fifo_stub.vhdl:27]
+	Parameter DRIVE bound to: 12 - type: integer 
+	Parameter IOSTANDARD bound to: LVCMOS33 - type: string 
+	Parameter SLEW bound to: SLOW - type: string 
+INFO: [Synth 8-113] binding component instance 'IOBUF_inst_a' to cell 'IOBUF' [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/GPIO_Demo.vhd:504]
+	Parameter DRIVE bound to: 12 - type: integer 
+	Parameter IOSTANDARD bound to: LVCMOS33 - type: string 
+	Parameter SLEW bound to: SLOW - type: string 
+INFO: [Synth 8-113] binding component instance 'IOBUF_inst_b' to cell 'IOBUF' [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/GPIO_Demo.vhd:519]
+	Parameter DRIVE bound to: 12 - type: integer 
+	Parameter IOSTANDARD bound to: LVCMOS33 - type: string 
+	Parameter SLEW bound to: SLOW - type: string 
+INFO: [Synth 8-113] binding component instance 'IOBUF_inst_c' to cell 'IOBUF' [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/GPIO_Demo.vhd:534]
+	Parameter DRIVE bound to: 12 - type: integer 
+	Parameter IOSTANDARD bound to: LVCMOS33 - type: string 
+	Parameter SLEW bound to: SLOW - type: string 
+INFO: [Synth 8-113] binding component instance 'IOBUF_inst_d' to cell 'IOBUF' [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/GPIO_Demo.vhd:549]
+	Parameter DRIVE bound to: 12 - type: integer 
+	Parameter IOSTANDARD bound to: LVCMOS33 - type: string 
+	Parameter SLEW bound to: SLOW - type: string 
+INFO: [Synth 8-113] binding component instance 'IOBUF_inst_a' to cell 'IOBUF' [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/GPIO_Demo.vhd:504]
+	Parameter DRIVE bound to: 12 - type: integer 
+	Parameter IOSTANDARD bound to: LVCMOS33 - type: string 
+	Parameter SLEW bound to: SLOW - type: string 
+INFO: [Synth 8-113] binding component instance 'IOBUF_inst_b' to cell 'IOBUF' [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/GPIO_Demo.vhd:519]
+	Parameter DRIVE bound to: 12 - type: integer 
+	Parameter IOSTANDARD bound to: LVCMOS33 - type: string 
+	Parameter SLEW bound to: SLOW - type: string 
+INFO: [Synth 8-113] binding component instance 'IOBUF_inst_c' to cell 'IOBUF' [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/GPIO_Demo.vhd:534]
+	Parameter DRIVE bound to: 12 - type: integer 
+	Parameter IOSTANDARD bound to: LVCMOS33 - type: string 
+	Parameter SLEW bound to: SLOW - type: string 
+INFO: [Synth 8-113] binding component instance 'IOBUF_inst_d' to cell 'IOBUF' [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/GPIO_Demo.vhd:549]
+	Parameter DRIVE bound to: 12 - type: integer 
+	Parameter IOSTANDARD bound to: LVCMOS33 - type: string 
+	Parameter SLEW bound to: SLOW - type: string 
+INFO: [Synth 8-113] binding component instance 'IOBUF_inst_a' to cell 'IOBUF' [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/GPIO_Demo.vhd:504]
+	Parameter DRIVE bound to: 12 - type: integer 
+	Parameter IOSTANDARD bound to: LVCMOS33 - type: string 
+	Parameter SLEW bound to: SLOW - type: string 
+INFO: [Synth 8-113] binding component instance 'IOBUF_inst_b' to cell 'IOBUF' [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/GPIO_Demo.vhd:519]
+	Parameter DRIVE bound to: 12 - type: integer 
+	Parameter IOSTANDARD bound to: LVCMOS33 - type: string 
+	Parameter SLEW bound to: SLOW - type: string 
+INFO: [Synth 8-113] binding component instance 'IOBUF_inst_c' to cell 'IOBUF' [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/GPIO_Demo.vhd:534]
+	Parameter DRIVE bound to: 12 - type: integer 
+	Parameter IOSTANDARD bound to: LVCMOS33 - type: string 
+	Parameter SLEW bound to: SLOW - type: string 
+INFO: [Synth 8-113] binding component instance 'IOBUF_inst_d' to cell 'IOBUF' [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/GPIO_Demo.vhd:549]
+	Parameter DRIVE bound to: 12 - type: integer 
+	Parameter IOSTANDARD bound to: LVCMOS33 - type: string 
+	Parameter SLEW bound to: SLOW - type: string 
+INFO: [Synth 8-113] binding component instance 'IOBUF_inst_a' to cell 'IOBUF' [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/GPIO_Demo.vhd:504]
+	Parameter DRIVE bound to: 12 - type: integer 
+	Parameter IOSTANDARD bound to: LVCMOS33 - type: string 
+	Parameter SLEW bound to: SLOW - type: string 
+INFO: [Synth 8-113] binding component instance 'IOBUF_inst_b' to cell 'IOBUF' [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/GPIO_Demo.vhd:519]
+	Parameter DRIVE bound to: 12 - type: integer 
+	Parameter IOSTANDARD bound to: LVCMOS33 - type: string 
+	Parameter SLEW bound to: SLOW - type: string 
+INFO: [Synth 8-113] binding component instance 'IOBUF_inst_c' to cell 'IOBUF' [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/GPIO_Demo.vhd:534]
+	Parameter DRIVE bound to: 12 - type: integer 
+	Parameter IOSTANDARD bound to: LVCMOS33 - type: string 
+	Parameter SLEW bound to: SLOW - type: string 
+INFO: [Synth 8-113] binding component instance 'IOBUF_inst_d' to cell 'IOBUF' [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/GPIO_Demo.vhd:549]
+	Parameter DRIVE bound to: 12 - type: integer 
+	Parameter IOSTANDARD bound to: LVCMOS33 - type: string 
+	Parameter SLEW bound to: SLOW - type: string 
+INFO: [Synth 8-113] binding component instance 'IOBUF_inst_a' to cell 'IOBUF' [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/GPIO_Demo.vhd:504]
+	Parameter DRIVE bound to: 12 - type: integer 
+	Parameter IOSTANDARD bound to: LVCMOS33 - type: string 
+	Parameter SLEW bound to: SLOW - type: string 
+INFO: [Synth 8-113] binding component instance 'IOBUF_inst_b' to cell 'IOBUF' [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/GPIO_Demo.vhd:519]
+	Parameter DRIVE bound to: 12 - type: integer 
+	Parameter IOSTANDARD bound to: LVCMOS33 - type: string 
+	Parameter SLEW bound to: SLOW - type: string 
+INFO: [Synth 8-113] binding component instance 'IOBUF_inst_c' to cell 'IOBUF' [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/GPIO_Demo.vhd:534]
+	Parameter DRIVE bound to: 12 - type: integer 
+	Parameter IOSTANDARD bound to: LVCMOS33 - type: string 
+	Parameter SLEW bound to: SLOW - type: string 
+INFO: [Synth 8-113] binding component instance 'IOBUF_inst_d' to cell 'IOBUF' [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/GPIO_Demo.vhd:549]
+	Parameter DRIVE bound to: 12 - type: integer 
+	Parameter IOSTANDARD bound to: LVCMOS33 - type: string 
+	Parameter SLEW bound to: SLOW - type: string 
+INFO: [Synth 8-113] binding component instance 'IOBUF_inst_a' to cell 'IOBUF' [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/GPIO_Demo.vhd:504]
+	Parameter DRIVE bound to: 12 - type: integer 
+	Parameter IOSTANDARD bound to: LVCMOS33 - type: string 
+	Parameter SLEW bound to: SLOW - type: string 
+INFO: [Synth 8-113] binding component instance 'IOBUF_inst_b' to cell 'IOBUF' [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/GPIO_Demo.vhd:519]
+	Parameter DRIVE bound to: 12 - type: integer 
+	Parameter IOSTANDARD bound to: LVCMOS33 - type: string 
+	Parameter SLEW bound to: SLOW - type: string 
+INFO: [Synth 8-113] binding component instance 'IOBUF_inst_c' to cell 'IOBUF' [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/GPIO_Demo.vhd:534]
+	Parameter DRIVE bound to: 12 - type: integer 
+	Parameter IOSTANDARD bound to: LVCMOS33 - type: string 
+	Parameter SLEW bound to: SLOW - type: string 
+INFO: [Synth 8-113] binding component instance 'IOBUF_inst_d' to cell 'IOBUF' [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/GPIO_Demo.vhd:549]
+	Parameter DRIVE bound to: 12 - type: integer 
+	Parameter IOSTANDARD bound to: LVCMOS33 - type: string 
+	Parameter SLEW bound to: SLOW - type: string 
+INFO: [Synth 8-113] binding component instance 'IOBUF_inst_a' to cell 'IOBUF' [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/GPIO_Demo.vhd:504]
+	Parameter DRIVE bound to: 12 - type: integer 
+	Parameter IOSTANDARD bound to: LVCMOS33 - type: string 
+	Parameter SLEW bound to: SLOW - type: string 
+INFO: [Synth 8-113] binding component instance 'IOBUF_inst_b' to cell 'IOBUF' [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/GPIO_Demo.vhd:519]
+	Parameter DRIVE bound to: 12 - type: integer 
+	Parameter IOSTANDARD bound to: LVCMOS33 - type: string 
+	Parameter SLEW bound to: SLOW - type: string 
+INFO: [Synth 8-113] binding component instance 'IOBUF_inst_c' to cell 'IOBUF' [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/GPIO_Demo.vhd:534]
+	Parameter DRIVE bound to: 12 - type: integer 
+	Parameter IOSTANDARD bound to: LVCMOS33 - type: string 
+	Parameter SLEW bound to: SLOW - type: string 
+INFO: [Synth 8-113] binding component instance 'IOBUF_inst_d' to cell 'IOBUF' [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/GPIO_Demo.vhd:549]
+	Parameter DRIVE bound to: 12 - type: integer 
+	Parameter IOSTANDARD bound to: LVCMOS33 - type: string 
+	Parameter SLEW bound to: SLOW - type: string 
+INFO: [Synth 8-113] binding component instance 'IOBUF_inst_a' to cell 'IOBUF' [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/GPIO_Demo.vhd:504]
+	Parameter DRIVE bound to: 12 - type: integer 
+	Parameter IOSTANDARD bound to: LVCMOS33 - type: string 
+	Parameter SLEW bound to: SLOW - type: string 
+INFO: [Synth 8-113] binding component instance 'IOBUF_inst_b' to cell 'IOBUF' [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/GPIO_Demo.vhd:519]
+	Parameter DRIVE bound to: 12 - type: integer 
+	Parameter IOSTANDARD bound to: LVCMOS33 - type: string 
+	Parameter SLEW bound to: SLOW - type: string 
+INFO: [Synth 8-113] binding component instance 'IOBUF_inst_c' to cell 'IOBUF' [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/GPIO_Demo.vhd:534]
+	Parameter DRIVE bound to: 12 - type: integer 
+	Parameter IOSTANDARD bound to: LVCMOS33 - type: string 
+	Parameter SLEW bound to: SLOW - type: string 
+INFO: [Synth 8-113] binding component instance 'IOBUF_inst_d' to cell 'IOBUF' [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/GPIO_Demo.vhd:549]
+INFO: [Synth 8-3491] module 'LogicUnit' declared at 'D:/Projekte/Arty/ALU/ALU.srcs/sources_1/LogicUnit.vhd:34' bound to instance 'inst_LogicUnit' of component 'LogicUnit' [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/GPIO_Demo.vhd:570]
 INFO: [Synth 8-638] synthesizing module 'LogicUnit' [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/LogicUnit.vhd:55]
-INFO: [Synth 8-226] default block is never used [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/LogicUnit.vhd:725]
-INFO: [Synth 8-226] default block is never used [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/LogicUnit.vhd:780]
-INFO: [Synth 8-226] default block is never used [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/LogicUnit.vhd:968]
-INFO: [Synth 8-226] default block is never used [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/LogicUnit.vhd:1001]
+INFO: [Synth 8-226] default block is never used [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/LogicUnit.vhd:699]
+INFO: [Synth 8-226] default block is never used [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/LogicUnit.vhd:754]
+INFO: [Synth 8-226] default block is never used [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/LogicUnit.vhd:942]
+INFO: [Synth 8-226] default block is never used [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/LogicUnit.vhd:975]
 INFO: [Synth 8-256] done synthesizing module 'LogicUnit' (0#1) [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/LogicUnit.vhd:55]
-INFO: [Synth 8-3491] module 'ProgRam' declared at 'D:/Projekte/Arty/ALU/ALU.runs/synth_1/.Xil/Vivado-29728-DESKTOP-E28LK6R/realtime/ProgRam_stub.vhdl:6' bound to instance 'inst_ProgRam' of component 'ProgRam' [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/GPIO_Demo.vhd:596]
-INFO: [Synth 8-638] synthesizing module 'ProgRam' [D:/Projekte/Arty/ALU/ALU.runs/synth_1/.Xil/Vivado-29728-DESKTOP-E28LK6R/realtime/ProgRam_stub.vhdl:28]
-WARNING: [Synth 8-6044] Case expression and choice expression width mismatch, Case expression is 8 wide and choice expression is 9 wide [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/GPIO_Demo.vhd:734]
-INFO: [Synth 8-256] done synthesizing module 'GPIO_demo' (0#1) [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/GPIO_Demo.vhd:70]
-WARNING: [Synth 8-6014] Unused sequential element rs1_reg was removed.  [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/LogicUnit.vhd:471]
-WARNING: [Synth 8-6014] Unused sequential element rs2_reg was removed.  [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/LogicUnit.vhd:472]
-WARNING: [Synth 8-6014] Unused sequential element latched_immediate_reg was removed.  [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/LogicUnit.vhd:555]
-WARNING: [Synth 8-6014] Unused sequential element latched_rs2_reg was removed.  [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/LogicUnit.vhd:557]
-WARNING: [Synth 8-6014] Unused sequential element latched_rs1_reg was removed.  [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/LogicUnit.vhd:558]
-WARNING: [Synth 8-6014] Unused sequential element latched_rs2_val_reg was removed.  [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/LogicUnit.vhd:560]
-INFO: [Synth 8-6071] Mark debug on the nets applies keep_hierarchy on instance 'inst_LogicUnit'. This will prevent further optimization [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/GPIO_Demo.vhd:522]
+INFO: [Synth 8-3491] module 'ProgRam' declared at 'D:/Projekte/Arty/ALU/ALU.runs/synth_1/.Xil/Vivado-30008-DESKTOP-E28LK6R/realtime/ProgRam_stub.vhdl:6' bound to instance 'inst_ProgRam' of component 'ProgRam' [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/GPIO_Demo.vhd:644]
+INFO: [Synth 8-638] synthesizing module 'ProgRam' [D:/Projekte/Arty/ALU/ALU.runs/synth_1/.Xil/Vivado-30008-DESKTOP-E28LK6R/realtime/ProgRam_stub.vhdl:28]
+WARNING: [Synth 8-6044] Case expression and choice expression width mismatch, Case expression is 8 wide and choice expression is 9 wide [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/GPIO_Demo.vhd:782]
+WARNING: [Synth 8-6044] Case expression and choice expression width mismatch, Case expression is 8 wide and choice expression is 9 wide [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/GPIO_Demo.vhd:786]
+WARNING: [Synth 8-6044] Case expression and choice expression width mismatch, Case expression is 8 wide and choice expression is 9 wide [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/GPIO_Demo.vhd:790]
+WARNING: [Synth 8-6044] Case expression and choice expression width mismatch, Case expression is 8 wide and choice expression is 9 wide [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/GPIO_Demo.vhd:817]
+WARNING: [Synth 8-6044] Case expression and choice expression width mismatch, Case expression is 8 wide and choice expression is 9 wide [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/GPIO_Demo.vhd:823]
+INFO: [Synth 8-256] done synthesizing module 'GPIO_demo' (0#1) [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/GPIO_Demo.vhd:77]
+WARNING: [Synth 8-6014] Unused sequential element rs1_reg was removed.  [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/LogicUnit.vhd:445]
+WARNING: [Synth 8-6014] Unused sequential element rs2_reg was removed.  [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/LogicUnit.vhd:446]
+WARNING: [Synth 8-6014] Unused sequential element latched_immediate_reg was removed.  [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/LogicUnit.vhd:529]
+WARNING: [Synth 8-6014] Unused sequential element latched_rs2_reg was removed.  [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/LogicUnit.vhd:531]
+WARNING: [Synth 8-6014] Unused sequential element latched_rs1_reg was removed.  [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/LogicUnit.vhd:532]
+WARNING: [Synth 8-6014] Unused sequential element latched_rs2_val_reg was removed.  [D:/Projekte/Arty/ALU/ALU.srcs/sources_1/LogicUnit.vhd:534]
 WARNING: [Synth 8-7129] Port SW[3] in module GPIO_demo is either unconnected or has no load
 WARNING: [Synth 8-7129] Port SW[2] in module GPIO_demo is either unconnected or has no load
 WARNING: [Synth 8-7129] Port SW[1] in module GPIO_demo is either unconnected or has no load
 WARNING: [Synth 8-7129] Port SW[0] in module GPIO_demo is either unconnected or has no load
 ---------------------------------------------------------------------------------
-Finished RTL Elaboration : Time (s): cpu = 00:00:07 ; elapsed = 00:00:07 . Memory (MB): peak = 1357.395 ; gain = 689.262
+Finished RTL Elaboration : Time (s): cpu = 00:00:06 ; elapsed = 00:00:07 . Memory (MB): peak = 1358.566 ; gain = 689.852
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
 Start Handling Custom Attributes
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
-Finished Handling Custom Attributes : Time (s): cpu = 00:00:07 ; elapsed = 00:00:07 . Memory (MB): peak = 1357.395 ; gain = 689.262
+Finished Handling Custom Attributes : Time (s): cpu = 00:00:06 ; elapsed = 00:00:07 . Memory (MB): peak = 1358.566 ; gain = 689.852
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
-Finished RTL Optimization Phase 1 : Time (s): cpu = 00:00:07 ; elapsed = 00:00:07 . Memory (MB): peak = 1357.395 ; gain = 689.262
+Finished RTL Optimization Phase 1 : Time (s): cpu = 00:00:06 ; elapsed = 00:00:07 . Memory (MB): peak = 1358.566 ; gain = 689.852
 ---------------------------------------------------------------------------------
-Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.227 . Memory (MB): peak = 1357.395 ; gain = 0.000
+Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.201 . Memory (MB): peak = 1358.566 ; gain = 0.000
+INFO: [Netlist 29-17] Analyzing 32 Unisim elements for replacement
+INFO: [Netlist 29-28] Unisim Transformation completed in 0 CPU seconds
 INFO: [Project 1-570] Preparing netlist for logic optimization
 
 Processing XDC Constraints
@@ -98,35 +231,34 @@ Parsing XDC File [d:/Projekte/Arty/ALU/ALU.gen/sources_1/ip/ProgRam/ProgRam/Prog
 Finished Parsing XDC File [d:/Projekte/Arty/ALU/ALU.gen/sources_1/ip/ProgRam/ProgRam/ProgRam_in_context.xdc] for cell 'inst_ProgRam'
 Parsing XDC File [D:/Projekte/Arty/ALU/ALU.srcs/constrs_1/Arty-S7-25-Debug.xdc]
 Finished Parsing XDC File [D:/Projekte/Arty/ALU/ALU.srcs/constrs_1/Arty-S7-25-Debug.xdc]
-INFO: [Project 1-236] Implementation specific constraints were found while reading constraint file [D:/Projekte/Arty/ALU/ALU.srcs/constrs_1/Arty-S7-25-Debug.xdc]. These constraints will be ignored for synthesis but will be used in implementation. Impacted constraints are listed in the file [.Xil/GPIO_demo_propImpl.xdc].
-Resolution: To avoid this warning, move constraints listed in [.Xil/GPIO_demo_propImpl.xdc] to another XDC file and exclude this new file from synthesis with the used_in_synthesis property (File Properties dialog in GUI) and re-run elaboration/synthesis.
 Parsing XDC File [D:/Projekte/Arty/ALU/ALU.srcs/constrs_1/Arty-S7-25-Master.xdc]
 Finished Parsing XDC File [D:/Projekte/Arty/ALU/ALU.srcs/constrs_1/Arty-S7-25-Master.xdc]
 INFO: [Project 1-236] Implementation specific constraints were found while reading constraint file [D:/Projekte/Arty/ALU/ALU.srcs/constrs_1/Arty-S7-25-Master.xdc]. These constraints will be ignored for synthesis but will be used in implementation. Impacted constraints are listed in the file [.Xil/GPIO_demo_propImpl.xdc].
 Resolution: To avoid this warning, move constraints listed in [.Xil/GPIO_demo_propImpl.xdc] to another XDC file and exclude this new file from synthesis with the used_in_synthesis property (File Properties dialog in GUI) and re-run elaboration/synthesis.
 Completed Processing XDC Constraints
 
-Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.002 . Memory (MB): peak = 1444.543 ; gain = 0.000
+Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.004 . Memory (MB): peak = 1443.098 ; gain = 0.000
 INFO: [Project 1-111] Unisim Transformation Summary:
-No Unisim elements were transformed.
+  A total of 32 instances were transformed.
+  IOBUF => IOBUF (IBUF, OBUFT): 32 instances
 
-Constraint Validation Runtime : Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.016 . Memory (MB): peak = 1444.543 ; gain = 0.000
+Constraint Validation Runtime : Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.017 . Memory (MB): peak = 1443.098 ; gain = 0.000
 WARNING: [Timing 38-316] Clock period '20.000' specified during out-of-context synthesis of instance 'inst_ProgRam' at clock pin 'clka' is different from the actual clock period '10.000', this can lead to different synthesis results.
 ---------------------------------------------------------------------------------
-Finished Constraint Validation : Time (s): cpu = 00:00:15 ; elapsed = 00:00:15 . Memory (MB): peak = 1445.977 ; gain = 777.844
+Finished Constraint Validation : Time (s): cpu = 00:00:14 ; elapsed = 00:00:15 . Memory (MB): peak = 1443.559 ; gain = 774.844
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
 Start Loading Part and Timing Information
 ---------------------------------------------------------------------------------
 Loading part: xc7s25csga324-1
 ---------------------------------------------------------------------------------
-Finished Loading Part and Timing Information : Time (s): cpu = 00:00:15 ; elapsed = 00:00:15 . Memory (MB): peak = 1445.977 ; gain = 777.844
+Finished Loading Part and Timing Information : Time (s): cpu = 00:00:14 ; elapsed = 00:00:15 . Memory (MB): peak = 1443.559 ; gain = 774.844
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
 Start Applying 'set_property' XDC Constraints
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
-Finished applying 'set_property' XDC Constraints : Time (s): cpu = 00:00:15 ; elapsed = 00:00:15 . Memory (MB): peak = 1445.977 ; gain = 777.844
+Finished applying 'set_property' XDC Constraints : Time (s): cpu = 00:00:14 ; elapsed = 00:00:15 . Memory (MB): peak = 1443.559 ; gain = 774.844
 ---------------------------------------------------------------------------------
 INFO: [Synth 8-802] inferred FSM for state register 'r_SM_Main_reg' in module 'UART_TX_CTRL'
 INFO: [Synth 8-802] inferred FSM for state register 'fetch_state_reg' in module 'LogicUnit'
@@ -154,6 +286,15 @@ INFO: [Synth 8-3354] encoded FSM with state register 'fetch_state_reg' using enc
 ---------------------------------------------------------------------------------------------------
                    State |                     New Encoding |                Previous Encoding 
 ---------------------------------------------------------------------------------------------------
+      state_dm_read_idle |                              001 |                               00
+      state_dm_read_wait |                              010 |                               01
+           state_dm_read |                              100 |                               10
+---------------------------------------------------------------------------------------------------
+INFO: [Synth 8-3354] encoded FSM with state register 'dm_read_state_reg' using encoding 'one-hot' in module 'GPIO_demo'
+WARNING: [Synth 8-12595] Onehot encoded FSM with state register 'dm_read_state_reg' is not having reset. This may cause incorrect behavior. User should consider using FSM_SAFE_STATE attribute on the register
+---------------------------------------------------------------------------------------------------
+                   State |                     New Encoding |                Previous Encoding 
+---------------------------------------------------------------------------------------------------
        program_uart_idle |                              000 |                              000
       program_uart_write |                              001 |                              001
     program_uart_preread |                              010 |                              010
@@ -161,17 +302,8 @@ INFO: [Synth 8-3354] encoded FSM with state register 'fetch_state_reg' using enc
        program_uart_read |                              100 |                              100
 ---------------------------------------------------------------------------------------------------
 INFO: [Synth 8-3354] encoded FSM with state register 'progRam_Uart_State_reg' using encoding 'sequential' in module 'GPIO_demo'
----------------------------------------------------------------------------------------------------
-                   State |                     New Encoding |                Previous Encoding 
----------------------------------------------------------------------------------------------------
-      state_dm_read_idle |                              001 |                               00
-      state_dm_read_wait |                              010 |                               01
-           state_dm_read |                              100 |                               10
----------------------------------------------------------------------------------------------------
-INFO: [Synth 8-3354] encoded FSM with state register 'dm_read_state_reg' using encoding 'one-hot' in module 'GPIO_demo'
-WARNING: [Synth 8-12595] Onehot encoded FSM with state register 'dm_read_state_reg' is not having reset. This may cause incorrect behavior. User should consider using FSM_SAFE_STATE attribute on the register
 ---------------------------------------------------------------------------------
-Finished RTL Optimization Phase 2 : Time (s): cpu = 00:00:18 ; elapsed = 00:00:19 . Memory (MB): peak = 1445.977 ; gain = 777.844
+Finished RTL Optimization Phase 2 : Time (s): cpu = 00:00:17 ; elapsed = 00:00:19 . Memory (MB): peak = 1443.559 ; gain = 774.844
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
 Start RTL Component Statistics 
@@ -180,7 +312,8 @@ Detailed RTL Component Info :
 +---Adders : 
 	   2 Input   32 Bit       Adders := 11    
 	   3 Input   32 Bit       Adders := 1     
-	   2 Input   16 Bit       Adders := 7     
+	   2 Input   17 Bit       Adders := 2     
+	   2 Input   16 Bit       Adders := 5     
 	   2 Input   10 Bit       Adders := 2     
 	   2 Input    3 Bit       Adders := 3     
 +---XORs : 
@@ -189,10 +322,11 @@ Detailed RTL Component Info :
 +---Registers : 
 	               32 Bit    Registers := 54    
 	               21 Bit    Registers := 1     
-	               16 Bit    Registers := 8     
-	               13 Bit    Registers := 3     
+	               17 Bit    Registers := 2     
+	               16 Bit    Registers := 6     
+	               14 Bit    Registers := 3     
 	               10 Bit    Registers := 2     
-	                8 Bit    Registers := 17    
+	                8 Bit    Registers := 25    
 	                7 Bit    Registers := 2     
 	                5 Bit    Registers := 1     
 	                4 Bit    Registers := 5     
@@ -200,18 +334,18 @@ Detailed RTL Component Info :
 	                2 Bit    Registers := 1     
 	                1 Bit    Registers := 43    
 +---Muxes : 
-	   2 Input   32 Bit        Muxes := 263   
 	   4 Input   32 Bit        Muxes := 1     
-	   8 Input   32 Bit        Muxes := 31    
+	   2 Input   32 Bit        Muxes := 261   
 	   6 Input   32 Bit        Muxes := 31    
 	   3 Input   32 Bit        Muxes := 6     
-	   2 Input   21 Bit        Muxes := 1     
+	   8 Input   32 Bit        Muxes := 31    
 	  10 Input   21 Bit        Muxes := 1     
+	   2 Input   21 Bit        Muxes := 1     
+	   5 Input   17 Bit        Muxes := 2     
 	   2 Input   16 Bit        Muxes := 5     
-	   5 Input   16 Bit        Muxes := 2     
-	   2 Input   13 Bit        Muxes := 5     
-	   3 Input   13 Bit        Muxes := 1     
-	   5 Input   13 Bit        Muxes := 1     
+	   2 Input   14 Bit        Muxes := 5     
+	   3 Input   14 Bit        Muxes := 1     
+	   5 Input   14 Bit        Muxes := 1     
 	   2 Input   10 Bit        Muxes := 1     
 	   6 Input   10 Bit        Muxes := 1     
 	   2 Input    8 Bit        Muxes := 7     
@@ -224,15 +358,15 @@ Detailed RTL Component Info :
 	   2 Input    4 Bit        Muxes := 1     
 	   4 Input    3 Bit        Muxes := 1     
 	   2 Input    3 Bit        Muxes := 8     
-	   5 Input    3 Bit        Muxes := 1     
 	   3 Input    3 Bit        Muxes := 1     
+	   5 Input    3 Bit        Muxes := 1     
 	   3 Input    2 Bit        Muxes := 2     
 	   2 Input    2 Bit        Muxes := 6     
 	   4 Input    2 Bit        Muxes := 1     
-	   2 Input    1 Bit        Muxes := 293   
-	   4 Input    1 Bit        Muxes := 5     
+	   2 Input    1 Bit        Muxes := 294   
 	   3 Input    1 Bit        Muxes := 8     
-	   6 Input    1 Bit        Muxes := 6     
+	   4 Input    1 Bit        Muxes := 5     
+	   6 Input    1 Bit        Muxes := 7     
 	   5 Input    1 Bit        Muxes := 20    
 ---------------------------------------------------------------------------------
 Finished RTL Component Statistics 
@@ -255,25 +389,25 @@ WARNING: [Synth 8-7129] Port SW[2] in module GPIO_demo is either unconnected or 
 WARNING: [Synth 8-7129] Port SW[1] in module GPIO_demo is either unconnected or has no load
 WARNING: [Synth 8-7129] Port SW[0] in module GPIO_demo is either unconnected or has no load
 ---------------------------------------------------------------------------------
-Finished Cross Boundary and Area Optimization : Time (s): cpu = 00:00:40 ; elapsed = 00:00:41 . Memory (MB): peak = 1509.258 ; gain = 841.125
+Finished Cross Boundary and Area Optimization : Time (s): cpu = 00:00:38 ; elapsed = 00:00:41 . Memory (MB): peak = 1638.727 ; gain = 970.012
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
 Start Applying XDC Timing Constraints
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
-Finished Applying XDC Timing Constraints : Time (s): cpu = 00:00:44 ; elapsed = 00:00:45 . Memory (MB): peak = 1548.551 ; gain = 880.418
+Finished Applying XDC Timing Constraints : Time (s): cpu = 00:00:42 ; elapsed = 00:00:45 . Memory (MB): peak = 1638.727 ; gain = 970.012
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
 Start Timing Optimization
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
-Finished Timing Optimization : Time (s): cpu = 00:01:12 ; elapsed = 00:01:14 . Memory (MB): peak = 1769.668 ; gain = 1101.535
+Finished Timing Optimization : Time (s): cpu = 00:01:05 ; elapsed = 00:01:09 . Memory (MB): peak = 1874.699 ; gain = 1205.984
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
 Start Technology Mapping
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
-Finished Technology Mapping : Time (s): cpu = 00:01:13 ; elapsed = 00:01:15 . Memory (MB): peak = 1769.668 ; gain = 1101.535
+Finished Technology Mapping : Time (s): cpu = 00:01:07 ; elapsed = 00:01:11 . Memory (MB): peak = 1874.699 ; gain = 1205.984
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
 Start IO Insertion
@@ -291,37 +425,37 @@ Start Final Netlist Cleanup
 Finished Final Netlist Cleanup
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
-Finished IO Insertion : Time (s): cpu = 00:01:17 ; elapsed = 00:01:18 . Memory (MB): peak = 1801.258 ; gain = 1133.125
+Finished IO Insertion : Time (s): cpu = 00:01:10 ; elapsed = 00:01:14 . Memory (MB): peak = 1874.699 ; gain = 1205.984
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
 Start Renaming Generated Instances
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
-Finished Renaming Generated Instances : Time (s): cpu = 00:01:17 ; elapsed = 00:01:18 . Memory (MB): peak = 1801.258 ; gain = 1133.125
+Finished Renaming Generated Instances : Time (s): cpu = 00:01:10 ; elapsed = 00:01:14 . Memory (MB): peak = 1874.699 ; gain = 1205.984
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
 Start Rebuilding User Hierarchy
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
-Finished Rebuilding User Hierarchy : Time (s): cpu = 00:01:17 ; elapsed = 00:01:18 . Memory (MB): peak = 1801.258 ; gain = 1133.125
+Finished Rebuilding User Hierarchy : Time (s): cpu = 00:01:10 ; elapsed = 00:01:14 . Memory (MB): peak = 1874.699 ; gain = 1205.984
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
 Start Renaming Generated Ports
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
-Finished Renaming Generated Ports : Time (s): cpu = 00:01:17 ; elapsed = 00:01:18 . Memory (MB): peak = 1801.258 ; gain = 1133.125
+Finished Renaming Generated Ports : Time (s): cpu = 00:01:10 ; elapsed = 00:01:14 . Memory (MB): peak = 1874.699 ; gain = 1205.984
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
 Start Handling Custom Attributes
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
-Finished Handling Custom Attributes : Time (s): cpu = 00:01:17 ; elapsed = 00:01:19 . Memory (MB): peak = 1801.258 ; gain = 1133.125
+Finished Handling Custom Attributes : Time (s): cpu = 00:01:10 ; elapsed = 00:01:14 . Memory (MB): peak = 1874.699 ; gain = 1205.984
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
 Start Renaming Generated Nets
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
-Finished Renaming Generated Nets : Time (s): cpu = 00:01:17 ; elapsed = 00:01:19 . Memory (MB): peak = 1801.258 ; gain = 1133.125
+Finished Renaming Generated Nets : Time (s): cpu = 00:01:10 ; elapsed = 00:01:14 . Memory (MB): peak = 1874.699 ; gain = 1205.984
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
 Start Writing Synthesis Report
@@ -344,40 +478,42 @@ Report Cell Usage:
 |3     |BUFG           |     1|
 |4     |CARRY4         |   154|
 |5     |LUT1           |    29|
-|6     |LUT2           |   262|
-|7     |LUT3           |   269|
-|8     |LUT4           |   514|
-|9     |LUT5           |   495|
-|10    |LUT6           |  1297|
-|11    |MUXF7          |   259|
-|12    |FDRE           |  2131|
-|13    |FDSE           |    17|
+|6     |LUT2           |   244|
+|7     |LUT3           |   252|
+|8     |LUT4           |   402|
+|9     |LUT5           |   556|
+|10    |LUT6           |  1440|
+|11    |MUXF7          |   137|
+|12    |FDRE           |  2213|
+|13    |FDSE           |     4|
 |14    |IBUF           |     6|
-|15    |OBUF           |    11|
+|15    |IOBUF          |    32|
+|16    |OBUF           |    11|
 +------+---------------+------+
 ---------------------------------------------------------------------------------
-Finished Writing Synthesis Report : Time (s): cpu = 00:01:17 ; elapsed = 00:01:19 . Memory (MB): peak = 1801.258 ; gain = 1133.125
+Finished Writing Synthesis Report : Time (s): cpu = 00:01:10 ; elapsed = 00:01:14 . Memory (MB): peak = 1874.699 ; gain = 1205.984
 ---------------------------------------------------------------------------------
 Synthesis finished with 0 errors, 0 critical warnings and 7 warnings.
-Synthesis Optimization Runtime : Time (s): cpu = 00:01:07 ; elapsed = 00:01:16 . Memory (MB): peak = 1801.258 ; gain = 1044.543
-Synthesis Optimization Complete : Time (s): cpu = 00:01:17 ; elapsed = 00:01:19 . Memory (MB): peak = 1801.258 ; gain = 1133.125
+Synthesis Optimization Runtime : Time (s): cpu = 00:01:01 ; elapsed = 00:01:11 . Memory (MB): peak = 1874.699 ; gain = 1120.992
+Synthesis Optimization Complete : Time (s): cpu = 00:01:10 ; elapsed = 00:01:14 . Memory (MB): peak = 1874.699 ; gain = 1205.984
 INFO: [Project 1-571] Translating synthesized netlist
-Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.040 . Memory (MB): peak = 1810.426 ; gain = 0.000
-INFO: [Netlist 29-17] Analyzing 413 Unisim elements for replacement
+Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.055 . Memory (MB): peak = 1874.699 ; gain = 0.000
+INFO: [Netlist 29-17] Analyzing 323 Unisim elements for replacement
 INFO: [Netlist 29-28] Unisim Transformation completed in 0 CPU seconds
 WARNING: [Netlist 29-101] Netlist 'GPIO_demo' is not ideal for floorplanning, since the cellview 'LogicUnit' contains a large number of primitives.  Please consider enabling hierarchy in synthesis if you want to do floorplanning.
 INFO: [Project 1-570] Preparing netlist for logic optimization
 INFO: [Opt 31-138] Pushed 0 inverter(s) to 0 load pin(s).
-Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.001 . Memory (MB): peak = 1814.070 ; gain = 0.000
+Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.001 . Memory (MB): peak = 1874.699 ; gain = 0.000
 INFO: [Project 1-111] Unisim Transformation Summary:
-No Unisim elements were transformed.
+  A total of 32 instances were transformed.
+  IOBUF => IOBUF (IBUF, OBUFT): 32 instances
 
-Synth Design complete | Checksum: b8e110bc
+Synth Design complete | Checksum: 2f172869
 INFO: [Common 17-83] Releasing license: Synthesis
-47 Infos, 20 Warnings, 0 Critical Warnings and 0 Errors encountered.
+79 Infos, 24 Warnings, 0 Critical Warnings and 0 Errors encountered.
 synth_design completed successfully
-synth_design: Time (s): cpu = 00:01:19 ; elapsed = 00:01:23 . Memory (MB): peak = 1814.070 ; gain = 1306.324
-Write ShapeDB Complete: Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.004 . Memory (MB): peak = 1814.070 ; gain = 0.000
+synth_design: Time (s): cpu = 00:01:13 ; elapsed = 00:01:19 . Memory (MB): peak = 1874.699 ; gain = 1366.684
+Write ShapeDB Complete: Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.004 . Memory (MB): peak = 1874.699 ; gain = 0.000
 INFO: [Common 17-1381] The checkpoint 'D:/Projekte/Arty/ALU/ALU.runs/synth_1/GPIO_demo.dcp' has been generated.
 INFO: [Vivado 12-24828] Executing command : report_utilization -file GPIO_demo_utilization_synth.rpt -pb GPIO_demo_utilization_synth.pb
-INFO: [Common 17-206] Exiting Vivado at Wed Jan 21 10:32:26 2026...
+INFO: [Common 17-206] Exiting Vivado at Wed Jan 21 16:18:35 2026...

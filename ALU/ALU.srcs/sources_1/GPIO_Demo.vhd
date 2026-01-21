@@ -44,6 +44,9 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 
+library UNISIM;
+use UNISIM.VComponents.all;
+
 --The IEEE.std_logic_unsigned contains definitions that allow 
 --std_logic_vector types to be used with the + operator to instantiate a 
 --counter.
@@ -63,7 +66,11 @@ entity GPIO_demo is
 		led0_b : out std_logic;    
 		led1_r : out std_logic;
 		led1_g : out std_logic;
-		led1_b : out std_logic
+		led1_b : out std_logic;
+		ja : inout std_logic_vector(7 downto 0);
+		jb : inout std_logic_vector(7 downto 0);
+		jc : inout std_logic_vector(7 downto 0);
+		jd : inout std_logic_vector(7 downto 0)
 	);
 end GPIO_demo;
 
@@ -78,7 +85,7 @@ component LogicUnit
 		i_Give_Ctrl_Logic_Unit : in std_logic;
 		i_Take_Ctrl_Logic_Unit : in std_logic;
 		o_Return_Ctrl_Logic_Unit : out std_logic;
-		o_PM_Addr : out std_logic_vector(12 downto 0);
+		o_PM_Addr : out std_logic_vector(13 downto 0);
 		o_PM_DV : out std_logic;
 		i_PM_Data : in std_logic_vector(63 downto 0);
 		i_PM_DV : in std_logic;
@@ -134,27 +141,16 @@ component ProgRam
 	(
 		clka : in std_logic;
 		wea : in std_logic_vector ( 7 downto 0 );
-		addra : in std_logic_vector ( 12 downto 0 );
+		addra : in std_logic_vector ( 13 downto 0 );
 		dina : in std_logic_vector ( 63 downto 0 );
 		douta : out std_logic_vector ( 63 downto 0 );
 		clkb : in std_logic;
 		web : in std_logic_vector ( 3 downto 0 );
-		addrb : in std_logic_vector ( 13 downto 0 );
+		addrb : in std_logic_vector ( 14 downto 0 );
 		dinb : in std_logic_vector ( 31 downto 0 );
 		doutb : out std_logic_vector ( 31 downto 0 )
 	);
 end component;
-
---component DataRam
---	port
---	(
---		clka : in std_logic;
---		wea : in std_logic_vector ( 3 downto 0 );
---		addra : in std_logic_vector ( 13 downto 0 );
---		dina : in std_logic_vector ( 31 downto 0 );
---		douta : out std_logic_vector ( 31 downto 0 )
---	);
---end component;
 
 component debouncer
 Generic(
@@ -328,12 +324,12 @@ signal progRam_Uart_State : t_progRam_Uart_States := progRam_Uart_Idle;
 type t_pm_lu_states is (pm_lu_state_idle, pm_lu_state_pre_read, pm_lu_state_read);
 signal pm_lu_state : t_pm_lu_states := pm_lu_state_pre_read;
 
-signal progRam_Addr : std_logic_vector(12 downto 0) := (others => '0');
-signal progRam_addr_lu : std_logic_vector(12 downto 0) := (others => '0'); 
-signal latched_progRam_addr_lu : std_logic_vector(12 downto 0) := (others => '0'); 
+signal progRam_Addr : std_logic_vector(13 downto 0) := (others => '0');
+signal progRam_addr_lu : std_logic_vector(13 downto 0) := (others => '0'); 
+signal latched_progRam_addr_lu : std_logic_vector(13 downto 0) := (others => '0'); 
 signal progRam_addr_uart : std_logic_vector(12 downto 0) := (others => '0'); 
-signal progRam_Wr_Cntr : unsigned(15 downto 0) := (others => '0');
-signal progRam_Rd_Cntr : unsigned(15 downto 0) := (others => '0');
+signal progRam_Wr_Cntr : unsigned(16 downto 0) := (others => '0');
+signal progRam_Rd_Cntr : unsigned(16 downto 0) := (others => '0');
 signal progRam_Wr_En : std_logic_vector(7 downto 0) := (others => '0'); -- can also write single bytes instead of full 64 bit
 signal progRam_Data_In : std_logic_vector(63 downto 0); 
 signal progRam_Data_Out : std_logic_vector(63 downto 0); 
@@ -371,36 +367,24 @@ signal wait_peripheral_access_finish_cntr : natural range 0 to 7 := 0;
 
 
 -- Registers
-Signal cntr_100MHZ : unsigned(31 downto 0) := (others => '0');
+signal cntr_100MHZ : unsigned(31 downto 0) := (others => '0');
 
-attribute mark_debug : string;
-attribute mark_debug of ctrl_logic_unit : signal is "true";
-attribute mark_debug of cntr_100MHZ : signal is "true";
-attribute mark_debug of alu_read_dv : signal is "true";
-attribute mark_debug of alu_read_data : signal is "true";
+-- GPIO for PMOD ports
+signal ja_out : std_logic_vector(7 downto 0) := (others => '0');
+signal ja_in : std_logic_vector(7 downto 0);
+signal ja_io : std_logic_vector(7 downto 0) := (others => '0');
 
---attribute mark_debug of dm_data_in : signal is "true";
---attribute mark_debug of dm_data_out : signal is "true";
---attribute mark_debug of dm_wr_en : signal is "true";
---attribute mark_debug of dm_read_dv : signal is "true";
---attribute mark_debug of dm_read_state : signal is "true";
---attribute mark_debug of dm_lu_addr_dv : signal is "true";
---attribute mark_debug of dm_addr : signal is "true";
---attribute mark_debug of progRam_Addr : signal is "true";
---attribute mark_debug of progRam_Wr_En : signal is "true";
---attribute mark_debug of progRam_Data_In : signal is "true";
---attribute mark_debug of progRam_Data_Out : signal is "true";
---attribute mark_debug of uart_fifo_din : signal is "true";
---attribute mark_debug of uart_fifo_dout : signal is "true";
---attribute mark_debug of uart_fifo_wr_en : signal is "true";
---attribute mark_debug of uart_fifo_rd_en : signal is "true";
---attribute mark_debug of uart_fifo_valid : signal is "true";
---attribute mark_debug of uart_fifo_empty : signal is "true";
---attribute mark_debug of uart_fifo_srst : signal is "true";
---attribute mark_debug of uart_TX_Active : signal is "true";
---attribute mark_debug of uart_TX_Data : signal is "true";
---attribute mark_debug of uart_TX_DV : signal is "true";
---attribute mark_debug of debug_flags : signal is "true";
+signal jb_out : std_logic_vector(7 downto 0) := (others => '0');
+signal jb_in : std_logic_vector(7 downto 0);
+signal jb_io : std_logic_vector(7 downto 0) := (others => '0');
+
+signal jc_out : std_logic_vector(7 downto 0) := (others => '0');
+signal jc_in : std_logic_vector(7 downto 0);
+signal jc_io : std_logic_vector(7 downto 0) := (others => '0');
+
+signal jd_out : std_logic_vector(7 downto 0) := (others => '0');
+signal jd_in : std_logic_vector(7 downto 0);
+signal jd_io : std_logic_vector(7 downto 0) := (others => '0');
 
 --Current uart state signal
 signal uartState : UART_STATE_TYPE := RST_REG;
@@ -515,6 +499,70 @@ port map
 );
 
 
+gen_iobuf: for i in 0 to 7 generate
+
+	IOBUF_inst_a : IOBUF
+	generic map 
+	(
+		DRIVE => 12,
+		IOSTANDARD => "LVCMOS33",
+		SLEW => "SLOW"
+	)
+	port map 
+	(
+		O => ja_in(i),
+		IO => ja(i),
+		I => ja_out(i),
+		T => ja_io(i)
+	);
+	
+	IOBUF_inst_b : IOBUF
+	generic map 
+	(
+		DRIVE => 12,
+		IOSTANDARD => "LVCMOS33",
+		SLEW => "SLOW"
+	)
+	port map 
+	(
+		O => jb_in(i),
+		IO => jb(i),
+		I => jb_out(i),
+		T => jb_io(i)
+	);
+	
+	IOBUF_inst_c : IOBUF
+	generic map 
+	(
+		DRIVE => 12,
+		IOSTANDARD => "LVCMOS33",
+		SLEW => "SLOW"
+	)
+	port map 
+	(
+		O => jc_in(i),
+		IO => jc(i),
+		I => jc_out(i),
+		T => jc_io(i)
+	);
+	
+	IOBUF_inst_d : IOBUF
+	generic map 
+	(
+		DRIVE => 12,
+		IOSTANDARD => "LVCMOS33",
+		SLEW => "SLOW"
+	)
+	port map 
+	(
+		O => jd_in(i),
+		IO => jd(i),
+		I => jd_out(i),
+		T => jd_io(i)
+	);
+
+end generate;
+
 ----------------------------------------------------------
 ------              Logic Unit Control             -------
 ----------------------------------------------------------
@@ -603,7 +651,7 @@ port map
 	douta => progRam_Data_Out,
 	clkb => clk,
 	web => dm_wr_ram_en,
-	addrb => dm_addr(15 downto 2),
+	addrb => dm_addr(16 downto 2),
 	dinb => dm_data_in,
 	doutb => dm_data_out
 );
@@ -637,7 +685,7 @@ begin
 				when progRam_Uart_Write =>
 					if progRam_Wr_Cntr < x"FFFF" then
 						progRam_Data_In_Bytes(to_integer(progRam_Wr_Cntr(2 downto 0)))(7 downto 0) <= uart_RX_Data(7 downto 0);
-						progRam_Addr(12 downto 0) <=  std_logic_vector(progRam_Wr_Cntr(15 downto 3));
+						progRam_Addr(13 downto 0) <=  std_logic_vector(progRam_Wr_Cntr(16 downto 3));
 						progRam_Wr_En(to_integer(progRam_Wr_Cntr(2 downto 0))) <= '1'; 
 						progRam_Wr_Cntr <= progRam_Wr_Cntr + 1;
 					end if;
@@ -647,7 +695,7 @@ begin
 				-- Always takes a clk cycle to read data even if address didn't change
 				-- could be improved to read all 4 bytes in read and only change state when addres changes
 				when progRam_Uart_PreRead => 
-					progRam_Addr(12 downto 0) <= std_logic_vector(progRam_Rd_Cntr(15 downto 3));
+					progRam_Addr(13 downto 0) <= std_logic_vector(progRam_Rd_Cntr(16 downto 3));
 					progRam_Uart_State <= ProgRam_Uart_ReadWait;
 				
 				when progRam_Uart_ReadWait =>
@@ -734,7 +782,15 @@ begin
 						when "000000000" =>
 							peripherals_read_data <= std_logic_vector(cntr_100MHZ);
 							peripherals_read_dv <= '1';
-							
+						
+						when "000010000" => 
+							peripherals_read_data <= jd_in(7 downto 0) & jc_in(7 downto 0) & jb_in(7 downto 0) & ja_in(7 downto 0);
+							peripherals_read_dv <= '1';
+						
+						when "000010100" =>
+							peripherals_read_data <= jd_io(7 downto 0) & jc_io(7 downto 0) & jb_io(7 downto 0) & ja_io(7 downto 0);
+							peripherals_read_dv <= '1';
+						
 						when others =>
 							peripherals_read_dv <= '1';
 							null;
@@ -758,6 +814,18 @@ begin
 							uart_fifo_din(7 downto 0) <= dm_data_in(7 downto 0);
 							uart_fifo_wr_en <= '1';
 							
+						when "000010000" =>
+							ja_out(7 downto 0) <= dm_data_in(7 downto 0);
+							jb_out(7 downto 0) <= dm_data_in(15 downto 8);
+							jc_out(7 downto 0) <= dm_data_in(23 downto 16);
+							jd_out(7 downto 0) <= dm_data_in(31 downto 24);
+						
+						when "000010100" =>
+							ja_io(7 downto 0) <= dm_data_in(7 downto 0);
+							jb_io(7 downto 0) <= dm_data_in(15 downto 8);
+							jc_io(7 downto 0) <= dm_data_in(23 downto 16);
+							jd_io(7 downto 0) <= dm_data_in(31 downto 24);
+						
 						when others =>
 							null;
 							

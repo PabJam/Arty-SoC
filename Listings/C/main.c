@@ -6,9 +6,14 @@
 #define LED_BASE 0x80000004
 #define RGB_LED_BASE 0x80000008
 #define UART_BASE 0x8000000C
+#define GPIO_BASE 0x80000010
+#define GPIO_BASE_IN_OUT 0x80000014
+#define INPUT 0x1
+#define OUTPUT 0x0
+#define UART_BASE 0x8000000C
 #define Timer_BASE 0x80000000
 
-char message[] = { "Ich bin ein char array" };
+char message[] = { "Ich bin ein char array\r\n" };
 
 // Write to memory-mapped register
 static inline void write_reg(unsigned int addr, unsigned int value) {
@@ -49,6 +54,22 @@ static inline void set_rgb_leds(unsigned int rgb_leds)
     write_reg(RGB_LED_BASE, rgb_leds);
 }
 
+static inline void pin_mode(unsigned int pin, unsigned int in_out)
+{
+    unsigned int pin_modes = read_reg(GPIO_BASE_IN_OUT);
+    // clear the pin'th bit in pinmodes and or it with in_out shifted to the pin'th position
+    pin_modes = (pin_modes & ~(0b1 << pin)) | ((in_out & 0b1) << pin);
+    write_reg(GPIO_BASE_IN_OUT, pin_modes);
+}
+
+static inline void set_pin(unsigned int pin, unsigned int pin_out)
+{
+    unsigned int pins_output = read_reg(GPIO_BASE);
+    // clear the pin'th bit in pinmodes and or it with in_out shifted to the pin'th position
+    pins_output = (pins_output & ~(0b1 << pin)) | ((pin_out & 0b1) << pin);
+    write_reg(GPIO_BASE, pins_output);
+}
+
 void print_int(unsigned int val)
 {
     write_reg(UART_BASE, val >> 24);
@@ -68,6 +89,9 @@ void delay(int count) {
 int main(void) {
     unsigned int rgb_leds = 0b101100;
     unsigned int leds = 0b1010;
+    unsigned int output = 0;
+    pin_mode(0, OUTPUT);
+
     print("Entered Main\r\n");
     print(message);
     
@@ -84,6 +108,8 @@ int main(void) {
             print("Counter reset\r\n");
             set_leds(leds);
             set_rgb_leds(rgb_leds);
+            set_pin(0, output);
+            output ^= 0b1;
             leds ^= 0b1111;
             rgb_leds ^= 0b111111;
         }

@@ -2,7 +2,7 @@
 .global _start
 
 _start:
-    # Initialize stack pointer to 0x00010000 (just past end of 64KB RAM)
+    # Initialize stack pointer to 0x00020000 (just past end of 128KB RAM)
     lui sp, %hi(_stack_top)
     addi sp, sp, %lo(_stack_top)
     

@@ -77,7 +77,7 @@ set_property ip_output_repo d:/Projekte/Arty/ALU/ALU.cache/ip [current_project]
 set_property ip_cache_permissions {read write} [current_project]
 OPTRACE "Creating in-memory project" END { }
 OPTRACE "Adding files" START { }
-read_ip -quiet d:/Projekte/Arty/ALU/ALU.srcs/sources_1/ip/ProgRam/ProgRam.xci
+read_ip -quiet D:/Projekte/Arty/ALU/ALU.srcs/sources_1/ip/ProgRam/ProgRam.xci
 set_property used_in_implementation false [get_files -all d:/Projekte/Arty/ALU/ALU.gen/sources_1/ip/ProgRam/ProgRam_ooc.xdc]
 
 OPTRACE "Adding files" END { }

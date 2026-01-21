@@ -39,7 +39,7 @@ entity LogicUnit is
 		i_Give_Ctrl_Logic_Unit : in std_logic;
 		i_Take_Ctrl_Logic_Unit : in std_logic;
 		o_Return_Ctrl_Logic_Unit : out std_logic;
-		o_PM_Addr : out std_logic_vector(12 downto 0);
+		o_PM_Addr : out std_logic_vector(13 downto 0);
 		o_PM_DV : out std_logic;
 		i_PM_Data : in std_logic_vector(63 downto 0);
 		i_PM_DV : in std_logic;
@@ -113,32 +113,6 @@ signal instruction_read : std_logic := '0';
 signal instruction_jumped : std_logic := '0';
 signal latched_instruction_done : std_logic := '0';
 
-attribute mark_debug : string;
-
---attribute mark_debug of ctrl_logic_unit : signal is "true";
---attribute mark_debug of instruction_decoded : signal is "true";
---attribute mark_debug of instruction_multicycle : signal is "true";
---attribute mark_debug of instruction_jump : signal is "true";
---attribute mark_debug of instruction_jumped : signal is "true";
---attribute mark_debug of opcode : signal is "true";
---attribute mark_debug of func3 : signal is "true";
---attribute mark_debug of rs1 : signal is "true";
---attribute mark_debug of rs1_val : signal is "true";
---attribute mark_debug of rs2 : signal is "true";
---attribute mark_debug of rs2_val : signal is "true";
---attribute mark_debug of immediate : signal is "true";
---attribute mark_debug of current_pc : signal is "true";
---attribute mark_debug of instruction_done : signal is "true";
---attribute mark_debug of i_DM_DV : signal is "true";
---attribute mark_debug of i_DM_Data : signal is "true";
---attribute mark_debug of o_DM_DV : signal is "true";
---attribute mark_debug of o_DM_Data : signal is "true";
---attribute mark_debug of write_operation : signal is "true";
---attribute mark_debug of wait_finish_write_operation : signal is "true";
---attribute mark_debug of instruction_ready : signal is "true";
---attribute mark_debug of next_instruction_valid : signal is "true";
---attribute mark_debug of latched_instruction_done : signal is "true";
---attribute mark_debug of fetch_state : signal is "true";
 
 begin
 
@@ -177,7 +151,7 @@ begin
 		elsif ctrl_logic_unit = '1' and i_Take_Ctrl_Logic_Unit = '0' then
 			if (instruction_jump = '1') then
 				o_PM_DV <= '1';
-				o_PM_Addr <= std_logic_vector(jmp_addr(15 downto 3)); -- jmp_addr(2) decides if lower or upper 32bit 
+				o_PM_Addr <= std_logic_vector(jmp_addr(16 downto 3)); -- jmp_addr(2) decides if lower or upper 32bit 
 				pc_fetch(0) <= jmp_addr(31 downto 3) & '0' & jmp_addr(1 downto 0);
 				pc_fetch(1) <= jmp_addr(31 downto 3) & '1' & jmp_addr(1 downto 0);
 				fetch_state <= fetch_state_next;
@@ -186,7 +160,7 @@ begin
 				case fetch_state is 
 					when fetch_state_next =>
 						instruction_ready <= '0';
-						o_PM_Addr <= std_logic_vector(pc_fetch(0)(15 downto 3));
+						o_PM_Addr <= std_logic_vector(pc_fetch(0)(16 downto 3));
 						if i_PM_DV = '1' then
 							instruction_fetch(0) <= unsigned(i_PM_Data(31 downto 0));
 							instruction_fetch(1) <= unsigned(i_PM_Data(63 downto 32));
@@ -194,7 +168,7 @@ begin
 							pc(1) <= pc_fetch(1);
 							instruction_ready <= '1';
 							v_addr_p8 := pc_fetch(0) + 8;
-							o_PM_Addr <= std_logic_vector(v_addr_p8(15 downto 3));
+							o_PM_Addr <= std_logic_vector(v_addr_p8(16 downto 3));
 							o_PM_DV <= '1';
 							
 							fetch_state <= fetch_state_next_2;
@@ -206,7 +180,7 @@ begin
 					
 					when fetch_state_next_2 =>
 						instruction_ready <= '1';
-						o_PM_Addr <= std_logic_vector(pc_fetch(2)(15 downto 3));
+						o_PM_Addr <= std_logic_vector(pc_fetch(2)(16 downto 3));
 						if i_PM_DV = '1' then
 							if instruction_read = '1' then
 								instruction_fetch(0) <= unsigned(i_PM_Data(31 downto 0));
@@ -219,7 +193,7 @@ begin
 								pc_fetch(2) <= v_addr_p8;
 								pc_fetch(3) <= pc_fetch(3) + 8;
 								o_PM_DV <= '1';
-								o_PM_Addr <= std_logic_vector(v_addr_p8(15 downto 3));
+								o_PM_Addr <= std_logic_vector(v_addr_p8(16 downto 3));
 								fetch_state <= fetch_state_next_2;
 							else
 								instruction_fetch(2) <= unsigned(i_PM_Data(31 downto 0));
@@ -249,7 +223,7 @@ begin
 							pc_fetch(2) <= v_addr_p8;
 							pc_fetch(3) <= pc_fetch(3) + 8;
 							o_PM_DV <= '1';
-							o_PM_Addr <= std_logic_vector(v_addr_p8(15 downto 3));
+							o_PM_Addr <= std_logic_vector(v_addr_p8(16 downto 3));
 						else
 							fetch_state <= fetch_state_idle;
 						end if;
