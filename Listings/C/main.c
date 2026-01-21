@@ -66,13 +66,11 @@ void delay(int count) {
 
 // Main function - called by startup.s
 int main(void) {
-
+    unsigned int rgb_leds = 0b101100;
+    unsigned int leds = 0b1010;
     print("Entered Main\r\n");
     print(message);
-    set_leds(0b1010);
-    set_rgb_leds(0b101100);
     
-    return 0;
     // Main loop - runs forever
     unsigned int counter;
     while (1) {
@@ -83,10 +81,14 @@ int main(void) {
         // Reset counter periodically
         if (counter > 255) {
             counter = 0;
-            print("Reset\r\n");
+            print("Counter reset\r\n");
+            set_leds(leds);
+            set_rgb_leds(rgb_leds);
+            leds ^= 0b1111;
+            rgb_leds ^= 0b111111;
         }
 
-        delay(100000);
+        delay(10000);
     }
 
     // Never reached
