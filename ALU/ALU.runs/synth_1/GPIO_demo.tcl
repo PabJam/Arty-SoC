@@ -80,7 +80,6 @@ OPTRACE "Creating in-memory project" END { }
 OPTRACE "Adding files" START { }
 read_vhdl -library xil_defaultlib {
   D:/Projekte/Arty/ALU/ALU.srcs/sources_1/LogicUnit.vhd
-  D:/Projekte/Arty/ALU/ALU.srcs/sources_1/RGB_controller.vhd
   D:/Projekte/Arty/ALU/ALU.srcs/sources_1/UART_RX_CTRL.vhd
   D:/Projekte/Arty/ALU/ALU.srcs/sources_1/UART_TX_CTRL.vhd
   D:/Projekte/Arty/ALU/ALU.srcs/sources_1/debouncer.vhd

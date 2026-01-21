@@ -3,7 +3,12 @@
 
 // Memory-mapped peripheral addresses
 // Update these to match your hardware
-#define UART_BASE 0x80000008
+#define LED_BASE 0x80000004
+#define RGB_LED_BASE 0x80000008
+#define UART_BASE 0x8000000C
+#define Timer_BASE 0x80000000
+
+char message[] = { "Ich bin ein char array" };
 
 // Write to memory-mapped register
 static inline void write_reg(unsigned int addr, unsigned int value) {
@@ -13,6 +18,11 @@ static inline void write_reg(unsigned int addr, unsigned int value) {
 // Read from memory-mapped register
 static inline unsigned int read_reg(unsigned int addr) {
     return *((volatile unsigned int*)addr);
+}
+
+static inline unsigned int read_timer()
+{
+    return read_reg(Timer_BASE);
 }
 
 // print message up to 255 char
@@ -27,6 +37,26 @@ void print(const char* msg)
     }
 }
 
+// lowest 4 bits respond to 4 leds
+static inline void set_leds(unsigned int leds)
+{
+    write_reg(LED_BASE, leds);
+}
+
+// bits : 5 => r1, 4 => g1, 3 => b1, 2 => r0, 1 => g0, 0 => b0  
+static inline void set_rgb_leds(unsigned int rgb_leds)
+{
+    write_reg(RGB_LED_BASE, rgb_leds);
+}
+
+void print_int(unsigned int val)
+{
+    write_reg(UART_BASE, val >> 24);
+    write_reg(UART_BASE, val >> 16);
+    write_reg(UART_BASE, val >> 8);
+    write_reg(UART_BASE, val);
+}
+
 // Simple delay function
 void delay(int count) {
     for (volatile int i = 0; i < count; i++) {
@@ -36,9 +66,15 @@ void delay(int count) {
 
 // Main function - called by startup.s
 int main(void) {
-    unsigned int counter = 0;
+
     print("Entered Main\r\n");
+    print(message);
+    set_leds(0b1010);
+    set_rgb_leds(0b101100);
+    
+    return 0;
     // Main loop - runs forever
+    unsigned int counter;
     while (1) {
 
         //write_reg(UART_BASE, counter);

@@ -167,13 +167,13 @@ Port(
 		);
 end component;
 
-component RGB_controller 
-Port(
-	GCLK 		   : in std_logic;
-	RGB_LED_1_O	   : out std_logic_vector(2 downto 0);
-	RGB_LED_2_O	   : out std_logic_vector(2 downto 0)
-	);
-end component;
+--component RGB_controller 
+--Port(
+--	GCLK 		   : in std_logic;
+--	RGB_LED_1_O	   : out std_logic_vector(2 downto 0);
+--	RGB_LED_2_O	   : out std_logic_vector(2 downto 0)
+--	);
+--end component;
 
 
 
@@ -373,8 +373,12 @@ signal wait_peripheral_access_finish_cntr : natural range 0 to 7 := 0;
 -- Registers
 Signal cntr_100MHZ : unsigned(31 downto 0) := (others => '0');
 
---attribute mark_debug : string;
---attribute mark_debug of ctrl_logic_unit : signal is "true";
+attribute mark_debug : string;
+attribute mark_debug of ctrl_logic_unit : signal is "true";
+attribute mark_debug of cntr_100MHZ : signal is "true";
+attribute mark_debug of alu_read_dv : signal is "true";
+attribute mark_debug of alu_read_data : signal is "true";
+
 --attribute mark_debug of dm_data_in : signal is "true";
 --attribute mark_debug of dm_data_out : signal is "true";
 --attribute mark_debug of dm_wr_en : signal is "true";
@@ -407,6 +411,12 @@ signal btnDeBnc : std_logic_vector(3 downto 0);
 
 signal clk_cntr_reg : std_logic_vector (4 downto 0) := (others=>'0'); 
 signal saved_leds : std_logic_vector(3 downto 0) := (others => '0'); 
+signal saved_rgb_leds_r0 : std_logic := '0';
+signal saved_rgb_leds_g0 : std_logic := '0';
+signal saved_rgb_leds_b0 : std_logic := '0';
+signal saved_rgb_leds_r1 : std_logic := '0';
+signal saved_rgb_leds_g1 : std_logic := '0';
+signal saved_rgb_leds_b1 : std_logic := '0';
 --signal pwm_val_reg : std_logic := '0';
 
 --this counter counts the amount of time paused in the UART reset state
@@ -707,6 +717,12 @@ begin
 		
 		if sync_nRst_lu = '0' then
 			saved_leds <= (others => '0');
+			saved_rgb_leds_r0 <= '0';
+			saved_rgb_leds_g0 <= '0';
+			saved_rgb_leds_b0 <= '0';
+			saved_rgb_leds_r1 <= '0';
+			saved_rgb_leds_g1 <= '0';
+			saved_rgb_leds_b1 <= '0';
 			cntr_100MHZ <= (others => '0');
 		else 
 			
@@ -715,7 +731,7 @@ begin
 				if dm_wr_en = "0000" then -- read 
 					case dm_addr(7 downto 0) is
 						
-						when "000000001" =>
+						when "000000000" =>
 							peripherals_read_data <= std_logic_vector(cntr_100MHZ);
 							peripherals_read_dv <= '1';
 							
@@ -726,10 +742,19 @@ begin
 					end case;
 				else -- write
 					case dm_addr(7 downto 0) is
+						
 						when "00000100" =>	
 							saved_leds <= dm_data_in(3 downto 0);
-							
-						when "00001000" =>
+						
+						when "00001000" =>	
+							saved_rgb_leds_r0 <= dm_data_in(2);
+							saved_rgb_leds_g0 <= dm_data_in(1);
+							saved_rgb_leds_b0 <= dm_data_in(0);
+							saved_rgb_leds_r1 <= dm_data_in(5);
+							saved_rgb_leds_g1 <= dm_data_in(4);
+							saved_rgb_leds_b1 <= dm_data_in(3);
+						
+						when "00001100" =>
 							uart_fifo_din(7 downto 0) <= dm_data_in(7 downto 0);
 							uart_fifo_wr_en <= '1';
 							
@@ -793,6 +818,12 @@ led_proc: process (clk)
 begin
 	if rising_edge(clk) then
 		LED <= saved_leds;
+		led0_r <= saved_rgb_leds_r0;
+		led0_g <= saved_rgb_leds_g0;
+		led0_b <= saved_rgb_leds_b0;
+		led1_r <= saved_rgb_leds_r1;
+		led1_g <= saved_rgb_leds_g1;
+		led1_b <= saved_rgb_leds_b1 ;
 	end if;
 end process;
 
@@ -802,15 +833,15 @@ end process;
 
 
 
-RGB_Core1: RGB_controller port map(
-	GCLK => CLK, 			
-	RGB_LED_1_O(0) => led0_g, 
-	RGB_LED_1_O(1) => led0_b,
-	RGB_LED_1_O(2) => led0_r,
-	RGB_LED_2_O(0) => led1_g, 
-	RGB_LED_2_O(1) => led1_b,
-	RGB_LED_2_O(2) => led1_r
-	);
+--RGB_Core1: RGB_controller port map(
+--	GCLK => CLK, 			
+--	RGB_LED_1_O(0) => led0_g, 
+--	RGB_LED_1_O(1) => led0_b,
+--	RGB_LED_1_O(2) => led0_r,
+--	RGB_LED_2_O(0) => led1_g, 
+--	RGB_LED_2_O(1) => led1_b,
+--	RGB_LED_2_O(2) => led1_r
+--	);
 	
 
 end Behavioral;

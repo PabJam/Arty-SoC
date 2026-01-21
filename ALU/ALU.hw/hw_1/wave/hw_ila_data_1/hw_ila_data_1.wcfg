@@ -9,22 +9,29 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="620"></ZoomStartTime>
-      <ZoomEndTime time="637"></ZoomEndTime>
-      <Cursor1Time time="621"></Cursor1Time>
+      <ZoomStartTime time="997"></ZoomStartTime>
+      <ZoomEndTime time="1,006"></ZoomEndTime>
+      <Cursor1Time time="544"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="275"></NameColumnWidth>
-      <ValueColumnWidth column_width="138"></ValueColumnWidth>
+      <ValueColumnWidth column_width="134"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="12" />
+   <WVObjectSize size="4" />
    <wave_markers>
    </wave_markers>
-   <wvobject fp_name="dm_addr" type="array">
+   <wvobject fp_name="alu_read_dv" type="logic">
       <obj_property name="DisplayName">FullPathName</obj_property>
-      <obj_property name="ElementShortName">dm_addr[31:0]</obj_property>
-      <obj_property name="ObjectShortName">dm_addr[31:0]</obj_property>
-      <obj_property name="Radix">BINARYRADIX</obj_property>
+      <obj_property name="ElementShortName">alu_read_dv</obj_property>
+      <obj_property name="ObjectShortName">alu_read_dv</obj_property>
+      <obj_property name="LABELRADIX">true</obj_property>
+      <obj_property name="WaveformStyle">STYLE_DIGITAL</obj_property>
+   </wvobject>
+   <wvobject fp_name="cntr_100MHZ" type="array">
+      <obj_property name="DisplayName">FullPathName</obj_property>
+      <obj_property name="ElementShortName">cntr_100MHZ[31:0]</obj_property>
+      <obj_property name="ObjectShortName">cntr_100MHZ[31:0]</obj_property>
+      <obj_property name="Radix">HEXRADIX</obj_property>
       <obj_property name="LABELRADIX">true</obj_property>
       <obj_property name="WaveformStyle">STYLE_DIGITAL</obj_property>
    </wvobject>
@@ -35,77 +42,11 @@
       <obj_property name="LABELRADIX">true</obj_property>
       <obj_property name="WaveformStyle">STYLE_DIGITAL</obj_property>
    </wvobject>
-   <wvobject fp_name="dm_data_in" type="array">
+   <wvobject fp_name="alu_read_data" type="array">
       <obj_property name="DisplayName">FullPathName</obj_property>
-      <obj_property name="ElementShortName">dm_data_in[31:0]</obj_property>
-      <obj_property name="ObjectShortName">dm_data_in[31:0]</obj_property>
+      <obj_property name="ElementShortName">alu_read_data[31:0]</obj_property>
+      <obj_property name="ObjectShortName">alu_read_data[31:0]</obj_property>
       <obj_property name="Radix">HEXRADIX</obj_property>
-      <obj_property name="LABELRADIX">true</obj_property>
-      <obj_property name="WaveformStyle">STYLE_DIGITAL</obj_property>
-   </wvobject>
-   <wvobject fp_name="dm_lu_addr_dv" type="logic">
-      <obj_property name="DisplayName">FullPathName</obj_property>
-      <obj_property name="ElementShortName">dm_lu_addr_dv</obj_property>
-      <obj_property name="ObjectShortName">dm_lu_addr_dv</obj_property>
-      <obj_property name="LABELRADIX">true</obj_property>
-      <obj_property name="WaveformStyle">STYLE_DIGITAL</obj_property>
-   </wvobject>
-   <wvobject fp_name="dm_wr_en" type="array">
-      <obj_property name="DisplayName">FullPathName</obj_property>
-      <obj_property name="ElementShortName">dm_wr_en[3:0]</obj_property>
-      <obj_property name="ObjectShortName">dm_wr_en[3:0]</obj_property>
-      <obj_property name="Radix">HEXRADIX</obj_property>
-      <obj_property name="LABELRADIX">true</obj_property>
-      <obj_property name="WaveformStyle">STYLE_DIGITAL</obj_property>
-   </wvobject>
-   <wvobject fp_name="uart_fifo_din" type="array">
-      <obj_property name="DisplayName">FullPathName</obj_property>
-      <obj_property name="ElementShortName">uart_fifo_din[7:0]</obj_property>
-      <obj_property name="ObjectShortName">uart_fifo_din[7:0]</obj_property>
-      <obj_property name="Radix">HEXRADIX</obj_property>
-      <obj_property name="LABELRADIX">true</obj_property>
-      <obj_property name="WaveformStyle">STYLE_DIGITAL</obj_property>
-   </wvobject>
-   <wvobject fp_name="uart_fifo_dout" type="array">
-      <obj_property name="DisplayName">FullPathName</obj_property>
-      <obj_property name="ElementShortName">uart_fifo_dout[7:0]</obj_property>
-      <obj_property name="ObjectShortName">uart_fifo_dout[7:0]</obj_property>
-      <obj_property name="Radix">HEXRADIX</obj_property>
-      <obj_property name="LABELRADIX">true</obj_property>
-      <obj_property name="WaveformStyle">STYLE_DIGITAL</obj_property>
-   </wvobject>
-   <wvobject fp_name="uart_fifo_empty" type="logic">
-      <obj_property name="DisplayName">FullPathName</obj_property>
-      <obj_property name="ElementShortName">uart_fifo_empty</obj_property>
-      <obj_property name="ObjectShortName">uart_fifo_empty</obj_property>
-      <obj_property name="LABELRADIX">true</obj_property>
-      <obj_property name="WaveformStyle">STYLE_DIGITAL</obj_property>
-   </wvobject>
-   <wvobject fp_name="uart_fifo_rd_en" type="logic">
-      <obj_property name="DisplayName">FullPathName</obj_property>
-      <obj_property name="ElementShortName">uart_fifo_rd_en</obj_property>
-      <obj_property name="ObjectShortName">uart_fifo_rd_en</obj_property>
-      <obj_property name="LABELRADIX">true</obj_property>
-      <obj_property name="WaveformStyle">STYLE_DIGITAL</obj_property>
-   </wvobject>
-   <wvobject fp_name="uart_fifo_srst" type="logic">
-      <obj_property name="DisplayName">FullPathName</obj_property>
-      <obj_property name="ElementShortName">uart_fifo_srst</obj_property>
-      <obj_property name="ObjectShortName">uart_fifo_srst</obj_property>
-      <obj_property name="LABELRADIX">true</obj_property>
-      <obj_property name="WaveformStyle">STYLE_DIGITAL</obj_property>
-   </wvobject>
-   <wvobject fp_name="uart_fifo_valid" type="logic">
-      <obj_property name="DisplayName">FullPathName</obj_property>
-      <obj_property name="ElementShortName">uart_fifo_valid</obj_property>
-      <obj_property name="ObjectShortName">uart_fifo_valid</obj_property>
-      <obj_property name="LABELRADIX">true</obj_property>
-      <obj_property name="WaveformStyle">STYLE_DIGITAL</obj_property>
-   </wvobject>
-   <wvobject fp_name="uart_fifo_wr_en" type="logic">
-      <obj_property name="DisplayName">FullPathName</obj_property>
-      <obj_property name="ElementShortName">uart_fifo_wr_en</obj_property>
-      <obj_property name="ObjectShortName">uart_fifo_wr_en</obj_property>
       <obj_property name="LABELRADIX">true</obj_property>
       <obj_property name="WaveformStyle">STYLE_DIGITAL</obj_property>
    </wvobject>
