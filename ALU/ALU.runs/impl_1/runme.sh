@@ -43,6 +43,6 @@ EAStep()
 
 # pre-commands:
 /bin/touch .init_design.begin.rst
-EAStep vivado -log GPIO_demo.vdi -applog -m64 -product Vivado -messageDb vivado.pb -mode batch -source GPIO_demo.tcl -notrace
+EAStep vivado -log Top_of_Arty_SoC.vdi -applog -m64 -product Vivado -messageDb vivado.pb -mode batch -source Top_of_Arty_SoC.tcl -notrace
 
 

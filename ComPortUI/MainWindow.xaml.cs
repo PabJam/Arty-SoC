@@ -1,40 +1,10 @@
 ﻿using System.Text;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using System.IO.Ports;
 using Microsoft.Win32;
 using System.IO;
-using System.Diagnostics.Eventing.Reader;
-
-//012356789aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZ
-
-//.main:
-//addi x1, x0, 128
-//    slli x1, x1, 24
-//    addi x1, x1, 8
-//    addi x2, x0, 72
-//    sb x2, 0(x1)
-//    addi x2, x0, 97
-//    sb x2, 0(x1)
-//    addi x2, x0, 108
-//    sb x2, 0(x1)
-//    addi x2, x0, 108
-//    sb x2, 0(x1)
-//    addi x2, x0, 111
-//    sb x2, 0(x1)
-//.loop:
-//    addi x0, x0, 0
-//    beq x4, x1, .loop:
-//
-//.end:
-//ebreak
 
 namespace ComPortUI
 {
