@@ -105,3 +105,7 @@ set_property src_info {type:XDC file:1 line:87 export:INPUT save:INPUT read:READ
 set_property -dict {PACKAGE_PIN R12 IOSTANDARD LVCMOS33} [get_ports o_Uart_TXD]
 set_property src_info {type:XDC file:1 line:88 export:INPUT save:INPUT read:READ} [current_design]
 set_property -dict {PACKAGE_PIN V12 IOSTANDARD LVCMOS33} [get_ports i_Uart_RXD]
+set_property src_info {type:XDC file:1 line:178 export:INPUT save:INPUT read:READ} [current_design]
+set_property -dict { PACKAGE_PIN J14   IOSTANDARD LVCMOS33 } [get_ports { ck_scl }]; #IO_L24N_T3_RS0_15 Sch=ck_scl
+set_property src_info {type:XDC file:1 line:179 export:INPUT save:INPUT read:READ} [current_design]
+set_property -dict { PACKAGE_PIN J13   IOSTANDARD LVCMOS33 } [get_ports { ck_sda }]; #IO_L24P_T3_RS1_15 Sch=ck_sda

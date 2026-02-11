@@ -56,7 +56,9 @@ if {$::dispatch::connected} {
 }
 
 OPTRACE "synth_1" START { ROLLUP_AUTO }
+set_param tcl.collectionResultDisplayLimit 0
 set_param general.usePosixSpawnForFork 1
+set_param xicom.use_bs_reader 1
 OPTRACE "Creating in-memory project" START { }
 create_project -in_memory -part xc7s25csga324-1
 
@@ -77,6 +79,7 @@ OPTRACE "Creating in-memory project" END { }
 OPTRACE "Adding files" START { }
 read_vhdl -library xil_defaultlib {
   D:/Projekte/Arty/ALU/ALU.srcs/sources_1/Arithmetic_Logic_Unit.vhd
+  D:/Projekte/Arty/ALU/ALU.srcs/sources_1/I2C_Slave.vhd
   D:/Projekte/Arty/ALU/ALU.srcs/sources_1/UART_RX_CTRL.vhd
   D:/Projekte/Arty/ALU/ALU.srcs/sources_1/UART_TX_CTRL.vhd
   D:/Projekte/Arty/ALU/ALU.srcs/sources_1/debouncer.vhd
@@ -105,6 +108,8 @@ read_xdc D:/Projekte/Arty/ALU/ALU.srcs/constrs_1/Arty-S7-25-Master.xdc
 set_property used_in_implementation false [get_files D:/Projekte/Arty/ALU/ALU.srcs/constrs_1/Arty-S7-25-Master.xdc]
 
 set_param ips.enableIPCacheLiteLoad 1
+
+read_checkpoint -auto_incremental -incremental D:/Projekte/Arty/ALU/ALU.srcs/utils_1/imports/synth_1/Top_of_Arty_SoC.dcp
 close [open __synthesis_is_running__ w]
 
 OPTRACE "synth_design" START { }

@@ -1,7 +1,7 @@
 Copyright 1986-2022 Xilinx, Inc. All Rights Reserved. Copyright 2022-2025 Advanced Micro Devices, Inc. All Rights Reserved.
 ----------------------------------------------------------------------------------------------------------------------------------------------------------
 | Tool Version              : Vivado v.2025.1 (win64) Build 6140274 Thu May 22 00:12:29 MDT 2025
-| Date                      : Thu Jan 22 10:56:28 2026
+| Date                      : Wed Feb 11 20:01:07 2026
 | Host                      : DESKTOP-E28LK6R running 64-bit major release  (build 9200)
 | Command                   : report_io -file Top_of_Arty_SoC_io_placed.rpt
 | Design                    : Top_of_Arty_SoC
@@ -25,7 +25,7 @@ Table of Contents
 +---------------+
 | Total User IO |
 +---------------+
-|            53 |
+|            55 |
 +---------------+
 
 
@@ -191,8 +191,8 @@ Table of Contents
 | J10        |             | Dedicated  | VP_0                         | XADC          |             |       0 |            |      |                     |                      |         |            |           |          |          |                  |              |                   |              |
 | J11        |             |            | VCCINT                       | VCCINT        |             |         |            |      |                     |                      |         |            |           |          |          |                  |              |                   |              |
 | J12        |             |            | GND                          | GND           |             |         |            |      |                     |                      |     0.0 |            |           |          |          |                  |              |                   |              |
-| J13        |             | High Range | IO_L24P_T3_RS1_15            | User IO       |             |      15 |            |      |                     |                      |         |            |           |          |          |                  |              |                   |              |
-| J14        |             | High Range | IO_L24N_T3_RS0_15            | User IO       |             |      15 |            |      |                     |                      |         |            |           |          |          |                  |              |                   |              |
+| J13        | ck_sda      | High Range | IO_L24P_T3_RS1_15            | BIDIR         | LVCMOS33    |      15 |         12 | SLOW |                     |            FP_VTT_50 |         | FIXED      |           |          |          | NONE             |              |                   |              |
+| J14        | ck_scl      | High Range | IO_L24N_T3_RS0_15            | BIDIR         | LVCMOS33    |      15 |         12 | SLOW |                     |            FP_VTT_50 |         | FIXED      |           |          |          | NONE             |              |                   |              |
 | J15        | led0_r      | High Range | IO_L23N_T3_15                | OUTPUT        | LVCMOS33    |      15 |         12 | SLOW |                     |            FP_VTT_50 |         | FIXED      |           |          |          | NONE             |              |                   |              |
 | J16        | BTN[2]      | High Range | IO_L19N_T3_VREF_15           | INPUT         | LVCMOS33    |      15 |            |      |                     |                 NONE |         | FIXED      |           |          |          | NONE             |              |                   |              |
 | J17        |             | High Range | VCCO_15                      | VCCO          |             |      15 |            |      |                     |                      |    3.30 |            |           |          |          |                  |              |                   |              |
