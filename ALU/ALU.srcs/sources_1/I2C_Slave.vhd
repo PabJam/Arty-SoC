@@ -40,8 +40,11 @@ entity I2C_Slave is
 		i_SCL : in std_logic;
 		o_SDA : out std_logic;
 		o_RX_Byte : out std_logic_vector(7 downto 0);
+		i_TX_Byte : in std_logic_vector(7 downto 0);
 		i_Address : in std_logic_vector(6 downto 0);
-		o_RX_DV : out std_logic
+		i_TX_Byte_DV : in std_logic;
+		o_RX_DV : out std_logic;
+		o_TX_Read : out std_logic
 	);
 end I2C_Slave;
 
@@ -51,7 +54,7 @@ architecture Behavioral of I2C_Slave is
 	constant ADRESS_MAX : natural := 6;
 	constant DATA_MAX : natural := 7;
 	
-	type t_I2C_States is (s_idle, s_address, s_ack_adress, s_data_read, s_data_write, s_ack_data);
+	type t_I2C_States is (s_idle, s_address, s_ack_adress, s_data_read, s_data_write, s_ack_data_read, s_ack_data_write);
 	signal i2c_state : t_I2C_States := s_idle;
 	
 	type t_RW is (s_read, s_write);
@@ -63,11 +66,13 @@ architecture Behavioral of I2C_Slave is
 	signal latched_sda1, latched_sda2 : std_logic;
 	
 	signal rx_byte : std_logic_vector(DATA_MAX downto 0);
+	signal tx_byte : std_logic_vector(DATA_MAX downto 0);
 	signal rx_address : std_logic_vector(ADRESS_MAX downto 0);
 	
 	signal adress_cntr : natural range 0 to ADRESS_MAX := ADRESS_MAX;
 	signal adress_frame_cntr : natural range 0 to ADRESS_FRAME_MAX := ADRESS_FRAME_MAX;
 	signal data_cntr : natural range 0 to DATA_MAX := DATA_MAX;
+	signal wait_read_ack : std_logic := '0';
 	
 	attribute MARK_DEBUG : string;
 
@@ -85,6 +90,7 @@ begin
 			start := false;
 			stop := false;
 			o_RX_DV <= '0';
+			o_TX_Read <= '0';
 		
 			latched_scl1 <= i_SCL;
 			latched_sda1 <= i_SDA;
@@ -103,6 +109,7 @@ begin
 				i2c_state <= s_address;
 				adress_cntr <= ADRESS_MAX;
 				data_cntr <= DATA_MAX;
+
 			elsif (stop) then
 				i2c_state <= s_idle;
 				adress_cntr <= ADRESS_MAX;
@@ -138,26 +145,42 @@ begin
 						if (latched_scl2 = '1' and latched_scl1 = '0' and adress_frame_cntr = 0) then -- check valid
 							adress_frame_cntr <= ADRESS_FRAME_MAX;
 							if (rx_address = i_Address) then
-								latched_o_sda <= '0';
-								i2c_state <= s_ack_adress;
+								if (rw_state = s_read and i_TX_Byte_DV = '0') then
+									latched_o_sda <= '1';
+									i2c_state <= s_idle;
+								else 
+									latched_o_sda <= '0';
+									i2c_state <= s_ack_adress;
+								end if;
 							end if;
 						end if;
 					
 					when s_ack_adress =>
 						i2c_state <= s_ack_adress;
-
-						if (latched_scl2 = '1' and latched_scl1 = '0') then -- falling edge
-							latched_o_sda <= '1';
-							if (rw_state = s_read) then
-								i2c_state <= s_data_read;
-							else	
+						if (rw_state = s_read) then
+							i2c_state <= s_data_read;
+							tx_byte <= i_TX_Byte;
+							o_TX_Read <= '1';
+						else
+							if (latched_scl2 = '1' and latched_scl1 = '0') then -- falling edge
+								latched_o_sda <= '1';
 								i2c_state <= s_data_write;
 							end if;
-							
 						end if;
-						
+								
 					when s_data_read => 
-						null;
+						i2c_state <= s_data_read;
+						
+						if (latched_scl2 = '1' and latched_scl1 = '0') then 
+							latched_o_sda <= tx_byte(data_cntr);
+							if (data_cntr > 0) then
+								data_cntr <= data_cntr - 1;
+							else 
+								data_cntr <= DATA_MAX;
+								i2c_state <= s_ack_data_read;
+								wait_read_ack <= '0';
+							end if;
+						end if;
 					
 					when s_data_write =>
 						i2c_state <= s_data_write;
@@ -175,11 +198,28 @@ begin
 							latched_o_sda <= '0';
 							o_RX_Byte <= rx_byte;
 							o_RX_DV <= '1';
-							i2c_state <= s_ack_data;
+							i2c_state <= s_ack_data_write;
 						end if;
 					
-					when s_ack_data =>
-						i2c_state <= s_ack_data;
+					when s_ack_data_read =>
+						i2c_state <= s_ack_data_read;
+						if (latched_scl2 = '1' and latched_scl1 = '0') then 
+							latched_o_sda <= '1';
+							wait_read_ack <= '1';
+						end if;
+						
+						if (latched_scl2 = '0' and latched_scl1 = '1' and wait_read_ack = '1') then
+							if (latched_sda1 = '0') then
+								tx_byte <= i_TX_Byte;
+								o_TX_Read <= '1';
+								i2c_state <= s_data_read;
+							else
+								i2c_state <= s_idle;
+							end if;
+						end if;
+					
+					when s_ack_data_write =>
+						i2c_state <= s_ack_data_write;
 
 						if (latched_scl2 = '1' and latched_scl1 = '0') then -- falling edge
 							latched_o_sda <= '1';

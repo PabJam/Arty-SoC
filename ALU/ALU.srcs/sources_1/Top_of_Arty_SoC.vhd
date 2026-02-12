@@ -87,8 +87,11 @@ architecture Behavioral of Top_of_Arty_SoC is
 			i_SCL : in std_logic;
 			o_SDA : out std_logic;
 			o_RX_Byte : out std_logic_vector(7 downto 0);
+			i_TX_Byte : in std_logic_vector(7 downto 0);
 			i_Address : in std_logic_vector(6 downto 0);
-			o_RX_DV : out std_logic
+			i_TX_Byte_DV : in std_logic;
+			o_RX_DV : out std_logic;
+			o_TX_Read : out std_logic
 		);
 	end component;
 	
@@ -244,10 +247,22 @@ architecture Behavioral of Top_of_Arty_SoC is
 	Signal i2c_sda_in : std_logic;
 	signal i2c_sda_io : std_logic := '1';
 	
-	signal i2c_slave_address : std_logic_vector(6 downto 0) := "0001000";
+	signal i2c_slave_address : std_logic_vector(6 downto 0) := "0001000"; -- default address
 	signal i2c_slave_rx_dv : std_logic;
 	signal i2c_slave_rx_byte : std_logic_vector(7 downto 0);
 	signal i2c_slave_sda_out : std_logic;
+	signal i2c_slave_tx_byte : std_logic_vector(7 downto 0) := (others => '0');
+	signal i2c_slave_tx_byte_dv : std_logic := '0';
+	signal i2c_slave_tx_read : std_logic;
+	
+	signal i2c_slave_tx_register : std_logic_vector(31 downto 0);
+	signal i2c_slave_tx_register_cntr : natural range 0 to 3;
+	signal i2c_slave_tx_register_empty : std_logic;
+	signal i2c_slave_tx_register_full : std_logic;
+	signal i2c_slave_dx_register : std_logic_vector(31 downto 0);
+	signal i2c_slave_dx_register_cntr : natural range 0 to 3;
+	signal i2c_slave_dx_register_full : std_logic;
+	signal i2c_slave_dx_register_empty : std_logic;
 	
 	attribute MARK_DEBUG : string;
 
@@ -352,8 +367,11 @@ begin
 			i_SCL => i2c_scl_in,
 			o_SDA => i2c_slave_sda_out,
 			o_RX_Byte => i2c_slave_rx_byte,
+			i_TX_Byte => i2c_slave_tx_byte,
 			i_Address => i2c_slave_address,
-			o_RX_DV => i2c_slave_rx_dv
+			i_TX_Byte_DV => i2c_slave_tx_byte_dv,
+			o_RX_DV => i2c_slave_rx_dv,
+			o_TX_Read => i2c_slave_tx_read
 	);
 	
 	i2c_sda_io <= '0' when i2c_slave_sda_out = '0' else '1';
@@ -690,9 +708,20 @@ begin
 								peripherals_read_data <= jd_io(7 downto 0) & jc_io(7 downto 0) & jb_io(7 downto 0) & ja_io(7 downto 0);
 								peripherals_read_dv <= '1';
 							
+							when "000100000" =>
+								peripherals_read_data(31 downto 0) <= i2c_slave_dx_register(31 downto 0);
+								i2c_slave_dx_register_empty <= '1';
+								peripherals_read_dv <= '1';
+							
+							when "000100100" => 
+								peripherals_read_data(0) <= i2c_slave_dx_register_full;
+								peripherals_read_data(1) <= i2c_slave_tx_register_empty;
+								peripherals_read_dv <= '1';
+								
 							when others =>
 								peripherals_read_dv <= '1';
 								null;
+								
 						
 						end case;
 					else -- write
@@ -724,6 +753,10 @@ begin
 								jb_io(7 downto 0) <= dm_data_in(15 downto 8);
 								jc_io(7 downto 0) <= dm_data_in(23 downto 16);
 								jd_io(7 downto 0) <= dm_data_in(31 downto 24);
+							
+							when "000100000" => 
+								i2c_slave_tx_register(31 downto 0) <= dm_data_in(31 downto 0);
+								i2c_slave_tx_register_full <= '1';
 							
 							when others =>
 								null;
