@@ -256,19 +256,22 @@ architecture Behavioral of Top_of_Arty_SoC is
 	signal i2c_slave_tx_read : std_logic;
 	
 	signal i2c_slave_tx_register : std_logic_vector(31 downto 0);
-	signal i2c_slave_tx_register_cntr : natural range 0 to 3;
-	signal i2c_slave_tx_register_empty : std_logic;
+	signal i2c_slave_tx_register_cntr : std_logic_vector(2 downto 0) := (others => '0');
 	signal i2c_slave_tx_register_full : std_logic;
-	signal i2c_slave_dx_register : std_logic_vector(31 downto 0);
-	signal i2c_slave_dx_register_cntr : natural range 0 to 3;
-	signal i2c_slave_dx_register_full : std_logic;
-	signal i2c_slave_dx_register_empty : std_logic;
+	signal i2c_slave_rx_register : std_logic_vector(31 downto 0);
+	signal i2c_slave_rx_register_cntr : std_logic_vector(2 downto 0) := (others => '0');
+	signal i2c_slave_rx_register_empty : std_logic;
 	
 	attribute MARK_DEBUG : string;
 
-	attribute MARK_DEBUG of i2c_slave_rx_dv : signal is "TRUE";
+	attribute MARK_DEBUG of i2c_slave_tx_register : signal is "TRUE";
+	attribute MARK_DEBUG of i2c_slave_tx_register_cntr : signal is "TRUE";
+	attribute MARK_DEBUG of i2c_slave_rx_register : signal is "TRUE";
+	attribute MARK_DEBUG of i2c_slave_rx_register_cntr : signal is "TRUE";
 	attribute MARK_DEBUG of i2c_slave_rx_byte : signal is "TRUE";
-	attribute MARK_DEBUG of i2c_slave_sda_out : signal is "TRUE";
+	attribute MARK_DEBUG of i2c_slave_rx_dv : signal is "TRUE";
+	attribute MARK_DEBUG of i2c_slave_tx_byte : signal is "TRUE";
+	attribute MARK_DEBUG of i2c_slave_tx_read : signal is "TRUE";
 
 begin
 	
@@ -405,6 +408,63 @@ begin
 		I => '0', 		-- I2C uses external Pull Ups so we only ever need to pull the line low
 		T => i2c_sda_io
 	);
+	
+	i2c_read_register_proc : process (CLK)
+	begin
+		if (rising_edge(CLK)) then
+			
+			if (i2c_slave_rx_dv = '1') then
+				case i2c_slave_rx_register_cntr is
+					when "000" => 
+						i2c_slave_rx_register(7 downto 0) <= i2c_slave_rx_byte;
+						i2c_slave_rx_register_cntr <= "001";
+					when "001" => 
+						i2c_slave_rx_register(15 downto 8) <= i2c_slave_rx_byte;
+						i2c_slave_rx_register_cntr <= "010";
+					when "010" => 
+						i2c_slave_rx_register(23 downto 16) <= i2c_slave_rx_byte;
+						i2c_slave_rx_register_cntr <= "011";
+					when "011" => 
+						i2c_slave_rx_register(31 downto 24) <= i2c_slave_rx_byte;
+						i2c_slave_rx_register_cntr <= "100";
+						-- todo add flag for i2c slave to not accept data when register is full
+					when others =>
+						null; -- register is full 
+				end case;
+			end if;
+			
+			if (i2c_slave_tx_read = '1') then
+				case i2c_slave_tx_register_cntr is
+					when "100" => 
+						i2c_slave_tx_byte <= i2c_slave_rx_register(15 downto 8);
+						i2c_slave_tx_register_cntr <= "011";
+					when "011" => 
+						i2c_slave_tx_byte <= i2c_slave_rx_register(23 downto 16);
+						i2c_slave_tx_register_cntr <= "010";
+					when "010" => 
+						i2c_slave_tx_byte <= i2c_slave_rx_register(31 downto 24);
+						i2c_slave_tx_register_cntr <= "001";
+					when "001" => 
+						i2c_slave_tx_register_cntr <= "000";
+						i2c_slave_tx_byte_dv <= '0';
+					when others =>
+						null; -- register is empty
+				end case;
+			end if;
+			
+			if (i2c_slave_rx_register_empty = '1') then
+				i2c_slave_rx_register_cntr <= "000";
+				-- todo add nack when dx register is full and reset it here
+			end if;
+			
+			if (i2c_slave_tx_register_full = '1') then
+				i2c_slave_tx_register_cntr <= "100"; -- 4
+				i2c_slave_tx_byte <= i2c_slave_tx_register(7 downto 0);
+				i2c_slave_tx_byte_dv <= '1';
+			end if;
+			
+		end if;
+	end process;
 	
 	----------------------------------------------------------
 	------          IOBUF for Tri State GPIO           -------
@@ -709,13 +769,13 @@ begin
 								peripherals_read_dv <= '1';
 							
 							when "000100000" =>
-								peripherals_read_data(31 downto 0) <= i2c_slave_dx_register(31 downto 0);
-								i2c_slave_dx_register_empty <= '1';
+								peripherals_read_data(31 downto 0) <= i2c_slave_rx_register(31 downto 0);
+								i2c_slave_rx_register_empty <= '1';
 								peripherals_read_dv <= '1';
 							
 							when "000100100" => 
-								peripherals_read_data(0) <= i2c_slave_dx_register_full;
-								peripherals_read_data(1) <= i2c_slave_tx_register_empty;
+								peripherals_read_data(2 downto 0) <= i2c_slave_rx_register_cntr(2 downto 0);
+								peripherals_read_data(5 downto 3) <= i2c_slave_tx_register_cntr(2 downto 0);
 								peripherals_read_dv <= '1';
 								
 							when others =>

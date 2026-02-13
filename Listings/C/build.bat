@@ -19,6 +19,15 @@ if %errorlevel% neq 0 (
     exit /b 1
 )
 
+REM Compile the peripherals C source code
+echo Compiling Utils.c...
+riscv-none-elf-gcc.exe -march=rv32i -mabi=ilp32 -O2 -ffreestanding -nostdlib -I.\Libs -c Libs\Utils.c -o Utils.o
+if %errorlevel% neq 0 (
+    echo Utils compilation failed!
+    pause
+    exit /b 1
+)
+
 REM Compile the main C source code
 echo Compiling main.c...
 riscv-none-elf-gcc.exe -march=rv32i -mabi=ilp32 -O2 -ffreestanding -nostdlib -I.\Libs -c main.c -o main.o
@@ -30,7 +39,7 @@ if %errorlevel% neq 0 (
 
 REM Link all object files together
 echo Linking...
-riscv-none-elf-gcc.exe -march=rv32i -mabi=ilp32 -nostdlib -T linker.ld -o program.elf startup.o main.o Peripherals.o
+riscv-none-elf-gcc.exe -march=rv32i -mabi=ilp32 -nostdlib -T linker.ld -o program.elf startup.o main.o Peripherals.o Utils.o -lgcc
 if %errorlevel% neq 0 (
     echo Linking failed!
     pause

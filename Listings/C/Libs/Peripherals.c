@@ -1,4 +1,5 @@
-#include "Peripherals.h"
+#include ".\Peripherals.h"
+#include ".\Utils.h"
 
 void print(const char* msg)
 {
@@ -19,10 +20,9 @@ void wait_ms(unsigned int milliseconds)
     while ((read_timer() - start) < cycles);
 }
 
-void print_int(unsigned int val)
+void print_int(int val)
 {
-    write_reg(UART_BASE, val >> 24);
-    write_reg(UART_BASE, val >> 16);
-    write_reg(UART_BASE, val >> 8);
-    write_reg(UART_BASE, val);
+    char num_str[20];
+    int_to_string(val, num_str);
+    print(num_str);
 }

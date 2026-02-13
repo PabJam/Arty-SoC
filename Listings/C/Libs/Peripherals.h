@@ -10,6 +10,8 @@
 #define OUTPUT 0x0
 #define UART_BASE 0x8000000C
 #define TIMER_BASE 0x80000000
+#define I2C_SLAVE_REG 0x80000020
+#define I2C_SLAVE_REG_CNTR 0x80000024
 
 #define CLOCK_FREQ_HZ 100000000 //100MHz
 #define CYCLES_PER_MS 100000  
@@ -58,6 +60,42 @@ static inline void set_pin(unsigned int pin, unsigned int pin_out)
     write_reg(GPIO_BASE, pins_output);
 }
 
+/// <summary>
+/// Write 4 bytes to the i2c slave tx register, which are transmitted when a master requests read access
+/// </summary>
+/// <param name="messages">The 4 bytes which are transmitted</param>
+static inline void set_i2c_slave_tx(unsigned int messages)
+{
+    write_reg(I2C_SLAVE_REG, messages);
+}
+
+/// <summary>
+/// Read 4 bytes from the i2c Slave rx register
+/// </summary>
+/// <returns>The current i2c slave rx register</returns>
+static inline unsigned int get_i2c_slave_rx(void)
+{
+    return read_reg(I2C_SLAVE_REG);
+}
+
+/// <summary>
+/// Read out how many recieved bytes are in the rx register
+/// </summary>
+/// <returns>number of bytes</returns>
+static inline char get_i2c_slave_rx_counter(void)
+{
+    return (char)(read_reg(I2C_SLAVE_REG_CNTR) & 0b0111);
+}
+
+/// <summary>
+/// Read out how many bytes are in the tx register and ready to be transmitted
+/// </summary>
+/// <returns>number of bytes</returns>
+static inline char get_i2c_slave_tx_counter(void)
+{
+    return (char)((read_reg(I2C_SLAVE_REG_CNTR) >> 3) & 0b0111);
+}
+
 // print message containing up to 255 char 
 void print(const char* msg);
 
@@ -65,6 +103,6 @@ void print(const char* msg);
 void wait_ms(unsigned int milliseconds);
 
 // writes the val back over Uart
-void print_int(unsigned int val);
+void print_int(int val);
 
 #endif // !__PERIPHERALS_H__

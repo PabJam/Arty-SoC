@@ -226,6 +226,9 @@ begin
 							i2c_state <= s_idle;
 						end if;
 					
+					when others =>
+						null;	
+						i2c_state <= s_idle;
 				end case;
 			
 			end if;
