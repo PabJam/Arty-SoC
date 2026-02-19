@@ -25,7 +25,11 @@ int main(void) {
         {
             set_i2c_slave_tx(bmp[frame_cnt]);
             frame_cnt++;
-            if (frame_cnt == sizeof(bmp)) { frame_cnt = 0; }
+            if (frame_cnt == sizeof(bmp) / sizeof(int)) 
+            { 
+                frame_cnt = 0;
+                print("looped\r\n");
+            }
             
             //print("Set Register ");
             //print_int(tx_register);
