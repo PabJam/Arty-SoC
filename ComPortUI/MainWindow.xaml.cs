@@ -158,6 +158,7 @@ namespace ComPortUI
                     break;
             }
             Output_TB.Text = textOutput;
+            if (Output_TB.LineCount != 0) { Output_TB.ScrollToLine(Output_TB.LineCount - 1); }
         }
 
         public string GetOutputText()

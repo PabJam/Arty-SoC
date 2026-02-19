@@ -10,58 +10,49 @@
    </db_ref_list>
    <zoom_setting>
       <ZoomStartTime time="0"></ZoomStartTime>
-      <ZoomEndTime time="1,025"></ZoomEndTime>
+      <ZoomEndTime time="9"></ZoomEndTime>
       <Cursor1Time time="0"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="275"></NameColumnWidth>
-      <ValueColumnWidth column_width="110"></ValueColumnWidth>
+      <ValueColumnWidth column_width="90"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="6" />
-   <wave_markers>
-   </wave_markers>
-   <wvobject fp_name="i2c_slave_rx_byte" type="array">
+   <WVObjectSize size="5" />
+   <wvobject fp_name="i2c_slave_tx_byte" type="array">
       <obj_property name="DisplayName">FullPathName</obj_property>
-      <obj_property name="ElementShortName">i2c_slave_rx_byte[7:0]</obj_property>
-      <obj_property name="ObjectShortName">i2c_slave_rx_byte[7:0]</obj_property>
-      <obj_property name="Radix">BINARYRADIX</obj_property>
-      <obj_property name="LABELRADIX">true</obj_property>
-      <obj_property name="WaveformStyle">STYLE_DIGITAL</obj_property>
-   </wvobject>
-   <wvobject fp_name="i2c_slave_rx_dv" type="logic">
-      <obj_property name="DisplayName">FullPathName</obj_property>
-      <obj_property name="ElementShortName">i2c_slave_rx_dv</obj_property>
-      <obj_property name="ObjectShortName">i2c_slave_rx_dv</obj_property>
-      <obj_property name="LABELRADIX">true</obj_property>
-      <obj_property name="WaveformStyle">STYLE_DIGITAL</obj_property>
-   </wvobject>
-   <wvobject fp_name="i2c_slave_sda_out" type="logic">
-      <obj_property name="DisplayName">FullPathName</obj_property>
-      <obj_property name="ElementShortName">i2c_slave_sda_out</obj_property>
-      <obj_property name="ObjectShortName">i2c_slave_sda_out</obj_property>
-      <obj_property name="LABELRADIX">true</obj_property>
-      <obj_property name="WaveformStyle">STYLE_DIGITAL</obj_property>
-   </wvobject>
-   <wvobject fp_name="inst_I2C_Slave/i2c_state" type="array">
-      <obj_property name="DisplayName">FullPathName</obj_property>
-      <obj_property name="ElementShortName">inst_I2C_Slave/i2c_state[2:0]</obj_property>
-      <obj_property name="ObjectShortName">i2c_state[2:0]</obj_property>
+      <obj_property name="ElementShortName">i2c_slave_tx_byte[7:0]</obj_property>
+      <obj_property name="ObjectShortName">i2c_slave_tx_byte[7:0]</obj_property>
       <obj_property name="Radix">HEXRADIX</obj_property>
       <obj_property name="LABELRADIX">true</obj_property>
       <obj_property name="WaveformStyle">STYLE_DIGITAL</obj_property>
    </wvobject>
-   <wvobject fp_name="inst_I2C_Slave/rw_state" type="logic">
+   <wvobject fp_name="i2c_slave_tx_register" type="array">
       <obj_property name="DisplayName">FullPathName</obj_property>
-      <obj_property name="ElementShortName">inst_I2C_Slave/rw_state</obj_property>
-      <obj_property name="ObjectShortName">rw_state</obj_property>
+      <obj_property name="ElementShortName">i2c_slave_tx_register[31:0]</obj_property>
+      <obj_property name="ObjectShortName">i2c_slave_tx_register[31:0]</obj_property>
+      <obj_property name="Radix">HEXRADIX</obj_property>
       <obj_property name="LABELRADIX">true</obj_property>
       <obj_property name="WaveformStyle">STYLE_DIGITAL</obj_property>
    </wvobject>
-   <wvobject fp_name="inst_I2C_Slave/rx_address" type="array">
+   <wvobject fp_name="i2c_slave_tx_register_cntr__0" type="array">
       <obj_property name="DisplayName">FullPathName</obj_property>
-      <obj_property name="ElementShortName">inst_I2C_Slave/rx_address[6:0]</obj_property>
-      <obj_property name="ObjectShortName">rx_address[6:0]</obj_property>
+      <obj_property name="ElementShortName">i2c_slave_tx_register_cntr__0[2:0]</obj_property>
+      <obj_property name="ObjectShortName">i2c_slave_tx_register_cntr__0[2:0]</obj_property>
       <obj_property name="Radix">HEXRADIX</obj_property>
+      <obj_property name="LABELRADIX">true</obj_property>
+      <obj_property name="WaveformStyle">STYLE_DIGITAL</obj_property>
+   </wvobject>
+   <wvobject fp_name="i2c_slave_tx_register_full" type="logic">
+      <obj_property name="DisplayName">FullPathName</obj_property>
+      <obj_property name="ElementShortName">i2c_slave_tx_register_full</obj_property>
+      <obj_property name="ObjectShortName">i2c_slave_tx_register_full</obj_property>
+      <obj_property name="LABELRADIX">true</obj_property>
+      <obj_property name="WaveformStyle">STYLE_DIGITAL</obj_property>
+   </wvobject>
+   <wvobject fp_name="i2c_slave_tx_read" type="logic">
+      <obj_property name="DisplayName">FullPathName</obj_property>
+      <obj_property name="ElementShortName">i2c_slave_tx_read</obj_property>
+      <obj_property name="ObjectShortName">i2c_slave_tx_read</obj_property>
       <obj_property name="LABELRADIX">true</obj_property>
       <obj_property name="WaveformStyle">STYLE_DIGITAL</obj_property>
    </wvobject>

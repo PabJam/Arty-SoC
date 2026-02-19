@@ -272,6 +272,8 @@ architecture Behavioral of Top_of_Arty_SoC is
 	attribute MARK_DEBUG of i2c_slave_rx_dv : signal is "TRUE";
 	attribute MARK_DEBUG of i2c_slave_tx_byte : signal is "TRUE";
 	attribute MARK_DEBUG of i2c_slave_tx_read : signal is "TRUE";
+	attribute MARK_DEBUG of i2c_slave_tx_register_full : signal is "TRUE";
+	attribute MARK_DEBUG of i2c_slave_rx_register_empty : signal is "TRUE";
 
 begin
 	
@@ -416,16 +418,16 @@ begin
 			if (i2c_slave_rx_dv = '1') then
 				case i2c_slave_rx_register_cntr is
 					when "000" => 
-						i2c_slave_rx_register(7 downto 0) <= i2c_slave_rx_byte;
+						i2c_slave_rx_register(31 downto 24) <= i2c_slave_rx_byte;
 						i2c_slave_rx_register_cntr <= "001";
 					when "001" => 
-						i2c_slave_rx_register(15 downto 8) <= i2c_slave_rx_byte;
+						i2c_slave_rx_register(23 downto 16) <= i2c_slave_rx_byte;
 						i2c_slave_rx_register_cntr <= "010";
 					when "010" => 
-						i2c_slave_rx_register(23 downto 16) <= i2c_slave_rx_byte;
+						i2c_slave_rx_register(15 downto 8) <= i2c_slave_rx_byte;
 						i2c_slave_rx_register_cntr <= "011";
 					when "011" => 
-						i2c_slave_rx_register(31 downto 24) <= i2c_slave_rx_byte;
+						i2c_slave_rx_register(7 downto 0) <= i2c_slave_rx_byte;
 						i2c_slave_rx_register_cntr <= "100";
 						-- todo add flag for i2c slave to not accept data when register is full
 					when others =>
@@ -436,13 +438,13 @@ begin
 			if (i2c_slave_tx_read = '1') then
 				case i2c_slave_tx_register_cntr is
 					when "100" => 
-						i2c_slave_tx_byte <= i2c_slave_rx_register(15 downto 8);
+						i2c_slave_tx_byte <= i2c_slave_tx_register(23 downto 16);
 						i2c_slave_tx_register_cntr <= "011";
 					when "011" => 
-						i2c_slave_tx_byte <= i2c_slave_rx_register(23 downto 16);
+						i2c_slave_tx_byte <= i2c_slave_tx_register(15 downto 8);
 						i2c_slave_tx_register_cntr <= "010";
 					when "010" => 
-						i2c_slave_tx_byte <= i2c_slave_rx_register(31 downto 24);
+						i2c_slave_tx_byte <= i2c_slave_tx_register(7 downto 0);
 						i2c_slave_tx_register_cntr <= "001";
 					when "001" => 
 						i2c_slave_tx_register_cntr <= "000";
@@ -459,7 +461,7 @@ begin
 			
 			if (i2c_slave_tx_register_full = '1') then
 				i2c_slave_tx_register_cntr <= "100"; -- 4
-				i2c_slave_tx_byte <= i2c_slave_tx_register(7 downto 0);
+				i2c_slave_tx_byte <= i2c_slave_tx_register(31 downto 24);
 				i2c_slave_tx_byte_dv <= '1';
 			end if;
 			
@@ -739,6 +741,8 @@ begin
 			uart_fifo_wr_en <= '0';
 			peripherals_read_data <= (others => '0');
 			peripherals_read_dv <= '0';
+			i2c_slave_rx_register_empty <= '0';
+			i2c_slave_tx_register_full <= '0';
 			
 			if sync_nRst_alu = '0' then
 				saved_leds <= (others => '0');

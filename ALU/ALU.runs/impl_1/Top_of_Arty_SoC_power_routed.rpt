@@ -1,7 +1,7 @@
 Copyright 1986-2022 Xilinx, Inc. All Rights Reserved. Copyright 2022-2025 Advanced Micro Devices, Inc. All Rights Reserved.
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------
 | Tool Version     : Vivado v.2025.1 (win64) Build 6140274 Thu May 22 00:12:29 MDT 2025
-| Date             : Fri Feb 13 11:01:28 2026
+| Date             : Thu Feb 19 14:52:22 2026
 | Host             : DESKTOP-E28LK6R running 64-bit major release  (build 9200)
 | Command          : report_power -file Top_of_Arty_SoC_power_routed.rpt -pb Top_of_Arty_SoC_power_summary_routed.pb -rpx Top_of_Arty_SoC_power_routed.rpx
 | Design           : Top_of_Arty_SoC
@@ -53,15 +53,15 @@ Table of Contents
 | On-Chip                  | Power (W) | Used     | Available | Utilization (%) |
 +--------------------------+-----------+----------+-----------+-----------------+
 | Clocks                   |     0.016 |        4 |       --- |             --- |
-| Slice Logic              |     0.007 |    11511 |       --- |             --- |
-|   LUT as Logic           |     0.006 |     4547 |     14600 |           31.14 |
-|   CARRY4                 |    <0.001 |      206 |      3650 |            5.64 |
-|   Register               |    <0.001 |     5138 |     29200 |           17.60 |
+| Slice Logic              |     0.007 |    11725 |       --- |             --- |
+|   LUT as Logic           |     0.006 |     4612 |     14600 |           31.59 |
+|   CARRY4                 |    <0.001 |      210 |      3650 |            5.75 |
+|   Register               |    <0.001 |     5240 |     29200 |           17.95 |
 |   F7/F8 Muxes            |    <0.001 |      236 |     14600 |            1.62 |
-|   LUT as Shift Register  |    <0.001 |      189 |      5000 |            3.78 |
+|   LUT as Shift Register  |    <0.001 |      200 |      5000 |            4.00 |
 |   LUT as Distributed RAM |    <0.001 |       24 |      5000 |            0.48 |
-|   Others                 |     0.000 |      440 |       --- |             --- |
-| Signals                  |     0.013 |     9397 |       --- |             --- |
+|   Others                 |     0.000 |      460 |       --- |             --- |
+| Signals                  |     0.013 |     9525 |       --- |             --- |
 | Block RAM                |     0.017 |     35.5 |        45 |           78.89 |
 | I/O                      |     0.025 |       51 |       150 |           34.00 |
 | Static Power             |     0.063 |          |           |                 |
@@ -154,7 +154,7 @@ Table of Contents
 |       inst_blk_mem_gen       |     0.018 |
 |   u_ila_0                    |     0.011 |
 |     inst                     |     0.011 |
-|       ila_core_inst          |     0.010 |
+|       ila_core_inst          |     0.011 |
 +------------------------------+-----------+
 
 

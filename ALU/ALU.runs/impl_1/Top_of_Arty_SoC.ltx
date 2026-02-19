@@ -31,8 +31,35 @@
                                 "direction": "IN",
                                 "isVector": true,
                                 "leftIndex": 0,
-                                "rightIndex": 6,
+                                "rightIndex": 2,
                                 "portIndex": 0,
+                                "nets": [
+                                    {
+                                        "name": "inst_I2C_Slave/i2c_state",
+                                        "isBus": true,
+                                        "subnets": [
+                                            {
+                                                "name": "inst_I2C_Slave/i2c_state[2]"
+                                            },
+                                            {
+                                                "name": "inst_I2C_Slave/i2c_state[1]"
+                                            },
+                                            {
+                                                "name": "inst_I2C_Slave/i2c_state[0]"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "name": "probe1",
+                                "id": 1,
+                                "type": "DATA_TRIGGER",
+                                "direction": "IN",
+                                "isVector": true,
+                                "leftIndex": 0,
+                                "rightIndex": 6,
+                                "portIndex": 1,
                                 "nets": [
                                     {
                                         "name": "inst_I2C_Slave/rx_address",
@@ -64,41 +91,83 @@
                                 ]
                             },
                             {
-                                "name": "probe1",
-                                "id": 1,
-                                "type": "DATA_TRIGGER",
-                                "direction": "IN",
-                                "isVector": true,
-                                "leftIndex": 0,
-                                "rightIndex": 2,
-                                "portIndex": 1,
-                                "nets": [
-                                    {
-                                        "name": "inst_I2C_Slave/i2c_state",
-                                        "isBus": true,
-                                        "subnets": [
-                                            {
-                                                "name": "inst_I2C_Slave/i2c_state[2]"
-                                            },
-                                            {
-                                                "name": "inst_I2C_Slave/i2c_state[1]"
-                                            },
-                                            {
-                                                "name": "inst_I2C_Slave/i2c_state[0]"
-                                            }
-                                        ]
-                                    }
-                                ]
-                            },
-                            {
                                 "name": "probe2",
                                 "id": 2,
                                 "type": "DATA_TRIGGER",
                                 "direction": "IN",
                                 "isVector": true,
                                 "leftIndex": 0,
-                                "rightIndex": 31,
+                                "rightIndex": 2,
                                 "portIndex": 2,
+                                "nets": [
+                                    {
+                                        "name": "i2c_slave_rx_register_cntr__0",
+                                        "isBus": true,
+                                        "subnets": [
+                                            {
+                                                "name": "i2c_slave_rx_register_cntr__0[2]"
+                                            },
+                                            {
+                                                "name": "i2c_slave_rx_register_cntr__0[1]"
+                                            },
+                                            {
+                                                "name": "i2c_slave_rx_register_cntr__0[0]"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "name": "probe3",
+                                "id": 3,
+                                "type": "DATA_TRIGGER",
+                                "direction": "IN",
+                                "isVector": true,
+                                "leftIndex": 0,
+                                "rightIndex": 7,
+                                "portIndex": 3,
+                                "nets": [
+                                    {
+                                        "name": "i2c_slave_tx_byte",
+                                        "isBus": true,
+                                        "subnets": [
+                                            {
+                                                "name": "i2c_slave_tx_byte[7]"
+                                            },
+                                            {
+                                                "name": "i2c_slave_tx_byte[6]"
+                                            },
+                                            {
+                                                "name": "i2c_slave_tx_byte[5]"
+                                            },
+                                            {
+                                                "name": "i2c_slave_tx_byte[4]"
+                                            },
+                                            {
+                                                "name": "i2c_slave_tx_byte[3]"
+                                            },
+                                            {
+                                                "name": "i2c_slave_tx_byte[2]"
+                                            },
+                                            {
+                                                "name": "i2c_slave_tx_byte[1]"
+                                            },
+                                            {
+                                                "name": "i2c_slave_tx_byte[0]"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "name": "probe4",
+                                "id": 4,
+                                "type": "DATA_TRIGGER",
+                                "direction": "IN",
+                                "isVector": true,
+                                "leftIndex": 0,
+                                "rightIndex": 31,
+                                "portIndex": 4,
                                 "nets": [
                                     {
                                         "name": "i2c_slave_tx_register",
@@ -205,75 +274,6 @@
                                 ]
                             },
                             {
-                                "name": "probe3",
-                                "id": 3,
-                                "type": "DATA_TRIGGER",
-                                "direction": "IN",
-                                "isVector": true,
-                                "leftIndex": 0,
-                                "rightIndex": 2,
-                                "portIndex": 3,
-                                "nets": [
-                                    {
-                                        "name": "i2c_slave_rx_register_cntr__0",
-                                        "isBus": true,
-                                        "subnets": [
-                                            {
-                                                "name": "i2c_slave_rx_register_cntr__0[2]"
-                                            },
-                                            {
-                                                "name": "i2c_slave_rx_register_cntr__0[1]"
-                                            },
-                                            {
-                                                "name": "i2c_slave_rx_register_cntr__0[0]"
-                                            }
-                                        ]
-                                    }
-                                ]
-                            },
-                            {
-                                "name": "probe4",
-                                "id": 4,
-                                "type": "DATA_TRIGGER",
-                                "direction": "IN",
-                                "isVector": true,
-                                "leftIndex": 0,
-                                "rightIndex": 7,
-                                "portIndex": 4,
-                                "nets": [
-                                    {
-                                        "name": "i2c_slave_tx_byte",
-                                        "isBus": true,
-                                        "subnets": [
-                                            {
-                                                "name": "i2c_slave_tx_byte[7]"
-                                            },
-                                            {
-                                                "name": "i2c_slave_tx_byte[6]"
-                                            },
-                                            {
-                                                "name": "i2c_slave_tx_byte[5]"
-                                            },
-                                            {
-                                                "name": "i2c_slave_tx_byte[4]"
-                                            },
-                                            {
-                                                "name": "i2c_slave_tx_byte[3]"
-                                            },
-                                            {
-                                                "name": "i2c_slave_tx_byte[2]"
-                                            },
-                                            {
-                                                "name": "i2c_slave_tx_byte[1]"
-                                            },
-                                            {
-                                                "name": "i2c_slave_tx_byte[0]"
-                                            }
-                                        ]
-                                    }
-                                ]
-                            },
-                            {
                                 "name": "probe5",
                                 "id": 5,
                                 "type": "DATA_TRIGGER",
@@ -307,8 +307,50 @@
                                 "direction": "IN",
                                 "isVector": true,
                                 "leftIndex": 0,
-                                "rightIndex": 31,
+                                "rightIndex": 7,
                                 "portIndex": 6,
+                                "nets": [
+                                    {
+                                        "name": "i2c_slave_rx_byte",
+                                        "isBus": true,
+                                        "subnets": [
+                                            {
+                                                "name": "i2c_slave_rx_byte[7]"
+                                            },
+                                            {
+                                                "name": "i2c_slave_rx_byte[6]"
+                                            },
+                                            {
+                                                "name": "i2c_slave_rx_byte[5]"
+                                            },
+                                            {
+                                                "name": "i2c_slave_rx_byte[4]"
+                                            },
+                                            {
+                                                "name": "i2c_slave_rx_byte[3]"
+                                            },
+                                            {
+                                                "name": "i2c_slave_rx_byte[2]"
+                                            },
+                                            {
+                                                "name": "i2c_slave_rx_byte[1]"
+                                            },
+                                            {
+                                                "name": "i2c_slave_rx_byte[0]"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "name": "probe7",
+                                "id": 7,
+                                "type": "DATA_TRIGGER",
+                                "direction": "IN",
+                                "isVector": true,
+                                "leftIndex": 0,
+                                "rightIndex": 31,
+                                "portIndex": 7,
                                 "nets": [
                                     {
                                         "name": "i2c_slave_rx_register",
@@ -415,48 +457,6 @@
                                 ]
                             },
                             {
-                                "name": "probe7",
-                                "id": 7,
-                                "type": "DATA_TRIGGER",
-                                "direction": "IN",
-                                "isVector": true,
-                                "leftIndex": 0,
-                                "rightIndex": 7,
-                                "portIndex": 7,
-                                "nets": [
-                                    {
-                                        "name": "i2c_slave_rx_byte",
-                                        "isBus": true,
-                                        "subnets": [
-                                            {
-                                                "name": "i2c_slave_rx_byte[7]"
-                                            },
-                                            {
-                                                "name": "i2c_slave_rx_byte[6]"
-                                            },
-                                            {
-                                                "name": "i2c_slave_rx_byte[5]"
-                                            },
-                                            {
-                                                "name": "i2c_slave_rx_byte[4]"
-                                            },
-                                            {
-                                                "name": "i2c_slave_rx_byte[3]"
-                                            },
-                                            {
-                                                "name": "i2c_slave_rx_byte[2]"
-                                            },
-                                            {
-                                                "name": "i2c_slave_rx_byte[1]"
-                                            },
-                                            {
-                                                "name": "i2c_slave_rx_byte[0]"
-                                            }
-                                        ]
-                                    }
-                                ]
-                            },
-                            {
                                 "name": "probe8",
                                 "id": 8,
                                 "type": "DATA_TRIGGER",
@@ -483,7 +483,7 @@
                                 "portIndex": 9,
                                 "nets": [
                                     {
-                                        "name": "i2c_slave_tx_read",
+                                        "name": "i2c_slave_rx_register_empty",
                                         "isBus": false
                                     }
                                 ]
@@ -497,6 +497,38 @@
                                 "leftIndex": 0,
                                 "rightIndex": 0,
                                 "portIndex": 10,
+                                "nets": [
+                                    {
+                                        "name": "i2c_slave_tx_read",
+                                        "isBus": false
+                                    }
+                                ]
+                            },
+                            {
+                                "name": "probe11",
+                                "id": 11,
+                                "type": "DATA_TRIGGER",
+                                "direction": "IN",
+                                "isVector": false,
+                                "leftIndex": 0,
+                                "rightIndex": 0,
+                                "portIndex": 11,
+                                "nets": [
+                                    {
+                                        "name": "i2c_slave_tx_register_full",
+                                        "isBus": false
+                                    }
+                                ]
+                            },
+                            {
+                                "name": "probe12",
+                                "id": 12,
+                                "type": "DATA_TRIGGER",
+                                "direction": "IN",
+                                "isVector": false,
+                                "leftIndex": 0,
+                                "rightIndex": 0,
+                                "portIndex": 12,
                                 "nets": [
                                     {
                                         "name": "inst_I2C_Slave/rw_state",
