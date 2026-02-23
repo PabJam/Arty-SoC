@@ -1,5 +1,9 @@
-﻿using System.IO.Ports;
+﻿using System;
+using System.IO.Ports;
 using System.Text;
+using System.Windows;
+using System.Windows.Threading;
+using System.Collections.Concurrent;
 
 namespace ComPortUI
 {
@@ -7,6 +11,7 @@ namespace ComPortUI
     {
         public static MainWindow mainWindow { get; }
         public static SerialPort serialPort { get; }
+        public static ConcurrentQueue<byte[]> dataQueue {  get; }
 
         const string portName = "COM7";
         const int baudRate = 115200;
@@ -20,24 +25,27 @@ namespace ComPortUI
             serialPort = new SerialPort(portName, baudRate, parity, dataBits, stopBits);
             serialPort.Encoding = Encoding.Latin1;
             serialPort.DataReceived += new SerialDataReceivedEventHandler(SerialDataRecievedHandler);
+            dataQueue = new ConcurrentQueue<byte[]>();
         }
 
         private static void SerialDataRecievedHandler(object sender, SerialDataReceivedEventArgs e)
         {
             SerialPort sp = (SerialPort)sender;
-            int bytesToRead = sp.BytesToRead;
-            byte[] bytes = new byte[bytesToRead];
-            for (int i = 0; i < bytesToRead; i++)
+            try
             {
-                bytes[i] = (byte)sp.ReadByte();
+                int bytesToRead = sp.BytesToRead;
+                byte[] bytes = new byte[bytesToRead];
+                sp.Read(bytes, 0, bytesToRead);
+
+                dataQueue.Enqueue(bytes);
             }
-
-
-            mainWindow.Dispatcher.Invoke(() =>
+            catch (Exception ex)
             {
-                mainWindow.AddOutputBytes(bytes);
-
-            });
+                mainWindow.Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    MessageBox.Show("Serial Error: " + ex.Message);
+                }));    
+            }
         }
 
     }

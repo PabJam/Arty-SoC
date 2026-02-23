@@ -5,6 +5,7 @@ using System.Windows.Input;
 using System.IO.Ports;
 using Microsoft.Win32;
 using System.IO;
+using System.Windows.Threading;
 
 namespace ComPortUI
 {
@@ -13,9 +14,10 @@ namespace ComPortUI
     /// </summary>
     public partial class MainWindow : Window
     {
-        SerialPort serialPort;
+        private SerialPort serialPort;
         private string textOutput = string.Empty;
-        List<byte> realOutput = new List<byte>();
+        private List<byte> realOutput = new List<byte>();
+        private DispatcherTimer uiTimer = new DispatcherTimer();
 
         public MainWindow()
         {
@@ -30,6 +32,10 @@ namespace ComPortUI
                 Console.WriteLine($"Error {ex.Message}");
             }
 
+            uiTimer.Interval = TimeSpan.FromMilliseconds(50); // 20 Times per second
+            uiTimer.Tick += UiTimer_Tick;
+            uiTimer.Start();
+
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -42,6 +48,7 @@ namespace ComPortUI
 
         private void Input_TB_KeyDown(object sender, KeyEventArgs e)
         {
+            if (Input_TB == null || Output_TB == null) {  return; }
             if (e.Key == Key.Enter)
             {
                 if (Keyboard.IsKeyDown(Key.LeftShift))
@@ -122,6 +129,19 @@ namespace ComPortUI
             return bytes;
         }
 
+        private void UiTimer_Tick(object? sender, EventArgs e)
+        {
+            if (ReferenceManager.dataQueue.IsEmpty == true) { return; }
+
+            List<byte> batch = new List<byte>();
+            while (ReferenceManager.dataQueue.TryDequeue(out byte[] data))
+            {
+                batch.AddRange(data);
+            }
+
+            AddOutputBytes(batch.ToArray());
+        }
+
         public void SetOutputText(byte[] bytes)
         {
             realOutput.Clear();
@@ -137,6 +157,7 @@ namespace ComPortUI
 
         private void WriteToOutput_TB()
         {
+            if (OutputFormat_CB == null || Output_TB == null) { return; }
             switch (OutputFormat_CB.SelectedIndex)
             {
                 case 0: // ASCII
@@ -179,6 +200,21 @@ namespace ComPortUI
         private void ClearOutput_Btn_Click(object sender, RoutedEventArgs e)
         {
             SetOutputText(new byte[0]);
+        }
+
+        private void SelectSourceBtn_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void RunBatBtn_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void BrowseBatBtn_Click(object sender, RoutedEventArgs e)
+        {
+
         }
     }   
 }
