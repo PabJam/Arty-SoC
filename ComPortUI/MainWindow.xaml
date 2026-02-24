@@ -55,14 +55,23 @@
 
             <TabItem Header="Settings">
                 <StackPanel Margin="20" MaxWidth="600" HorizontalAlignment="Left">
-                    <Label Content="GCC Batch Script Location" FontWeight="Bold"/>
+                    <Label Content="GCC Build Folder" FontWeight="Bold"/>
                     <DockPanel Margin="0,5,0,20">
                         <Button x:Name="BrowseBatBtn" Content="Browse" DockPanel.Dock="Right" Click="BrowseBatBtn_Click" Width="75" Margin="5,0,0,0"/>
-                        <TextBox x:Name="BatPath_TB" Text="C:\scripts\build.bat" VerticalContentAlignment="Center"/>
+                        <TextBox x:Name="BatPath_TB" Text="" VerticalContentAlignment="Center"/>
                     </DockPanel>
 
-                    <Label Content="Additional GCC Arguments" FontWeight="Bold"/>
-                    <TextBox x:Name="GccArgs_TB" Margin="0,5,0,0"/>
+                    <Label Content="Linker Path" FontWeight="Bold"/>
+                    <DockPanel Margin="0,5,0,20">
+                        <Button x:Name="BrowseLdBtn" Content="Browse" DockPanel.Dock="Right" Click="BrowseLdBtn_Click" Width="75" Margin="5,0,0,0"/>
+                        <TextBox x:Name="LdPath_TB" Text="" VerticalContentAlignment="Center" Width="255"/>
+                    </DockPanel>
+
+                    <Label Content="Libs Path" FontWeight="Bold"/>
+                    <DockPanel Margin="0,5,0,20">
+                        <Button x:Name="BrowseLibBtn" Content="Browse" DockPanel.Dock="Right" Click="BrowseLibBtn_Click" Width="75" Margin="5,0,0,0"/>
+                        <TextBox x:Name="LibPath_TB" Text="" VerticalContentAlignment="Center" Width="255"/>
+                    </DockPanel>
                 </StackPanel>
             </TabItem>
         </TabControl>

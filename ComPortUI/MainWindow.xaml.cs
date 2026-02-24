@@ -1,10 +1,11 @@
-﻿using System.Text;
+﻿using Microsoft.Win32;
+using System.Diagnostics;
+using System.IO;
+using System.IO.Ports;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.IO.Ports;
-using Microsoft.Win32;
-using System.IO;
 using System.Windows.Threading;
 
 namespace ComPortUI
@@ -44,6 +45,8 @@ namespace ComPortUI
             {
                 serialPort.Close();
             }
+
+            ReferenceManager.SaveToXml(ReferenceManager.settings, ReferenceManager.settingsPath);
         }
 
         private void Input_TB_KeyDown(object sender, KeyEventArgs e)
@@ -70,14 +73,10 @@ namespace ComPortUI
 
         private void LoadFileButton_Click(object sender, RoutedEventArgs e)
         {
-            OpenFileDialog ofd = new OpenFileDialog();
-            bool? result = ofd.ShowDialog();
+            string path = ReferenceManager.GetPathFromFileDialog();
+            if (path == string.Empty) { return; }
+            
             byte[] fileBytes;
-            if (result == null || result == false) 
-            {
-                return;
-            }
-            string path = ofd.FileName;
             if (ConvertStringToBin.IsChecked == false)
             {
                 fileBytes = File.ReadAllBytes(path);
@@ -134,8 +133,9 @@ namespace ComPortUI
             if (ReferenceManager.dataQueue.IsEmpty == true) { return; }
 
             List<byte> batch = new List<byte>();
-            while (ReferenceManager.dataQueue.TryDequeue(out byte[] data))
+            while (ReferenceManager.dataQueue.TryDequeue(out byte[]? data))
             {
+                if (data == null) { continue; }
                 batch.AddRange(data);
             }
 
@@ -204,17 +204,91 @@ namespace ComPortUI
 
         private void SelectSourceBtn_Click(object sender, RoutedEventArgs e)
         {
-
+            string srcPath = ReferenceManager.GetPathFromFileDialog();
+            if (srcPath == string.Empty) { return; }
+            SelectedFilePath.Text = srcPath;
         }
 
-        private void RunBatBtn_Click(object sender, RoutedEventArgs e)
+        private async void RunBatBtn_Click(object sender, RoutedEventArgs e)
         {
+            string mainFile = SelectedFilePath.Text;
+            if (File.Exists(mainFile) == false) 
+            {
+                MessageBox.Show("Selected File does not exist!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            string batPath = ReferenceManager.GenerateBatchFile(mainFile);
 
+            string? workingDirectory = Path.GetDirectoryName(batPath);
+            if (workingDirectory == null) { return; }
+
+            ConsoleOutput_TB.Text = "Starting Build...\n";
+
+            // Run the process on a background thread so the UI stays responsive
+            string result = await Task.Run(() =>
+            {
+                try
+                {
+                    ProcessStartInfo psi = new ProcessStartInfo
+                    {
+                        FileName = "cmd.exe",
+                        // /C runs the command then terminates. Path needs to be in qoutes
+                        Arguments = $"/c \"{batPath}\"",
+                        WorkingDirectory = workingDirectory, // needed for relative paths to work
+                        UseShellExecute = false,
+                        RedirectStandardOutput = true,
+                        RedirectStandardError = true,
+                        CreateNoWindow = true
+                    };
+
+                    using (Process? process = Process.Start(psi))
+                    {
+                        if (process == null) { throw new Exception("process was null"); }
+                        string outStr = process.StandardOutput.ReadToEnd();
+                        string errStr = process.StandardError.ReadToEnd();
+                        process.WaitForExit();
+                        return outStr + "\n" + errStr;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    return "Error: " + ex.Message;
+                }
+            });
+
+            ConsoleOutput_TB.Text = result;   
+            ConsoleOutput_TB.ScrollToEnd();
         }
 
         private void BrowseBatBtn_Click(object sender, RoutedEventArgs e)
         {
+            var dialog = new Microsoft.Win32.OpenFolderDialog();
+            dialog.Multiselect = false;
+            dialog.Title = "Select Build Folder";
+            if (dialog.ShowDialog() == true)
+            {
+                BatPath_TB.Text = dialog.FolderName;
 
+            }
+            ReferenceManager.settings.BuildPath = BatPath_TB.Text;
+        }
+
+        private void BrowseLdBtn_Click(object sender, RoutedEventArgs e)
+        {
+            LdPath_TB.Text = ReferenceManager.GetPathFromFileDialog();
+            ReferenceManager.settings.LinkerPath = LdPath_TB.Text;
+        }
+
+        private void BrowseLibBtn_Click(object sender, RoutedEventArgs e)
+        {
+            var dialog = new Microsoft.Win32.OpenFolderDialog();
+            dialog.Multiselect = false;
+            dialog.Title = "Select Lib Folder";
+            if (dialog.ShowDialog() == true)
+            {
+                LibPath_TB.Text = dialog.FolderName;
+
+            }
+            ReferenceManager.settings.LibPath = LibPath_TB.Text;
         }
     }   
 }

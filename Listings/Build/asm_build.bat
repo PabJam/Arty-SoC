@@ -2,7 +2,7 @@
 echo Building assembly listing
 
 REM Compile and link the assembly code
-riscv-none-elf-gcc.exe -march=rv32i -mabi=ilp32 -nostdlib -T linker.ld -o loop.elf loop.s
+riscv-none-elf-gcc.exe -march=rv32i -mabi=ilp32 -nostdlib -T asm_linker.ld -o loop.elf loop.s
 
 if %errorlevel% neq 0 (
     echo Build failed!
