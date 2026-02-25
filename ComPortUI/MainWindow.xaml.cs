@@ -30,8 +30,12 @@ namespace ComPortUI
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error {ex.Message}");
+                MessageBox.Show($"Error: {ex.Message}", "Serial connection error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
+
+            BatPath_TB.Text = ReferenceManager.settings.BuildPath;
+            LdPath_TB.Text = ReferenceManager.settings.LinkerPath;
+            LibPath_TB.Text = ReferenceManager.settings.LibPath;
 
             uiTimer.Interval = TimeSpan.FromMilliseconds(50); // 20 Times per second
             uiTimer.Tick += UiTimer_Tick;
@@ -109,6 +113,19 @@ namespace ComPortUI
             {
                 MessageBox.Show("File could not be loadet because it exceeded the Program memory of 65.536 bytes", "File too large", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
+            }
+
+            if (serialPort.IsOpen == false)
+            {
+                try
+                {
+                    serialPort.Open();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Error: {ex.Message}", "Serial connection error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
             }
             serialPort.Write(fileBytes, 0, fileBytes.Length);
         }
@@ -269,13 +286,12 @@ namespace ComPortUI
                 BatPath_TB.Text = dialog.FolderName;
 
             }
-            ReferenceManager.settings.BuildPath = BatPath_TB.Text;
         }
 
         private void BrowseLdBtn_Click(object sender, RoutedEventArgs e)
         {
             LdPath_TB.Text = ReferenceManager.GetPathFromFileDialog();
-            ReferenceManager.settings.LinkerPath = LdPath_TB.Text;
+            
         }
 
         private void BrowseLibBtn_Click(object sender, RoutedEventArgs e)
@@ -288,6 +304,21 @@ namespace ComPortUI
                 LibPath_TB.Text = dialog.FolderName;
 
             }
+            
+        }
+
+        private void BatPath_TB_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            ReferenceManager.settings.BuildPath = BatPath_TB.Text;
+        }
+
+        private void LdPath_TB_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            ReferenceManager.settings.LinkerPath = LdPath_TB.Text;
+        }
+
+        private void LibPath_TB_TextChanged(object sender, TextChangedEventArgs e)
+        {
             ReferenceManager.settings.LibPath = LibPath_TB.Text;
         }
     }   

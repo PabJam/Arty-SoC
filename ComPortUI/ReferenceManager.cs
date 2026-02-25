@@ -96,7 +96,7 @@ namespace ComPortUI
             {
                 compilerCall.Append($" -I{allIncludes[i]}");
             }
-            compilerCall.Append($" -c {file} -o {buildPath}{fileName.Substring(0, fileName.Length - 2)}.o");
+            compilerCall.Append($" -c {file} -o {Path.Combine(buildPath, fileName.Substring(0, fileName.Length - 2))}.o");
             compilerCall.Append($"\r\n{GetErrorCheck(file)}");
    
             return compilerCall.ToString();
@@ -134,7 +134,7 @@ namespace ComPortUI
             objPaths.Add($"{startUpPath.Substring(0, startUpPath.Length - 2)}.o");
             batchContent.AppendLine(GetCompilerCall(mainPath, settings.BuildPath, settings.cBaseArguments, settings.mainOptLevel, settings.LibPath)); // main
             string mainFileName = Path.GetFileName(mainPath);
-            objPaths.Add($"{settings.BuildPath}{mainFileName.Substring(0, mainFileName.Length - 2)}.o");
+            objPaths.Add($"{Path.Combine(settings.BuildPath, mainFileName.Substring(0, mainFileName.Length - 2))}.o");
             string[] allASMFiles = Directory.GetFiles(settings.LibPath, "*.s", SearchOption.AllDirectories);
             string[] allCFiles = Directory.GetFiles(settings.LibPath, "*.c", SearchOption.AllDirectories);
             string fileName = string.Empty;
@@ -142,17 +142,17 @@ namespace ComPortUI
             {   
                 fileName = Path.GetFileName(allASMFiles[i]);
                 batchContent.AppendLine(GetCompilerCall(allASMFiles[i], settings.BuildPath, settings.asmBaseArguments, string.Empty, settings.LibPath));
-                objPaths.Add($"{settings.BuildPath}{fileName.Substring(0, fileName.Length - 2)}.o");
+                objPaths.Add($"{Path.Combine(settings.BuildPath, fileName.Substring(0, fileName.Length - 2))}.o");
             }
             for (int i = 0; i < allCFiles.Length; i++)
             {
                 fileName = Path.GetFileName(allCFiles[i]);
                 batchContent.AppendLine(GetCompilerCall(allCFiles[i], settings.BuildPath, settings.cBaseArguments, settings.LibOptLevel, settings.LibPath));
-                objPaths.Add($"{settings.BuildPath}{fileName.Substring(0, fileName.Length - 2)}.o");
+                objPaths.Add($"{Path.Combine(settings.BuildPath, fileName.Substring(0, fileName.Length - 2))}.o");
             }
 
             //Linker Call
-            string binaryPath = $"{settings.BuildPath}{mainFileName.Substring(0, mainFileName.Length - 2)}";
+            string binaryPath = $"{Path.Combine(settings.BuildPath, mainFileName.Substring(0, mainFileName.Length - 2))}";
             batchContent.AppendLine(GetLinkerCall(settings.LinkerPath, binaryPath, settings.linkerArguments, objPaths, settings.stdLibs)); 
             //.elf -> .bin
             batchContent.AppendLine($"riscv-none-elf-objcopy.exe -O binary {binaryPath}.elf {binaryPath}.bin");
