@@ -1,5 +1,0 @@
-<?xml version="1.0"?>
-<ProcessHandle Version="1" Minor="0">
-    <Process Command=".planAhead." Owner="PJamin" Host="PJAMIN-PC" Pid="30312">
-    </Process>
-</ProcessHandle>

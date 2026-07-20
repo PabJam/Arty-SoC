@@ -396,3 +396,26 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+
+# ==========================================
+# Vivado Version Control Git Ignore Rules
+# ==========================================
+
+# Xilinx/Vivado log and journal files (generated everywhere)
+*.log
+*.jou
+*.str
+.Xil/
+vivado*.zip
+
+# Vivado local project directories and runs
+# (Assuming your Vivado project folder is named 'ALU' or similar)
+**/ALU.cache/
+**/ALU.hw/
+**/ALU.ip_user_files/
+**/ALU.runs/
+**/ALU.sim/
+**/ALU.gen/
+
+# SDK / Vitis files if you use them later
+**/workspace/
