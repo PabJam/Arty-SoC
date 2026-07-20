@@ -43,8 +43,8 @@
 
                     <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,10">
                         <Button x:Name="SelectSourceBtn" Content="Select Source File" Click="SelectSourceBtn_Click" Padding="10,5"/>
-                        <TextBlock x:Name="SelectedFilePath" Text="No file selected" VerticalAlignment="Center" Margin="15,0" Foreground="Gray"/>
-                        <Button x:Name="RunBatBtn" Content="Run GCC Build" Click="RunBatBtn_Click" Padding="20,5" Background="LightGreen"/>
+                        <Button x:Name="RunBatBtn" Content="Run GCC Build" Click="RunBatBtn_Click" Padding="20,5" Margin="15,0" Background="LightGreen"/>
+                        <TextBlock x:Name="SelectedFilePath" Text="No file selected" VerticalAlignment="Center" Foreground="Gray"/>
                     </StackPanel>
 
                     <GroupBox Header="Console Output" Grid.Row="1">
@@ -58,20 +58,27 @@
                     <Label Content="GCC Build Folder" FontWeight="Bold"/>
                     <DockPanel Margin="0,5,0,20">
                         <Button x:Name="BrowseBatBtn" Content="Browse" DockPanel.Dock="Right" Click="BrowseBatBtn_Click" Width="75" Margin="5,0,0,0"/>
-                        <TextBox x:Name="BatPath_TB" Text="" VerticalContentAlignment="Center" TextChanged="BatPath_TB_TextChanged"/>
+                        <TextBox x:Name="BatPath_TB" Text="" VerticalContentAlignment="Center" HorizontalAlignment="Left" Width="500" TextChanged="BatPath_TB_TextChanged"/>
                     </DockPanel>
 
                     <Label Content="Linker Path" FontWeight="Bold"/>
                     <DockPanel Margin="0,5,0,20">
                         <Button x:Name="BrowseLdBtn" Content="Browse" DockPanel.Dock="Right" Click="BrowseLdBtn_Click" Width="75" Margin="5,0,0,0"/>
-                        <TextBox x:Name="LdPath_TB" Text="" VerticalContentAlignment="Center" Width="255" TextChanged="LdPath_TB_TextChanged"/>
+                        <TextBox x:Name="LdPath_TB" Text="" VerticalContentAlignment="Center" HorizontalAlignment="Left" Width="500" TextChanged="LdPath_TB_TextChanged"/>
                     </DockPanel>
 
                     <Label Content="Libs Path" FontWeight="Bold"/>
                     <DockPanel Margin="0,5,0,20">
                         <Button x:Name="BrowseLibBtn" Content="Browse" DockPanel.Dock="Right" Click="BrowseLibBtn_Click" Width="75" Margin="5,0,0,0"/>
-                        <TextBox x:Name="LibPath_TB" Text="" VerticalContentAlignment="Center" Width="255" TextChanged="LibPath_TB_TextChanged"/>
+                        <TextBox x:Name="LibPath_TB" Text="" VerticalContentAlignment="Center" HorizontalAlignment="Left" Width="500" TextChanged="LibPath_TB_TextChanged"/>
                     </DockPanel>
+
+                    <Label Content="GCC Path" FontWeight="Bold"/>
+                    <DockPanel Margin="0,5,0,20">
+                        <Button x:Name="BrowseGccBtn" Content="Browse" DockPanel.Dock="Right" Width="75" Margin="5,0,0,0" Click="BrowseGccBtn_Click"/>
+                        <TextBox x:Name="GccPath_TB" Text="" VerticalContentAlignment="Center" HorizontalAlignment="Left" Width="500" TextChanged="GccPath_TB_TextChanged" />
+                    </DockPanel>
+
                 </StackPanel>
             </TabItem>
         </TabControl>

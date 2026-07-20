@@ -36,6 +36,7 @@ namespace ComPortUI
             BatPath_TB.Text = ReferenceManager.settings.BuildPath;
             LdPath_TB.Text = ReferenceManager.settings.LinkerPath;
             LibPath_TB.Text = ReferenceManager.settings.LibPath;
+            GccPath_TB.Text = ReferenceManager.settings.GccPath;
 
             uiTimer.Interval = TimeSpan.FromMilliseconds(50); // 20 Times per second
             uiTimer.Tick += UiTimer_Tick;
@@ -307,6 +308,18 @@ namespace ComPortUI
             
         }
 
+        private void BrowseGccBtn_Click(object sender, RoutedEventArgs e)
+        {
+            var dialog = new Microsoft.Win32.OpenFolderDialog();
+            dialog.Multiselect = false;
+            dialog.Title = "Select GCC Folder";
+            if (dialog.ShowDialog() == true)
+            {
+                GccPath_TB.Text = dialog.FolderName;
+
+            }
+        }
+
         private void BatPath_TB_TextChanged(object sender, TextChangedEventArgs e)
         {
             ReferenceManager.settings.BuildPath = BatPath_TB.Text;
@@ -320,6 +333,11 @@ namespace ComPortUI
         private void LibPath_TB_TextChanged(object sender, TextChangedEventArgs e)
         {
             ReferenceManager.settings.LibPath = LibPath_TB.Text;
+        }
+
+        private void GccPath_TB_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            ReferenceManager.settings.GccPath = GccPath_TB.Text;
         }
     }   
 }

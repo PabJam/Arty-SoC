@@ -76,13 +76,13 @@ namespace ComPortUI
             return $"if %errorlevel% neq 0 (\r\n    echo {Path.GetFileName(file)} compilation failed!  \r\n    exit /b 1\r\n)";
         }
 
-        private static string GetCompilerCall(string file, string buildPath, List<string> arguments, string optLevel, string includes)
+        private static string GetCompilerCall(string file, string buildPath, string[] arguments, string optLevel, string includes)
         {
             string fileName = Path.GetFileName(file);
             string message = $"echo Compiling {fileName}...";
             StringBuilder compilerCall = new StringBuilder();
             compilerCall.Append("riscv-none-elf-gcc.exe");
-            for (int i = 0; i < arguments.Count; i++)
+            for (int i = 0; i < arguments.Length; i++)
             {
                 compilerCall.Append($" {arguments[i]}" );
             }
@@ -102,11 +102,11 @@ namespace ComPortUI
             return compilerCall.ToString();
         }
 
-        private static string GetLinkerCall(string linkerPath, string binaryName, List<string> arguments, List<string> objectPaths, List<string> stdLibs)
+        private static string GetLinkerCall(string linkerPath, string binaryName, string[] arguments, List<string> objectPaths, string[] stdLibs)
         {
             StringBuilder linkerCall = new StringBuilder();
             linkerCall.Append("riscv-none-elf-gcc.exe");
-            for (int i = 0; i < arguments.Count; i++)
+            for (int i = 0; i < arguments.Length; i++)
             {
                 linkerCall.Append($" {arguments[i]}");
             }
@@ -115,7 +115,7 @@ namespace ComPortUI
             {
                 linkerCall.Append($" {objectPaths[i]}");
             }
-            for (int i = 0; i < stdLibs.Count; i++)
+            for (int i = 0; i < stdLibs.Length; i++)
             {
                 linkerCall.Append($" -l{stdLibs[i]}");
             }
@@ -129,6 +129,7 @@ namespace ComPortUI
             StringBuilder batchContent = new StringBuilder();
             List<string> objPaths = new List<string>();
             batchContent.AppendLine("@echo off");
+            batchContent.AppendLine($"set \"PATH={settings.GccPath};%PATH%\"");
             string startUpPath = Path.Combine(settings.BuildPath, "startup.s");
             batchContent.AppendLine(GetCompilerCall(startUpPath, settings.BuildPath, settings.asmBaseArguments, string.Empty, settings.LibPath)); // start up
             objPaths.Add($"{startUpPath.Substring(0, startUpPath.Length - 2)}.o");

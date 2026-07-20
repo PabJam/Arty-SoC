@@ -262,18 +262,18 @@ architecture Behavioral of Top_of_Arty_SoC is
 	signal i2c_slave_rx_register_cntr : std_logic_vector(2 downto 0) := (others => '0');
 	signal i2c_slave_rx_register_empty : std_logic;
 	
-	attribute MARK_DEBUG : string;
-
-	attribute MARK_DEBUG of i2c_slave_tx_register : signal is "TRUE";
-	attribute MARK_DEBUG of i2c_slave_tx_register_cntr : signal is "TRUE";
-	attribute MARK_DEBUG of i2c_slave_rx_register : signal is "TRUE";
-	attribute MARK_DEBUG of i2c_slave_rx_register_cntr : signal is "TRUE";
-	attribute MARK_DEBUG of i2c_slave_rx_byte : signal is "TRUE";
-	attribute MARK_DEBUG of i2c_slave_rx_dv : signal is "TRUE";
-	attribute MARK_DEBUG of i2c_slave_tx_byte : signal is "TRUE";
-	attribute MARK_DEBUG of i2c_slave_tx_read : signal is "TRUE";
-	attribute MARK_DEBUG of i2c_slave_tx_register_full : signal is "TRUE";
-	attribute MARK_DEBUG of i2c_slave_rx_register_empty : signal is "TRUE";
+	--attribute MARK_DEBUG : string;
+	--
+	--attribute MARK_DEBUG of i2c_slave_tx_register : signal is "TRUE";
+	--attribute MARK_DEBUG of i2c_slave_tx_register_cntr : signal is "TRUE";
+	--attribute MARK_DEBUG of i2c_slave_rx_register : signal is "TRUE";
+	--attribute MARK_DEBUG of i2c_slave_rx_register_cntr : signal is "TRUE";
+	--attribute MARK_DEBUG of i2c_slave_rx_byte : signal is "TRUE";
+	--attribute MARK_DEBUG of i2c_slave_rx_dv : signal is "TRUE";
+	--attribute MARK_DEBUG of i2c_slave_tx_byte : signal is "TRUE";
+	--attribute MARK_DEBUG of i2c_slave_tx_read : signal is "TRUE";
+	--attribute MARK_DEBUG of i2c_slave_tx_register_full : signal is "TRUE";
+	--attribute MARK_DEBUG of i2c_slave_rx_register_empty : signal is "TRUE";
 
 begin
 	
