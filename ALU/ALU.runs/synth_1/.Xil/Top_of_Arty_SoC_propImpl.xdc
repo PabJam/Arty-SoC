@@ -1,5 +1,5 @@
-set_property SRC_FILE_INFO {cfile:D:/Projekte/Arty/ALU/ALU.srcs/constrs_1/Arty-S7-25-Debug.xdc rfile:../../../ALU.srcs/constrs_1/Arty-S7-25-Debug.xdc id:1} [current_design]
-set_property SRC_FILE_INFO {cfile:D:/Projekte/Arty/ALU/ALU.srcs/constrs_1/Arty-S7-25-Master.xdc rfile:../../../ALU.srcs/constrs_1/Arty-S7-25-Master.xdc id:2} [current_design]
+set_property SRC_FILE_INFO {cfile:C:/Users/PJamin/projects/Arty-SoC/ALU/ALU.srcs/constrs_1/Arty-S7-25-Debug.xdc rfile:../../../ALU.srcs/constrs_1/Arty-S7-25-Debug.xdc id:1} [current_design]
+set_property SRC_FILE_INFO {cfile:C:/Users/PJamin/projects/Arty-SoC/ALU/ALU.srcs/constrs_1/Arty-S7-25-Master.xdc rfile:../../../ALU.srcs/constrs_1/Arty-S7-25-Master.xdc id:2} [current_design]
 set_property src_info {type:XDC file:1 line:1 export:INPUT save:INPUT read:READ} [current_design]
 create_debug_core u_ila_0 ila
 set_property src_info {type:XDC file:1 line:2 export:INPUT save:INPUT read:READ} [current_design]

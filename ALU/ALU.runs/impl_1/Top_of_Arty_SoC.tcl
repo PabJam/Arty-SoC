@@ -1,5 +1,5 @@
 namespace eval ::optrace {
-  variable script "D:/Projekte/Arty/ALU/ALU.runs/impl_1/Top_of_Arty_SoC.tcl"
+  variable script "C:/Users/PJamin/projects/Arty-SoC/ALU/ALU.runs/impl_1/Top_of_Arty_SoC.tcl"
   variable category "vivado_impl"
 }
 
@@ -104,32 +104,28 @@ start_step init_design
 set ACTIVE_STEP init_design
 set rc [catch {
   create_msg_db init_design.pb
-  set_param tcl.collectionResultDisplayLimit 0
-  set_param chipscope.maxJobs 6
+  set_param chipscope.maxJobs 5
   set_param general.usePosixSpawnForFork 1
-  set_param xicom.use_bs_reader 1
-  set_param runs.launchOptions { -jobs 12  }
+  set_param runs.launchOptions { -jobs 10  }
 OPTRACE "create in-memory project" START { }
   create_project -in_memory -part xc7s25csga324-1
-  set_property board_part_repo_paths {C:/Users/jamin/AppData/Roaming/Xilinx/Vivado/2025.1/xhub/board_store/xilinx_board_store} [current_project]
-  set_property board_part digilentinc.com:arty-s7-25:part0:1.1 [current_project]
   set_property design_mode GateLvl [current_fileset]
   set_param project.singleFileAddWarning.threshold 0
 OPTRACE "create in-memory project" END { }
 OPTRACE "set parameters" START { }
-  set_property webtalk.parent_dir D:/Projekte/Arty/ALU/ALU.cache/wt [current_project]
-  set_property parent.project_path D:/Projekte/Arty/ALU/ALU.xpr [current_project]
-  set_property ip_output_repo D:/Projekte/Arty/ALU/ALU.cache/ip [current_project]
+  set_property webtalk.parent_dir C:/Users/PJamin/projects/Arty-SoC/ALU/ALU.cache/wt [current_project]
+  set_property parent.project_path C:/Users/PJamin/projects/Arty-SoC/ALU/ALU.xpr [current_project]
+  set_property ip_output_repo C:/Users/PJamin/projects/Arty-SoC/ALU/ALU.cache/ip [current_project]
   set_property ip_cache_permissions {read write} [current_project]
   set_property XPM_LIBRARIES {XPM_CDC XPM_MEMORY} [current_project]
 OPTRACE "set parameters" END { }
 OPTRACE "add files" START { }
-  add_files -quiet D:/Projekte/Arty/ALU/ALU.runs/synth_1/Top_of_Arty_SoC.dcp
-  read_ip -quiet D:/Projekte/Arty/ALU/ALU.srcs/sources_1/ip/UART_Fifo/UART_Fifo.xci
-  read_ip -quiet D:/Projekte/Arty/ALU/ALU.srcs/sources_1/ip/ProgRam/ProgRam.xci
+  add_files -quiet C:/Users/PJamin/projects/Arty-SoC/ALU/ALU.runs/synth_1/Top_of_Arty_SoC.dcp
+  read_ip -quiet C:/Users/PJamin/projects/Arty-SoC/ALU/ALU.srcs/sources_1/ip/UART_Fifo/UART_Fifo.xci
+  read_ip -quiet C:/Users/PJamin/projects/Arty-SoC/ALU/ALU.srcs/sources_1/ip/ProgRam/ProgRam.xci
 OPTRACE "read constraints: implementation" START { }
-  read_xdc D:/Projekte/Arty/ALU/ALU.srcs/constrs_1/Arty-S7-25-Debug.xdc
-  read_xdc D:/Projekte/Arty/ALU/ALU.srcs/constrs_1/Arty-S7-25-Master.xdc
+  read_xdc C:/Users/PJamin/projects/Arty-SoC/ALU/ALU.srcs/constrs_1/Arty-S7-25-Debug.xdc
+  read_xdc C:/Users/PJamin/projects/Arty-SoC/ALU/ALU.srcs/constrs_1/Arty-S7-25-Master.xdc
 OPTRACE "read constraints: implementation" END { }
 OPTRACE "read constraints: implementation_pre" START { }
 OPTRACE "read constraints: implementation_pre" END { }

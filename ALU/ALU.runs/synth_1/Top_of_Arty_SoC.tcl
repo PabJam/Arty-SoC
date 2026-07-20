@@ -4,7 +4,7 @@
 
 set TIME_start [clock seconds] 
 namespace eval ::optrace {
-  variable script "D:/Projekte/Arty/ALU/ALU.runs/synth_1/Top_of_Arty_SoC.tcl"
+  variable script "C:/Users/PJamin/projects/Arty-SoC/ALU/ALU.runs/synth_1/Top_of_Arty_SoC.tcl"
   variable category "vivado_synth"
 }
 
@@ -56,10 +56,7 @@ if {$::dispatch::connected} {
 }
 
 OPTRACE "synth_1" START { ROLLUP_AUTO }
-set_param tcl.collectionResultDisplayLimit 0
-set_param chipscope.maxJobs 6
 set_param general.usePosixSpawnForFork 1
-set_param xicom.use_bs_reader 1
 OPTRACE "Creating in-memory project" START { }
 create_project -in_memory -part xc7s25csga324-1
 
@@ -67,31 +64,29 @@ set_param project.singleFileAddWarning.threshold 0
 set_param project.compositeFile.enableAutoGeneration 0
 set_param synth.vivado.isSynthRun true
 set_msg_config -source 4 -id {IP_Flow 19-2162} -severity warning -new_severity info
-set_property webtalk.parent_dir D:/Projekte/Arty/ALU/ALU.cache/wt [current_project]
-set_property parent.project_path D:/Projekte/Arty/ALU/ALU.xpr [current_project]
+set_property webtalk.parent_dir C:/Users/PJamin/projects/Arty-SoC/ALU/ALU.cache/wt [current_project]
+set_property parent.project_path C:/Users/PJamin/projects/Arty-SoC/ALU/ALU.xpr [current_project]
 set_property XPM_LIBRARIES {XPM_CDC XPM_MEMORY} [current_project]
 set_property default_lib xil_defaultlib [current_project]
 set_property target_language VHDL [current_project]
-set_property board_part_repo_paths {C:/Users/jamin/AppData/Roaming/Xilinx/Vivado/2025.1/xhub/board_store/xilinx_board_store} [current_project]
-set_property board_part digilentinc.com:arty-s7-25:part0:1.1 [current_project]
-set_property ip_output_repo d:/Projekte/Arty/ALU/ALU.cache/ip [current_project]
+set_property ip_output_repo c:/Users/PJamin/projects/Arty-SoC/ALU/ALU.cache/ip [current_project]
 set_property ip_cache_permissions {read write} [current_project]
 OPTRACE "Creating in-memory project" END { }
 OPTRACE "Adding files" START { }
 read_vhdl -library xil_defaultlib {
-  D:/Projekte/Arty/ALU/ALU.srcs/sources_1/Arithmetic_Logic_Unit.vhd
-  D:/Projekte/Arty/ALU/ALU.srcs/sources_1/I2C_Slave.vhd
-  D:/Projekte/Arty/ALU/ALU.srcs/sources_1/UART_RX_CTRL.vhd
-  D:/Projekte/Arty/ALU/ALU.srcs/sources_1/UART_TX_CTRL.vhd
-  D:/Projekte/Arty/ALU/ALU.srcs/sources_1/debouncer.vhd
-  D:/Projekte/Arty/ALU/ALU.srcs/sources_1/Top_of_Arty_SoC.vhd
+  C:/Users/PJamin/projects/Arty-SoC/ALU/ALU.srcs/sources_1/Arithmetic_Logic_Unit.vhd
+  C:/Users/PJamin/projects/Arty-SoC/ALU/ALU.srcs/sources_1/I2C_Slave.vhd
+  C:/Users/PJamin/projects/Arty-SoC/ALU/ALU.srcs/sources_1/UART_RX_CTRL.vhd
+  C:/Users/PJamin/projects/Arty-SoC/ALU/ALU.srcs/sources_1/UART_TX_CTRL.vhd
+  C:/Users/PJamin/projects/Arty-SoC/ALU/ALU.srcs/sources_1/debouncer.vhd
+  C:/Users/PJamin/projects/Arty-SoC/ALU/ALU.srcs/sources_1/Top_of_Arty_SoC.vhd
 }
-read_ip -quiet D:/Projekte/Arty/ALU/ALU.srcs/sources_1/ip/UART_Fifo/UART_Fifo.xci
-set_property used_in_implementation false [get_files -all d:/Projekte/Arty/ALU/ALU.gen/sources_1/ip/UART_Fifo/UART_Fifo.xdc]
-set_property used_in_implementation false [get_files -all d:/Projekte/Arty/ALU/ALU.gen/sources_1/ip/UART_Fifo/UART_Fifo_ooc.xdc]
+read_ip -quiet C:/Users/PJamin/projects/Arty-SoC/ALU/ALU.srcs/sources_1/ip/UART_Fifo/UART_Fifo.xci
+set_property used_in_implementation false [get_files -all c:/Users/PJamin/projects/Arty-SoC/ALU/ALU.gen/sources_1/ip/UART_Fifo/UART_Fifo.xdc]
+set_property used_in_implementation false [get_files -all c:/Users/PJamin/projects/Arty-SoC/ALU/ALU.gen/sources_1/ip/UART_Fifo/UART_Fifo_ooc.xdc]
 
-read_ip -quiet D:/Projekte/Arty/ALU/ALU.srcs/sources_1/ip/ProgRam/ProgRam.xci
-set_property used_in_implementation false [get_files -all d:/Projekte/Arty/ALU/ALU.gen/sources_1/ip/ProgRam/ProgRam_ooc.xdc]
+read_ip -quiet C:/Users/PJamin/projects/Arty-SoC/ALU/ALU.srcs/sources_1/ip/ProgRam/ProgRam.xci
+set_property used_in_implementation false [get_files -all c:/Users/PJamin/projects/Arty-SoC/ALU/ALU.gen/sources_1/ip/ProgRam/ProgRam_ooc.xdc]
 
 OPTRACE "Adding files" END { }
 # Mark all dcp files as not used in implementation to prevent them from being
@@ -102,15 +97,15 @@ OPTRACE "Adding files" END { }
 foreach dcp [get_files -quiet -all -filter file_type=="Design\ Checkpoint"] {
   set_property used_in_implementation false $dcp
 }
-read_xdc D:/Projekte/Arty/ALU/ALU.srcs/constrs_1/Arty-S7-25-Debug.xdc
-set_property used_in_implementation false [get_files D:/Projekte/Arty/ALU/ALU.srcs/constrs_1/Arty-S7-25-Debug.xdc]
+read_xdc C:/Users/PJamin/projects/Arty-SoC/ALU/ALU.srcs/constrs_1/Arty-S7-25-Debug.xdc
+set_property used_in_implementation false [get_files C:/Users/PJamin/projects/Arty-SoC/ALU/ALU.srcs/constrs_1/Arty-S7-25-Debug.xdc]
 
-read_xdc D:/Projekte/Arty/ALU/ALU.srcs/constrs_1/Arty-S7-25-Master.xdc
-set_property used_in_implementation false [get_files D:/Projekte/Arty/ALU/ALU.srcs/constrs_1/Arty-S7-25-Master.xdc]
+read_xdc C:/Users/PJamin/projects/Arty-SoC/ALU/ALU.srcs/constrs_1/Arty-S7-25-Master.xdc
+set_property used_in_implementation false [get_files C:/Users/PJamin/projects/Arty-SoC/ALU/ALU.srcs/constrs_1/Arty-S7-25-Master.xdc]
 
 set_param ips.enableIPCacheLiteLoad 1
 
-read_checkpoint -auto_incremental -incremental D:/Projekte/Arty/ALU/ALU.srcs/utils_1/imports/synth_1/Top_of_Arty_SoC.dcp
+read_checkpoint -auto_incremental -incremental C:/Users/PJamin/projects/Arty-SoC/ALU/ALU.srcs/utils_1/imports/synth_1/Top_of_Arty_SoC.dcp
 close [open __synthesis_is_running__ w]
 
 OPTRACE "synth_design" START { }

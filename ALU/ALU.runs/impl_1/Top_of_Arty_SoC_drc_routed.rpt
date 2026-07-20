@@ -1,8 +1,8 @@
 Copyright 1986-2022 Xilinx, Inc. All Rights Reserved. Copyright 2022-2025 Advanced Micro Devices, Inc. All Rights Reserved.
 ---------------------------------------------------------------------------------------------------------------------------------------------
 | Tool Version : Vivado v.2025.1 (win64) Build 6140274 Thu May 22 00:12:29 MDT 2025
-| Date         : Thu Feb 19 14:52:16 2026
-| Host         : DESKTOP-E28LK6R running 64-bit major release  (build 9200)
+| Date         : Thu Jun 18 12:01:18 2026
+| Host         : PJamin-PC running 64-bit major release  (build 9200)
 | Command      : report_drc -file Top_of_Arty_SoC_drc_routed.rpt -pb Top_of_Arty_SoC_drc_routed.pb -rpx Top_of_Arty_SoC_drc_routed.rpx
 | Design       : Top_of_Arty_SoC
 | Device       : xc7s25csga324-1
