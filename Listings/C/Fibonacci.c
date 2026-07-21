@@ -14,7 +14,14 @@ int main(void) {
     while (1)
     {
         timer = read_timer();
-        if (timer - timerStart > 1000000000) { break; } // 100MHZ * 1sec
+        int dif = timer - timerStart;
+        if (dif > 1000000000) { break; } // 100MHZ * 1sec
+        print_int(n);
+        print(": ");
+        print_int(result);
+        print(" after ");
+        print_int(dif);
+        print(" ticks\r\n");
         n++;
         result = Fibonacci(n);
     }

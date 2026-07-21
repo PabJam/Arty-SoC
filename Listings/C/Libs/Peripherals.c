@@ -1,23 +1,24 @@
 #include ".\Peripherals.h"
 #include ".\Utils.h"
 
-void print(const char* msg)
-{
-    int idx = 0;
-    while (true)
-    {
-        if (msg[idx] == 0 || idx > 255) { return; }
-        write_reg(UART_BASE, (int)(msg[idx]));
-        idx++;
-    }
-}
-
 void wait_ms(unsigned int milliseconds)
 {
     unsigned int start = read_timer();
     unsigned int cycles = milliseconds * CYCLES_PER_MS;
 
     while ((read_timer() - start) < cycles);
+}
+
+void print(const char* msg)
+{
+    int idx = 0;
+    while (true)
+    {
+        if (msg[idx] == 0 || idx > 255) { return; }
+        while (get_uart_fifo_full());
+        write_reg(UART_BASE, (int)(msg[idx]));
+        idx++;
+    }
 }
 
 void print_int(int val)

@@ -1,11 +1,9 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
--- Import textio for file operations
 use std.textio.all;
 
 entity tb_Top_of_Arty_SoC is
--- Testbenches have no external ports
 end tb_Top_of_Arty_SoC;
 
 architecture Behavioral of tb_Top_of_Arty_SoC is
@@ -62,6 +60,7 @@ architecture Behavioral of tb_Top_of_Arty_SoC is
     type byte_array is array (0 to 4095) of std_logic_vector(7 downto 0);
     shared variable bytes_sent   : byte_array;
     shared variable total_bytes  : integer := 0;
+	shared variable match_count : integer := 0;
 
 begin
 
@@ -84,14 +83,15 @@ begin
         end loop;
     end process;
 
-    -- =========================================================================
-    -- TRANSMIT PROCESS: Reads the GCC binary and streams it to the FPGA
-    -- =========================================================================
+    -- reads a binary file and simulates writing it to the fpga over uart
     stim_proc: process
         type binary_file is file of character; 
-        file f_input         : binary_file;
+        file f_input          : binary_file;
         variable current_char : character;
         variable current_byte : std_logic_vector(7 downto 0);
+        
+        -- Declaring the status variable at the process level (VHDL-93 compatible)
+        variable open_status  : file_open_status;
         
         procedure uart_send_byte(data : in std_logic_vector(7 downto 0)) is
         begin
@@ -106,49 +106,65 @@ begin
     begin		
         wait for 200 ns;	
         
-        -- Relative paths start from the Vivado project folder (.xpr location)
-        file_open(f_input, "Fibonacci.bin", READ_MODE);
+        report "--- ATTEMPTING TO OPEN BINARY FILE ---";
+        
+        -- Open the file and capture the status
+        file_open(open_status, f_input, "Fibonacci.bin", READ_MODE);
+        
+        -- Check if it opened successfully
+        assert open_status = OPEN_OK
+            report "FATAL: Could not open Fibonacci.bin! Make sure it is copied into your ALU.sim/sim_1/behav/xsim/ directory."
+            severity failure;
         
         report "--- STARTING BINARY TRANSMISSION ---";
         while not endfile(f_input) loop
             read(f_input, current_char);
             current_byte := std_logic_vector(to_unsigned(character'pos(current_char), 8));
             
-            -- store data to verify it later
+            -- store sent bytes, so they can be verified later
             bytes_sent(total_bytes) := current_byte;
             total_bytes := total_bytes + 1;
             
-            -- stream to fpga
             uart_send_byte(current_byte);
         end loop;
         file_close(f_input);
-        report "Transmitted " & integer'image(total_bytes) & " bytes";
+        report "Transmitted " & integer'image(total_bytes) & " bytes smoothly.";
 
         -- time to settle/store the final byte
         wait for 50 us; 
         
-        -- Simulate pushing Button 0 (BTN(0)) to trigger loopback transmission
+        -- Simulate pushing BTN(0) to trigger loopback transmission
         report "--- PRESSING BUTTON 0 TO TRANSMIT BACK ---";
         BTN_tb(0) <= '1';
-        wait for 100 us; -- Hold button down
-        BTN_tb(0) <= '0'; -- Release button
+        wait for 1 ms; -- wait for debouncer to register press
+        BTN_tb(0) <= '0'; 
         
-        -- Keep simulation alive long enough to catch all responding UART packets
-        wait for (total_bytes * 11 * BIT_PERIOD) + 1 ms; 
+        for i in 1 to 5000 loop
+            wait for 100 us; -- timeout if matchcount never eqauls total_bytes
+            exit when match_count = total_bytes;
+        end loop;
 
-        assert false report "Simulation Completed Processed Perfectly!" severity failure;
+        -- check and report if all bytes matched
+        report "==================================================";
+        if match_count = total_bytes then
+            report " SUCCESS: ALL " & integer'image(total_bytes) & " BYTES VERIFIED FLAWLESSLY!";
+            report "==================================================";
+            -- End simulation cleanly without looking like a crash
+            assert false report "Simulation Completed Successfully!" severity failure;
+        else
+            report " FAILURE: Only verified " & integer'image(match_count) & " out of " & integer'image(total_bytes) & " bytes!";
+            report "==================================================";
+            assert false report "Simulation Failed: Incomplete Loopback Data." severity failure;
+        end if;
+
         wait;
     end process;
 
-    -- =========================================================================
-    -- RECEIVE & VERIFY PROCESS: Captures FPGA TX and asserts correctness
-    -- =========================================================================
+    -- recieve bytes and check if they match the sent bytes
     rx_verify_proc: process
-        variable rx_byte      : std_logic_vector(7 downto 0);
-        variable match_count  : integer := 0;
+        variable rx_byte : std_logic_vector(7 downto 0);
     begin
         while true loop
-            -- Wait for a falling edge on the FPGA's TX line (Start Bit)
             wait until falling_edge(o_Uart_TXD_tb);
             wait for BIT_PERIOD / 2; -- sample in middle of start bit
             
@@ -161,7 +177,7 @@ begin
                     wait for BIT_PERIOD;
                 end loop;
                 
-                -- Assert check against our recorded history array
+                -- compare recieved byte against stored byte
                 assert rx_byte = bytes_sent(match_count)
                     report "ERROR: Data mismatch! Expected: " & 
                            integer'image(to_integer(unsigned(bytes_sent(match_count)))) & 

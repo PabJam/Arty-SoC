@@ -154,6 +154,7 @@ architecture Behavioral of Top_of_Arty_SoC is
 	signal uart_TX_Active : std_logic;
 	signal uart_TX_done : std_logic;
 	signal uart_fifo_empty : std_logic;
+	signal uart_fifo_full : std_logic;
 	signal uart_fifo_rd_en : std_logic;
 	signal uart_fifo_valid : std_logic;
 	signal uart_fifo_wr_en : std_logic;
@@ -353,7 +354,7 @@ begin
 		wr_en => uart_fifo_wr_en,
 		rd_en => uart_fifo_rd_en,
 		dout => uart_fifo_dout,
-		full => open,
+		full => uart_fifo_full,
 		empty => uart_fifo_empty,
 		valid => uart_fifo_valid
 	);
@@ -758,26 +759,30 @@ begin
 				cntr_100MHZ <= cntr_100MHZ + 1; 
 				if dm_alu_addr_dv = '1' and dm_addr(31) = '1' then -- peripherals
 					if dm_wr_en = "0000" then -- read 
-						case dm_addr(7 downto 0) is
+						case dm_addr(7 downto 2) is
 							
-							when "000000000" =>
+							when "000000" =>
 								peripherals_read_data <= std_logic_vector(cntr_100MHZ);
 								peripherals_read_dv <= '1';
 							
-							when "000010000" => 
+							when "000011" =>
+								peripherals_read_data(0) <= uart_fifo_full;
+								peripherals_read_dv <= '1';
+							
+							when "000100" => 
 								peripherals_read_data <= jd_in(7 downto 0) & jc_in(7 downto 0) & jb_in(7 downto 0) & ja_in(7 downto 0);
 								peripherals_read_dv <= '1';
 							
-							when "000010100" =>
+							when "000101" =>
 								peripherals_read_data <= jd_io(7 downto 0) & jc_io(7 downto 0) & jb_io(7 downto 0) & ja_io(7 downto 0);
 								peripherals_read_dv <= '1';
 							
-							when "000100000" =>
+							when "001000" =>
 								peripherals_read_data(31 downto 0) <= i2c_slave_rx_register(31 downto 0);
 								i2c_slave_rx_register_empty <= '1';
 								peripherals_read_dv <= '1';
 							
-							when "000100100" => 
+							when "001001" => 
 								peripherals_read_data(2 downto 0) <= i2c_slave_rx_register_cntr(2 downto 0);
 								peripherals_read_data(5 downto 3) <= i2c_slave_tx_register_cntr(2 downto 0);
 								peripherals_read_dv <= '1';
@@ -789,12 +794,12 @@ begin
 						
 						end case;
 					else -- write
-						case dm_addr(7 downto 0) is
+						case dm_addr(7 downto 2) is
 							
-							when "00000100" =>	
+							when "000001" =>	
 								saved_leds <= dm_data_in(3 downto 0);
 							
-							when "00001000" =>	
+							when "000010" =>	
 								saved_rgb_leds_r0 <= dm_data_in(2);
 								saved_rgb_leds_g0 <= dm_data_in(1);
 								saved_rgb_leds_b0 <= dm_data_in(0);
@@ -802,23 +807,23 @@ begin
 								saved_rgb_leds_g1 <= dm_data_in(4);
 								saved_rgb_leds_b1 <= dm_data_in(3);
 							
-							when "00001100" =>
+							when "000011" =>
 								uart_fifo_din(7 downto 0) <= dm_data_in(7 downto 0);
 								uart_fifo_wr_en <= '1';
 								
-							when "000010000" =>
+							when "000100" =>
 								ja_out(7 downto 0) <= dm_data_in(7 downto 0);
 								jb_out(7 downto 0) <= dm_data_in(15 downto 8);
 								jc_out(7 downto 0) <= dm_data_in(23 downto 16);
 								jd_out(7 downto 0) <= dm_data_in(31 downto 24);
 							
-							when "000010100" =>
+							when "000101" =>
 								ja_io(7 downto 0) <= dm_data_in(7 downto 0);
 								jb_io(7 downto 0) <= dm_data_in(15 downto 8);
 								jc_io(7 downto 0) <= dm_data_in(23 downto 16);
 								jd_io(7 downto 0) <= dm_data_in(31 downto 24);
 							
-							when "000100000" => 
+							when "001000" => 
 								i2c_slave_tx_register(31 downto 0) <= dm_data_in(31 downto 0);
 								i2c_slave_tx_register_full <= '1';
 							

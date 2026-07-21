@@ -4,11 +4,11 @@
 #define LED_BASE 0x80000004
 #define RGB_LED_BASE 0x80000008
 #define UART_BASE 0x8000000C
+#define UART_FIFO_FULL_BASE 0x8000000C
 #define GPIO_BASE 0x80000010
 #define GPIO_BASE_IN_OUT 0x80000014
 #define INPUT 0x1
 #define OUTPUT 0x0
-#define UART_BASE 0x8000000C
 #define TIMER_BASE 0x80000000
 #define I2C_SLAVE_REG 0x80000020
 #define I2C_SLAVE_REG_CNTR 0x80000024
@@ -94,6 +94,14 @@ static inline char get_i2c_slave_rx_counter(void)
 static inline char get_i2c_slave_tx_counter(void)
 {
     return (char)((read_reg(I2C_SLAVE_REG_CNTR) >> 3) & 0b0111);
+}
+
+/// <summary>
+/// Checks if the Uart hardware fifo is full
+/// </summary>
+static inline char get_uart_fifo_full(void)
+{
+    return (char)(read_reg(UART_FIFO_FULL_BASE));
 }
 
 // print message containing up to 255 char 
