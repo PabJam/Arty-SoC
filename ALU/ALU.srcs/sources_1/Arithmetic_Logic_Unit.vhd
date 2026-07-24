@@ -40,7 +40,6 @@ entity Arithmetic_Logic_Unit is
 		i_Take_Ctrl_ALU : in std_logic;
 		o_Return_Ctrl_ALU : out std_logic;
 		o_PM_Addr : out std_logic_vector(13 downto 0);
-		o_PM_DV : out std_logic;
 		i_PM_Data : in std_logic_vector(63 downto 0);
 		i_PM_DV : in std_logic;
 		o_DM_Addr : out std_logic_vector(31 downto 0);
@@ -57,7 +56,7 @@ architecture Behavioral of Arithmetic_Logic_Unit is
 signal ctrl_arithmetic_logic_unit : std_logic := '0';
 
 type t_reg_array is array(natural range 0 to 31) of unsigned(31 downto 0);
-signal registers : t_reg_array;
+signal registers : t_reg_array := (others => (others => '0'));
 
 type t_fetch_states is (fetch_state_idle, fetch_state_next, fetch_state_next_2);
 signal fetch_state : t_fetch_states := fetch_state_next;
@@ -131,7 +130,7 @@ Instruction_Fetch_Proc : process(i_Clk)
 	variable v_addr_p8 : unsigned(31 downto 0);
 begin
 	if rising_edge(i_Clk) then
-		o_PM_DV <= '0';
+		--o_PM_DV <= '0';
 		if (i_Sync_nRst = '0') then
 			pc_fetch(0) <= x"0000000" & "0000";
 			pc_fetch(1) <= x"0000000" & "0100";
@@ -146,11 +145,9 @@ begin
 			o_PM_Addr <= (others => '0');
 			fetch_state <= fetch_state_next;
 			instruction_ready <= '0';
-		elsif i_Give_Ctrl_ALU = '1' then
-			o_PM_DV <= '1';
 		elsif ctrl_arithmetic_logic_unit = '1' and i_Take_Ctrl_ALU = '0' then
 			if (instruction_jump = '1') then
-				o_PM_DV <= '1';
+				--o_PM_DV <= '1';
 				o_PM_Addr <= std_logic_vector(jmp_addr(16 downto 3)); -- jmp_addr(2) decides if lower or upper 32bit 
 				pc_fetch(0) <= jmp_addr(31 downto 3) & '0' & jmp_addr(1 downto 0);
 				pc_fetch(1) <= jmp_addr(31 downto 3) & '1' & jmp_addr(1 downto 0);
@@ -169,7 +166,7 @@ begin
 							instruction_ready <= '1';
 							v_addr_p8 := pc_fetch(0) + 8;
 							o_PM_Addr <= std_logic_vector(v_addr_p8(16 downto 3));
-							o_PM_DV <= '1';
+							--o_PM_DV <= '1';
 							
 							fetch_state <= fetch_state_next_2;
 							pc_fetch(2) <= v_addr_p8;
@@ -192,7 +189,7 @@ begin
 								v_addr_p8 := pc_fetch(2) + 8;
 								pc_fetch(2) <= v_addr_p8;
 								pc_fetch(3) <= pc_fetch(3) + 8;
-								o_PM_DV <= '1';
+								--o_PM_DV <= '1';
 								o_PM_Addr <= std_logic_vector(v_addr_p8(16 downto 3));
 								fetch_state <= fetch_state_next_2;
 							else
@@ -222,7 +219,7 @@ begin
 							v_addr_p8 := pc_fetch(2) + 8;
 							pc_fetch(2) <= v_addr_p8;
 							pc_fetch(3) <= pc_fetch(3) + 8;
-							o_PM_DV <= '1';
+							--o_PM_DV <= '1';
 							o_PM_Addr <= std_logic_vector(v_addr_p8(16 downto 3));
 						else
 							fetch_state <= fetch_state_idle;

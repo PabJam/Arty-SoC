@@ -31,7 +31,9 @@ architecture Behavioral of tb_Top_of_Arty_SoC_Ascii is
             ck_sda     : inout std_logic
         );
     end component;
-
+	
+	signal pm_bottleneck_flag : std_logic := '0';
+	
     -- Testbench Signals
     signal SW_tb         : std_logic_vector(3 downto 0) := "0000";
     signal BTN_tb        : std_logic_vector(3 downto 0) := "0000";
@@ -79,6 +81,34 @@ begin
             CLK_tb <= '1'; wait for CLK_PERIOD / 2;
         end loop;
     end process;
+
+	process(CLK_tb)
+		-- Aliases inside the process (where uut is already elaborated)
+		alias internal_instruction_jump  is << signal .tb_Top_of_Arty_SoC_Ascii.uut.inst_Arithmetic_Logic_Unit.instruction_jump : std_logic >>;
+		alias internal_instruction_ready is << signal .tb_Top_of_Arty_SoC_Ascii.uut.inst_Arithmetic_Logic_Unit.instruction_ready : std_logic >>;
+	
+		-- Pipeline history variables
+		variable sig_jump_d1, sig_jump_d2, sig_jump_d3 : std_logic := '0';
+		variable sig_ready_d1, sig_ready_d2           : std_logic := '0';
+	begin
+		if rising_edge(CLK_tb) then
+			-- Pipeline history
+			sig_jump_d3 := sig_jump_d2;
+			sig_jump_d2 := sig_jump_d1;
+			sig_jump_d1 := internal_instruction_jump;
+			
+			sig_ready_d2 := sig_ready_d1;
+			sig_ready_d1 := internal_instruction_ready;
+	
+			-- Check: ready fell on this cycle AND jump did NOT rise 1 cycle prior
+			if (sig_ready_d2 = '1' and sig_ready_d1 = '0') and not (sig_jump_d3 = '0' and sig_jump_d2 = '1') then
+				pm_bottleneck_flag <= '1';
+				report "Violation detected: instruction_ready fell without instruction_jump rising 1 cycle prior!" severity error;
+			else
+				pm_bottleneck_flag <= '0';
+			end if;
+		end if;
+	end process;
 
     -- reads a binary file and simulates writing it to the fpga over uart
     stim_proc: process

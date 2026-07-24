@@ -43,7 +43,7 @@ architecture Behavioral of Top_of_Arty_SoC is
 			i_Take_Ctrl_ALU : in std_logic;
 			o_Return_Ctrl_ALU : out std_logic;
 			o_PM_Addr : out std_logic_vector(13 downto 0);
-			o_PM_DV : out std_logic;
+			--o_PM_DV : out std_logic;
 			i_PM_Data : in std_logic_vector(63 downto 0);
 			i_PM_DV : in std_logic;
 			o_DM_Addr : out std_logic_vector(31 downto 0);
@@ -168,19 +168,19 @@ architecture Behavioral of Top_of_Arty_SoC is
 	signal progRam_Uart_State : t_progRam_Uart_States := progRam_Uart_Idle;
 	
 	type t_pm_alu_states is (pm_alu_state_idle, pm_alu_state_pre_read, pm_alu_state_read);
-	signal pm_alu_state : t_pm_alu_states := pm_alu_state_pre_read;
+	signal pm_alu_state : t_pm_alu_states := pm_alu_state_idle;
 	
 	signal progRam_Addr : std_logic_vector(13 downto 0) := (others => '0');
 	signal progRam_addr_alu : std_logic_vector(13 downto 0) := (others => '0'); 
 	signal latched_progRam_addr_alu : std_logic_vector(13 downto 0) := (others => '0'); 
-	signal progRam_addr_uart : std_logic_vector(12 downto 0) := (others => '0'); 
+	signal progRam_addr_uart : std_logic_vector(13 downto 0) := (others => '0'); 
 	signal progRam_Wr_Cntr : unsigned(16 downto 0) := (others => '0');
 	signal progRam_Rd_Cntr : unsigned(16 downto 0) := (others => '0');
 	signal progRam_Wr_En : std_logic_vector(7 downto 0) := (others => '0'); -- can also write single bytes instead of full 64 bit
 	signal progRam_Data_In : std_logic_vector(63 downto 0); 
 	signal progRam_Data_Out : std_logic_vector(63 downto 0); 
 	signal progRam_dv : std_logic := '0';
-	signal progRam_addr_valid : std_logic;
+	--signal progRam_addr_valid : std_logic;
 	
 	
 	type t_8byte_array is array (0 to 7) of std_logic_vector(7 downto 0);
@@ -203,12 +203,12 @@ architecture Behavioral of Top_of_Arty_SoC is
 	signal dm_read_state : t_dm_read_states := state_dm_read_idle;
 	--Logic Unit Signal
 	signal ctrl_arithmetic_logic_unit : std_logic := '0';
+	signal latched_ctrl_arithmetic_logic_unit : std_logic := '0';
 	Signal get_ctrl_logic_unit : std_logic := '0';
 	signal give_ctrl_logic_unit : std_logic := '0';
 	signal take_ctrl_logic_unit : std_logic := '0';
 	signal sync_nRst_alu : std_logic := '0';
 	Signal wait_peripheral_access_finish : std_logic := '0';
-	Signal wait_setup_pm : std_logic := '0';
 	signal wait_peripheral_access_finish_cntr : natural range 0 to 7 := 0; 
 	
 	
@@ -551,7 +551,7 @@ begin
 		i_Take_Ctrl_ALU => take_ctrl_logic_unit,
 		o_Return_Ctrl_ALU => get_ctrl_logic_unit,
 		o_PM_Addr => progRam_addr_alu,
-		o_PM_DV => progRam_addr_valid,
+		--o_PM_DV => progRam_addr_valid,
 		i_PM_Data => progRam_Data_Out,
 		i_PM_DV => progRam_dv,
 		o_DM_Addr => dm_addr,
@@ -564,6 +564,7 @@ begin
 	
 	alu_read_dv <= '1' when (dm_read_dv = '1' or peripherals_read_dv = '1') else '0';
 	alu_read_data <= peripherals_read_data when peripherals_read_dv = '1' else dm_data_out;
+	ProgRam_dv <= '1' when progRam_addr_alu = latched_progRam_addr_alu else '0';
 	
 	Ctrl_ALU_Proc : process(clk)
 	begin
@@ -572,17 +573,12 @@ begin
 			give_ctrl_logic_unit <= '0';
 			sync_nRst_alu <= '1';
 			uart_fifo_srst <= '0';
-			wait_setup_pm <= '0';
 			
 			if (wait_peripheral_access_finish = '1' and uart_fifo_empty = '1' and wait_peripheral_access_finish_cntr = 0) then
 				ctrl_arithmetic_logic_unit <= '0';
 				wait_peripheral_access_finish <= '0';
 			elsif wait_peripheral_access_finish_cntr /= 0 then
 				wait_peripheral_access_finish_cntr <= wait_peripheral_access_finish_cntr - 1;
-			end if;
-			
-			if (wait_setup_pm = '1' and ctrl_arithmetic_logic_unit = '1') then
-				give_ctrl_logic_unit <= '1';
 			end if;
 			
 			if (get_ctrl_logic_unit = '1') then
@@ -602,12 +598,10 @@ begin
 			end if;
 			
 			if (btnReg(1)='0' and btnDeBnc(1)='1') then
-				wait_setup_pm <= '1';
 				ctrl_arithmetic_logic_unit <= '1';
+				give_ctrl_logic_unit <= '1';
 			end if;
-			
-			
-			
+					
 		end if;
 	end process;
 	
@@ -616,6 +610,7 @@ begin
 	----------------------------------------------------------
 	
 	dm_wr_ram_en <= dm_wr_en when dm_addr(31) = '0' else (others => '0');
+	progRam_Addr <= progRam_addr_alu when ctrl_arithmetic_logic_unit = '1' else progRam_addr_uart;
 	
 	inst_ProgRam: ProgRam
 	port map
@@ -638,12 +633,13 @@ begin
 		
 			progRam_Wr_En <= (others => '0'); -- default assignment
 			uart_TX_DV <= '0';
-			progRam_dv <= '0';
+			--progRam_dv <= '0';
 			uart_fifo_rd_en <= '0';
 			latched_progRam_addr_alu <= progRam_addr_alu;
+			latched_ctrl_arithmetic_logic_unit <= ctrl_arithmetic_logic_unit;
 			
 			if ctrl_arithmetic_logic_unit = '0' then
-				pm_alu_state <= pm_alu_state_pre_read;
+				pm_alu_state <= pm_alu_state_idle;
 				
 				case progRam_Uart_State is
 					
@@ -661,7 +657,7 @@ begin
 					when progRam_Uart_Write =>
 						if progRam_Wr_Cntr < x"FFFF" then
 							progRam_Data_In_Bytes(to_integer(progRam_Wr_Cntr(2 downto 0)))(7 downto 0) <= uart_RX_Data(7 downto 0);
-							progRam_Addr(13 downto 0) <=  std_logic_vector(progRam_Wr_Cntr(16 downto 3));
+							progRam_addr_uart(13 downto 0) <=  std_logic_vector(progRam_Wr_Cntr(16 downto 3));
 							progRam_Wr_En(to_integer(progRam_Wr_Cntr(2 downto 0))) <= '1'; 
 							progRam_Wr_Cntr <= progRam_Wr_Cntr + 1;
 						end if;
@@ -671,7 +667,7 @@ begin
 					-- Always takes a clk cycle to read data even if address didn't change
 					-- could be improved to read all 4 bytes in read and only change state when addres changes
 					when progRam_Uart_PreRead => 
-						progRam_Addr(13 downto 0) <= std_logic_vector(progRam_Rd_Cntr(16 downto 3));
+						progRam_addr_uart(13 downto 0) <= std_logic_vector(progRam_Rd_Cntr(16 downto 3));
 						progRam_Uart_State <= ProgRam_Uart_ReadWait;
 					
 					when progRam_Uart_ReadWait =>
@@ -698,29 +694,7 @@ begin
 					
 				end case;
 			else -- lu has control over pm
-				progRam_Addr <= progRam_addr_alu; 
-				
-				if progRam_addr_valid = '1' then
-					if latched_progRam_addr_alu /= progRam_addr_alu then
-						pm_alu_state <= pm_alu_state_pre_read;
-					else
-						pm_alu_state <= pm_alu_state_read;
-					end if;
-				else
-					case pm_alu_state is
-						when pm_alu_state_idle =>
-							pm_alu_state <= pm_alu_state_idle;
-						when pm_alu_state_pre_read =>
-							pm_alu_state <= pm_alu_state_read;
-						when pm_alu_state_read =>
-							progRam_dv <= '1';
-							pm_alu_state <= pm_alu_state_idle;
-						when others =>
-							null;
-							pm_alu_state <= pm_alu_state_idle;
-					end case;
-				end if;
-				
+		
 				if uart_fifo_valid = '1' and uart_TX_Active = '0' and uart_fifo_empty = '0' and uart_fifo_rd_en = '0' then
 					uart_TX_Data <= uart_fifo_dout;
 					uart_fifo_rd_en <= '1';
