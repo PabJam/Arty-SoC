@@ -411,6 +411,9 @@ begin
 				v_latched_instruction_done := '1';
 			end if;
 			
+			-- todo add buffer of decoded instructions and turn v_latched_instruction_done into a signal to know if an instruction was taken 
+			-- from the buffer so this process knows if it can decode another one or not. It should not require an instruction to be done to have a decoded one ready
+			-- unneccessary bottleneck
 			if (instruction_ready = '1' or next_instruction_valid = '1') and v_latched_instruction_done = '1' and instruction_jump = '0' then
 				
 				if instruction_upper(0) = '0' then
