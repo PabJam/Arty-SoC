@@ -53,825 +53,558 @@ end Arithmetic_Logic_Unit;
 
 architecture Behavioral of Arithmetic_Logic_Unit is
 
-signal ctrl_arithmetic_logic_unit : std_logic := '0';
+	-- registers
+	type t_reg_array is array(natural range 0 to 31) of unsigned(31 downto 0);
+	signal registers : t_reg_array := (others => (others => '0'));
 
-type t_reg_array is array(natural range 0 to 31) of unsigned(31 downto 0);
-signal registers : t_reg_array := (others => (others => '0'));
+	-- data memory helpers
+	type t_byte_array_32 is array(0 to 3) of std_logic_vector(7 downto 0);
+	type t_2byte_array_32 is array(0 to 1) of std_logic_vector(15 downto 0);
+	signal dm_read_data_bytes : t_byte_array_32;
+	signal dm_read_data_2bytes : t_2byte_array_32;
+	signal dm_addr : std_logic_vector(31 downto 0);
 
-type t_fetch_states is (fetch_state_idle, fetch_state_next, fetch_state_next_2);
-signal fetch_state : t_fetch_states := fetch_state_next;
+	-- fetch stage
+	type t_fetch_states is (fetch_state_idle, fetch_state_next, fetch_state_next_2);
+	signal fetch_state : t_fetch_states := fetch_state_next;
 
-type t_byte_array_32 is array(0 to 3) of std_logic_vector(7 downto 0);
-type t_2byte_array_32 is array(0 to 1) of std_logic_vector(15 downto 0);
-signal dm_read_data_bytes : t_byte_array_32;
-signal dm_read_data_2bytes : t_2byte_array_32;
-signal dm_addr : std_logic_vector(31 downto 0);
+	type t_pm_fetch_array is array(0 to 3) of unsigned(31 downto 0);
+	type t_2_u32 is array(0 to 1) of unsigned(31 downto 0);
 
-type t_pm_fetch_array is array(0 to 3) of unsigned(31 downto 0);
-type t_2_u32 is array(0 to 1) of unsigned(31 downto 0);
---type t_2_u21 is array(0 to 1) of unsigned(20 downto 0);
---type t_2_u5 is array(0 to 1) of unsigned(4 downto 0) 
+	signal pc : t_2_u32;
+	signal pc_fetch : t_pm_fetch_array;
+	signal instruction_fetch : t_pm_fetch_array;
+	signal instruction_ready : std_logic := '0';
+	signal instruction_read : std_logic := '0';
+	
+	-- decode stage
+	signal instruction_upper : unsigned(0 downto 0) := (others => '0');
+	signal next_instruction : unsigned(31 downto 0) := (others => '0');
+	signal next_pc : unsigned(31 downto 0) := (others => '0');
+	signal next_instruction_valid : std_logic := '0';
+	signal instruction_jumped : std_logic := '0';
+	
+	-- decoded instruction queue
+	constant C_IQ_WIDTH : natural := 2;
+	constant C_IQ_DEPTH : natural := 2**C_IQ_WIDTH;
+	
+	type t_decoded is record
+		opcode : unsigned(6 downto 0);
+		func3 : unsigned(2 downto 0);
+		func7 : unsigned(6 downto 0);
+		rs1 : natural range 0 to 31;
+		rs2 : natural range 0 to 31;
+		rd : natural range 0 to 31;
+		imm : unsigned(31 downto 0);
+		pc : unsigned(31 downto 0);
+	end record;
+	
+	constant C_DECODED_RST : t_decoded := 
+	(
+		opcode => (others => '0'),
+		func3 => (others => '0'),
+		func7 => (others => '0'),
+		rs1 => 0,
+		rs2 => 0,
+		rd => 0,
+		imm => (others => '0'),
+		pc => (others => '0')
+	);
+	
+	-- fifo to queue instructions
+	type t_iq_array is array (0 to C_IQ_DEPTH - 1) of t_decoded;
+	signal iq : t_iq_array := (others => C_DECODED_RST);
+	-- msb is used to track loops so full & empty can be differentiated
+	signal iq_wr_ptr : unsigned(C_IQ_WIDTH downto 0) := (others => '0'); 
+	signal iq_rd_ptr : unsigned(C_IQ_WIDTH downto 0) := (others => '0');
+	signal iq_empty : std_logic;
+	signal iq_full : std_logic;
+	
+	-- execute stage
+	signal ctrl_arithmetic_logic_unit : std_logic := '0';
+	signal jmp_addr : unsigned(31 downto 0);
+	signal instruction_jump : std_logic := '0';
 
-signal pc : t_2_u32;
-signal jmp_addr : unsigned(31 downto 0);
-signal pc_fetch : t_pm_fetch_array;
---signal instruction : t_2_u32;
-signal immediate : unsigned(20 downto 0) := (others => '0');
-signal rs1 : natural range 0 to 31 := 0;
-signal rs2 : natural range 0 to 31 := 0;
-signal rd : natural range 0 to 31 := 0;
-signal rs1_val : unsigned(31 downto 0) := (others => '0');
-signal rs2_val : unsigned(31 downto 0) := (others => '0');
-signal opcode : unsigned(6 downto 0) := (others => '0');
-signal func3 : unsigned(2 downto 0) := (others => '0');
-signal write_operation : std_logic := '0';
-signal wait_finish_write_operation : std_logic := '0';
-signal latched_immediate : unsigned(20 downto 0) := (others => '0');
-signal latched_rs1 : natural range 0 to 31 := 0;
-signal latched_rs2 : natural range 0 to 31 := 0;
-signal latched_rs1_val : unsigned(31 downto 0) := (others => '0');
-signal latched_rs2_val : unsigned(31 downto 0) := (others => '0');
-signal latched_rd : natural range 0 to 31 := 0;
-signal latched_opcode : unsigned(6 downto 0) := (others => '0');
-signal latched_func3 : unsigned(2 downto 0) := (others => '0');
-signal instruction_decoded : std_logic;
-signal instruction_fetch : t_pm_fetch_array;
-signal instruction_jump : std_logic := '0';
-signal instruction_ready : std_logic := '0';
-signal instruction_loaded : std_logic := '0';
-signal instruction_p4_ready : std_logic := '0';
-signal instruction_upper : unsigned(0 downto 0) := (others => '0');
-signal instruction_multicycle : std_logic := '0';
-signal next_instruction : unsigned(31 downto 0) := (others => '0');
-signal next_instruction_valid : std_logic := '0';
-signal current_pc : unsigned(31 downto 0) := (others => '0');
-signal next_pc : unsigned(31 downto 0) := (others => '0');
-signal latched_current_pc : unsigned(31 downto 0) := (others => '0');
-signal instruction_done : std_logic := '0';
-signal instruction_read : std_logic := '0';
-signal instruction_jumped : std_logic := '0';
-signal latched_instruction_done : std_logic := '0';
-
+	signal load_pending : std_logic := '0';
+	signal load_rd : natural range 0 to 31 := 0;
+	signal load_func3 : unsigned(2 downto 0) := (others => '0');
+	signal load_addr_lsb : unsigned(1 downto 0) := (others => '0');
 
 begin
 
-
-dm_read_data_bytes(0) <= i_DM_Data(7 downto 0);
-dm_read_data_bytes(1) <= i_DM_Data(15 downto 8);
-dm_read_data_bytes(2) <= i_DM_Data(23 downto 16);
-dm_read_data_bytes(3) <= i_DM_Data(31 downto 24);
+	dm_read_data_bytes(0) <= i_DM_Data(7 downto 0);
+	dm_read_data_bytes(1) <= i_DM_Data(15 downto 8);
+	dm_read_data_bytes(2) <= i_DM_Data(23 downto 16);
+	dm_read_data_bytes(3) <= i_DM_Data(31 downto 24);
  
-dm_read_data_2bytes(0) <= i_DM_Data(15 downto 0);
-dm_read_data_2bytes(1) <= i_DM_Data(31 downto 16);
+	dm_read_data_2bytes(0) <= i_DM_Data(15 downto 0);
+	dm_read_data_2bytes(1) <= i_DM_Data(31 downto 16);
 
-o_DM_Addr <= dm_addr;
+	o_DM_Addr <= dm_addr;
+	
+	-- same read/write pointer => empty
+	-- same read/write pointer with different msb => full
+	iq_empty <= '1' when iq_wr_ptr = iq_rd_ptr else '0';
+	iq_full <= '1' when (iq_wr_ptr(C_IQ_WIDTH) /= iq_rd_ptr(C_IQ_WIDTH)) and 
+		(iq_wr_ptr(C_IQ_WIDTH - 1 downto 0) = iq_rd_ptr(C_IQ_WIDTH - 1 downto 0))
+		else '0';
 
-Instruction_Fetch_Proc : process(i_Clk)
-	variable v_addr_p8 : unsigned(31 downto 0);
-begin
-	if rising_edge(i_Clk) then
-		--o_PM_DV <= '0';
-		if (i_Sync_nRst = '0') then
-			pc_fetch(0) <= x"0000000" & "0000";
-			pc_fetch(1) <= x"0000000" & "0100";
-			pc_fetch(2) <= x"0000000" & "1000";
-			pc_fetch(3) <= x"0000000" & "1100";
-			pc(0) <= (others => '0');
-			pc(1) <= (others => '0');
-			instruction_fetch(0) <= (others => '0'); 
-			instruction_fetch(1) <= (others => '0'); 
-			instruction_fetch(2) <= (others => '0'); 
-			instruction_fetch(3) <= (others => '0'); 
-			o_PM_Addr <= (others => '0');
-			fetch_state <= fetch_state_next;
-			instruction_ready <= '0';
-		elsif ctrl_arithmetic_logic_unit = '1' and i_Take_Ctrl_ALU = '0' then
-			if (instruction_jump = '1') then
-				--o_PM_DV <= '1';
-				o_PM_Addr <= std_logic_vector(jmp_addr(16 downto 3)); -- jmp_addr(2) decides if lower or upper 32bit 
-				pc_fetch(0) <= jmp_addr(31 downto 3) & '0' & jmp_addr(1 downto 0);
-				pc_fetch(1) <= jmp_addr(31 downto 3) & '1' & jmp_addr(1 downto 0);
+	-- fetch stage
+	Instruction_Fetch_Proc : process(i_Clk)
+		variable v_addr_p8 : unsigned(31 downto 0);
+	begin
+		if rising_edge(i_Clk) then
+			if (i_Sync_nRst = '0') then
+				pc_fetch(0) <= x"0000000" & "0000";
+				pc_fetch(1) <= x"0000000" & "0100";
+				pc_fetch(2) <= x"0000000" & "1000";
+				pc_fetch(3) <= x"0000000" & "1100";
+				pc(0) <= (others => '0');
+				pc(1) <= (others => '0');
+				instruction_fetch(0) <= (others => '0'); 
+				instruction_fetch(1) <= (others => '0'); 
+				instruction_fetch(2) <= (others => '0'); 
+				instruction_fetch(3) <= (others => '0'); 
+				o_PM_Addr <= (others => '0');
 				fetch_state <= fetch_state_next;
 				instruction_ready <= '0';
-			else
-				case fetch_state is 
-					when fetch_state_next =>
-						instruction_ready <= '0';
-						o_PM_Addr <= std_logic_vector(pc_fetch(0)(16 downto 3));
-						if i_PM_DV = '1' then
-							instruction_fetch(0) <= unsigned(i_PM_Data(31 downto 0));
-							instruction_fetch(1) <= unsigned(i_PM_Data(63 downto 32));
-							pc(0) <= pc_fetch(0);
-							pc(1) <= pc_fetch(1);
-							instruction_ready <= '1';
-							v_addr_p8 := pc_fetch(0) + 8;
-							o_PM_Addr <= std_logic_vector(v_addr_p8(16 downto 3));
-							--o_PM_DV <= '1';
-							
-							fetch_state <= fetch_state_next_2;
-							pc_fetch(2) <= v_addr_p8;
-							pc_fetch(3) <= pc_fetch(1) + 8;
-						else
-							fetch_state <= fetch_state_next;
-						end if;
-					
-					when fetch_state_next_2 =>
-						instruction_ready <= '1';
-						o_PM_Addr <= std_logic_vector(pc_fetch(2)(16 downto 3));
-						if i_PM_DV = '1' then
-							if instruction_read = '1' then
+			
+			elsif ctrl_arithmetic_logic_unit = '1' and i_Take_Ctrl_ALU = '0' then
+				
+				if (instruction_jump = '1') then
+					o_PM_Addr <= std_logic_vector(jmp_addr(16 downto 3)); -- jmp_addr(2) decides if lower or upper 32bit 
+					pc_fetch(0) <= jmp_addr(31 downto 3) & '0' & jmp_addr(1 downto 0);
+					pc_fetch(1) <= jmp_addr(31 downto 3) & '1' & jmp_addr(1 downto 0);
+					fetch_state <= fetch_state_next;
+					instruction_ready <= '0';
+				else
+					case fetch_state is 
+						
+						when fetch_state_next =>
+							instruction_ready <= '0';
+							o_PM_Addr <= std_logic_vector(pc_fetch(0)(16 downto 3));
+							if i_PM_DV = '1' then
 								instruction_fetch(0) <= unsigned(i_PM_Data(31 downto 0));
 								instruction_fetch(1) <= unsigned(i_PM_Data(63 downto 32));
+								pc(0) <= pc_fetch(0);
+								pc(1) <= pc_fetch(1);
+								instruction_ready <= '1';
+								v_addr_p8 := pc_fetch(0) + 8;
+								o_PM_Addr <= std_logic_vector(v_addr_p8(16 downto 3));	
+								pc_fetch(2) <= v_addr_p8;
+								pc_fetch(3) <= pc_fetch(1) + 8;
+								
+								fetch_state <= fetch_state_next_2;
+							else
+								fetch_state <= fetch_state_next;
+							end if;
+						
+						when fetch_state_next_2 =>
+							instruction_ready <= '1';
+							o_PM_Addr <= std_logic_vector(pc_fetch(2)(16 downto 3));
+							if i_PM_DV = '1' then
+								if instruction_read = '1' then
+									instruction_fetch(0) <= unsigned(i_PM_Data(31 downto 0));
+									instruction_fetch(1) <= unsigned(i_PM_Data(63 downto 32));
+									pc_fetch(0) <= pc_fetch(2);
+									pc_fetch(1) <= pc_fetch(3);
+									pc(0) <= pc_fetch(2);
+									pc(1) <= pc_fetch(3);
+									v_addr_p8 := pc_fetch(2) + 8;
+									pc_fetch(2) <= v_addr_p8;
+									pc_fetch(3) <= pc_fetch(3) + 8;
+									o_PM_Addr <= std_logic_vector(v_addr_p8(16 downto 3));
+									fetch_state <= fetch_state_next_2;
+								else
+									instruction_fetch(2) <= unsigned(i_PM_Data(31 downto 0));
+									instruction_fetch(3) <= unsigned(i_PM_Data(63 downto 32));
+									fetch_state <= fetch_state_idle;
+								end if;
+							elsif instruction_read = '1' then
+								instruction_ready <= '0';
+								pc_fetch(0) <= pc_fetch(2);
+								pc_fetch(1) <= pc_fetch(3);
+								fetch_state <= fetch_state_next;
+							else
+								fetch_state <= fetch_state_next_2;
+							end if;
+							
+						when fetch_state_idle =>
+							instruction_ready <= '1';
+							if instruction_read = '1' then 
 								pc_fetch(0) <= pc_fetch(2);
 								pc_fetch(1) <= pc_fetch(3);
 								pc(0) <= pc_fetch(2);
 								pc(1) <= pc_fetch(3);
+								instruction_fetch(0) <= instruction_fetch(2);
+								instruction_fetch(1) <= instruction_fetch(3);
 								v_addr_p8 := pc_fetch(2) + 8;
 								pc_fetch(2) <= v_addr_p8;
 								pc_fetch(3) <= pc_fetch(3) + 8;
-								--o_PM_DV <= '1';
 								o_PM_Addr <= std_logic_vector(v_addr_p8(16 downto 3));
+								
 								fetch_state <= fetch_state_next_2;
 							else
-								instruction_fetch(2) <= unsigned(i_PM_Data(31 downto 0));
-								instruction_fetch(3) <= unsigned(i_PM_Data(63 downto 32));
 								fetch_state <= fetch_state_idle;
 							end if;
-						elsif instruction_read = '1' then
-							instruction_ready <= '0';
-							pc_fetch(0) <= pc_fetch(2);
-							pc_fetch(1) <= pc_fetch(3);
+						
+						when others =>
+							null;
 							fetch_state <= fetch_state_next;
-						else
-							fetch_state <= fetch_state_next_2;
-						end if;
-						
-					when fetch_state_idle =>
-						instruction_ready <= '1';
-						if instruction_read = '1' then 
-							pc_fetch(0) <= pc_fetch(2);
-							pc_fetch(1) <= pc_fetch(3);
-							pc(0) <= pc_fetch(2);
-							pc(1) <= pc_fetch(3);
-							instruction_fetch(0) <= instruction_fetch(2);
-							instruction_fetch(1) <= instruction_fetch(3);
-							fetch_state <= fetch_state_next_2;
-							v_addr_p8 := pc_fetch(2) + 8;
-							pc_fetch(2) <= v_addr_p8;
-							pc_fetch(3) <= pc_fetch(3) + 8;
-							--o_PM_DV <= '1';
-							o_PM_Addr <= std_logic_vector(v_addr_p8(16 downto 3));
-						else
-							fetch_state <= fetch_state_idle;
-						end if;
-					
-					when others =>
-						null;
-						fetch_state <= fetch_state_next;
-				end case;
+					end case;
+				end if;
+			else -- logic unit does not have control
+				null; 
 			end if;
-		else -- logic unit does not have control
-			null; 
 		end if;
-	end if;
-end process;
+	end process;
 
-
-instruction_Decode_Proc : process (i_Clk)
-		variable v_current_instruction : unsigned(31 downto 0) := (others => '0');
-		variable v_latched_instruction_done : std_logic := '1';
-begin
-	if rising_edge(i_Clk) then
-		instruction_read <= '0';
-
-		if (i_Sync_nRst = '0') then
-			instruction_upper <= (others => '0');
-			instruction_decoded <= '0';
-			next_instruction_valid <= '0';
-			v_latched_instruction_done := '1';
-		elsif ctrl_arithmetic_logic_unit = '1' and i_Take_Ctrl_ALU = '0' then
+	-- decode stage
+	instruction_Decode_Proc : process (i_Clk)
+		variable v_instruction : unsigned(31 downto 0);
+		variable v_decoded : t_decoded;
+		variable v_take : boolean;
+		variable v_from_pm : boolean;
+		variable v_immediate_i : signed(11 downto 0);
+		variable v_immediate_s : signed(11 downto 0);
+		variable v_immediate_b : signed(12 downto 0);
+		variable v_immediate_j : signed(20 downto 0);
+	begin
+		if rising_edge(i_Clk) then
+			instruction_read <= '0';
+	
+			if (i_Sync_nRst = '0') then
+				instruction_upper <= (others => '0');
+				next_instruction_valid <= '0';
+				instruction_jumped <= '0';
+				iq_wr_ptr <= (others => '0');
 			
-			if instruction_done = '1' then
-				v_latched_instruction_done := '1';
-			end if;
-			
-			-- todo add buffer of decoded instructions and turn v_latched_instruction_done into a signal to know if an instruction was taken 
-			-- from the buffer so this process knows if it can decode another one or not. It should not require an instruction to be done to have a decoded one ready
-			-- unneccessary bottleneck
-			if (instruction_ready = '1' or next_instruction_valid = '1') and v_latched_instruction_done = '1' and instruction_jump = '0' then
+			elsif instruction_jump = '1' then -- flush instruction queue fifo
+				iq_wr_ptr <= (others => '0');
+				next_instruction_valid <= '0';
+				instruction_jumped <= '1';
+				instruction_upper(0) <= jmp_addr(2); -- jumped to higher or lower instruction of 64bit block
 				
-				if instruction_upper(0) = '0' then
-					v_current_instruction := instruction_fetch(0);
-					next_instruction <= instruction_fetch(1);
-					current_pc <= pc(0);
-					next_pc <= pc(1);
-					instruction_read <= '1';
-					next_instruction_valid <= '1';
+			elsif ctrl_arithmetic_logic_unit = '1' and i_Take_Ctrl_ALU = '0' then
+				
+				-- take a new instruction from programm memory or nex instruction from instruction fetch
+				v_from_pm := (instruction_upper(0) = '0') or (instruction_jumped = '1');
+				
+				if v_from_pm then
+					-- instruction is ready from programm memory and 
+					-- no instruction was taken on the previous edge. 
+					-- on jump to an upper instruction the instruction_ready is still '1'
+					-- even though the lower instruction is the previous instruction and 
+					-- not the next in a new 64bit block
+					v_take := (instruction_ready = '1') and (instruction_read = '0');
 				else
-					if instruction_jumped = '1' then -- after a jump the next instruction could be on the upper address but we need to turn on instruction_read for the fetch process
-						v_current_instruction := instruction_fetch(1);
-						current_pc <= pc(1);
-						instruction_read <= '1';
-						
-					else
-						v_current_instruction := next_instruction;
-						current_pc <= next_pc;
-					end if;
-					next_instruction_valid <= '0';
+					v_take := (next_instruction_valid = '1');
 				end if;
 				
-				v_latched_instruction_done := '0';
-				instruction_jumped <= '0';
-				instruction_upper <= not instruction_upper;
+				if v_take and iq_full = '0' then
 				
-				opcode <= v_current_instruction(6 downto 0);
-				func3 <= v_current_instruction(14 downto 12);
-				rs1 <= to_integer(v_current_instruction(19 downto 15));
-				rs2 <= to_integer(v_current_instruction(24 downto 20));
-				rd <= to_integer(v_current_instruction(11 downto 7));
-				rs1_val <= registers(to_integer(v_current_instruction(19 downto 15)));
-				rs2_val <= registers(to_integer(v_current_instruction(24 downto 20)));
-				instruction_decoded <= '1';
-				
-				case v_current_instruction(6 downto 0) is --opcode
-					
-					when ("0110111" or "0010111") => -- lui / auipc
-						immediate(19 downto 0) <= v_current_instruction(31 downto 12);
-						
-						
-					when "1101111" => -- jal
-						immediate(20 downto 0) <= v_current_instruction(31) & v_current_instruction(19 downto 12) & v_current_instruction(20) & v_current_instruction(30 downto 21) & '0';
-						
-						
-					when "1100111" => -- jalr
-						immediate(11 downto 0) <= v_current_instruction(31 downto 20);
-			
-						
-					when "1100011" => -- B-type
-						immediate(12 downto 0) <= v_current_instruction(31) & v_current_instruction(7) & v_current_instruction(30 downto 25) & v_current_instruction(11 downto 8) & '0';
-						
-						
-					when "0000011" => -- I-type
-						immediate(11 downto 0) <= v_current_instruction(31 downto 20);
-						
-						
-					when "0100011" => -- S-type
-						immediate(11 downto 0) <= v_current_instruction(31 downto 25) & v_current_instruction(11 downto 7); 
-						
-					
-					when "0010011" => -- I-type
-						immediate(11 downto 0) <= v_current_instruction(31 downto 20);
-						
-					
-					when "0110011" => -- R-type
-						immediate(6 downto 0) <= v_current_instruction(31 downto 25);
-						
-					
-					when "1110011" => -- I-type
-						immediate(11 downto 0) <= v_current_instruction(31 downto 20);
-						
-					
-					when others =>
-						
-						null;
-				end case;
-						
-			elsif instruction_jump = '1' then
-				instruction_upper(0) <= jmp_addr(2);
-				instruction_decoded <= '0';
-				instruction_jumped <= '1';
-				next_instruction_valid <= '0';
-			else -- waiting cause of fetch or multi cycle
-				instruction_decoded <= '0';
-			end if;
-		else 
-			instruction_decoded <= '0';
-		end if; -- reset
-	end if; -- clk'rising_edge
-end process;
-
-Instructions_Execute_Proc : process (i_Clk)
-	variable v_dm_addr : std_logic_vector(31 downto 0) := (others => '0');
-	variable v_return_ctrl_logic_unit : std_logic := '0';
-	variable v_immediate : unsigned(31 downto 0);
-	variable v_dm_write_data_bytes : t_byte_array_32;
-	variable v_dm_write_data_2bytes : t_2byte_array_32;
-begin
-	if rising_edge(i_Clk) then
-		o_DM_DV <= '0';
-		o_DM_Wr_En <= (others => '0');
-		--v_instruction_new := '0';
-		instruction_jump <= '0';
-		instruction_done <= '0';
-		v_return_ctrl_logic_unit := '0';
-		o_Return_Ctrl_ALU <= '0';
-		instruction_multicycle <= '0';
-		
-		if instruction_decoded = '1' and instruction_multicycle = '0' and instruction_jump = '0' then
-			latched_opcode <= opcode;
-			latched_func3 <= func3;
-			latched_immediate <= immediate;
-			latched_rd <= rd;
-			latched_rs2 <= rs2;
-			latched_rs1 <= rs1;
-			latched_rs1_val <= rs1_val;
-			latched_rs2_val <= rs2_val;
-			latched_current_pc <= current_pc;
-			
-			case opcode is --opcode
-				
-				when "0110111" => -- lui
-					registers(rd) <= immediate(19 downto 0) & "000000000000";
-					instruction_done <= '1';
-				
-				when "0010111" => -- auipc
-					registers(rd) <= current_pc + (immediate(19 downto 0) & "000000000000");
-					instruction_done <= '1';
-				
-				when "1101111" => -- jal
-					registers(rd) <= current_pc + 4;
-					jmp_addr <= unsigned(resize(signed(immediate(20 downto 0)), current_pc'length));
-					instruction_multicycle <= '1';
-				
-				when "1100111" => -- jalr
-					registers(rd) <= current_pc + 4;
-					jmp_addr <= unsigned(resize(signed(immediate(11 downto 0)), current_pc'length));
-					instruction_multicycle <= '1';
-				
-				when "1100011" => -- B-type
-					case func3 is -- func3
-						
-						when "000" => -- beq
-							if rs1_val = rs2_val then
-								jmp_addr <= unsigned(resize(signed(immediate(12 downto 0)), current_pc'length));
-								instruction_multicycle <= '1';
-							else
-								instruction_done <= '1';
-							end if;
-							
-								
-						when "001" => -- bne
-							if rs1_val /= rs2_val then
-								jmp_addr <= unsigned(resize(signed(immediate(12 downto 0)), current_pc'length));
-								instruction_multicycle <= '1';
-							else
-								instruction_done <= '1';
-							end if;
-						
-						when "100" => -- blt
-							if signed(rs1_val) < signed(rs2_val) then
-								jmp_addr <= unsigned(resize(signed(immediate(12 downto 0)), current_pc'length));
-								instruction_multicycle <= '1';
-							else
-								instruction_done <= '1';
-							end if;
-						
-						when "101" => -- bge
-							if signed(rs1_val) >= signed(rs2_val) then
-								jmp_addr <= unsigned(resize(signed(immediate(12 downto 0)), current_pc'length));
-								instruction_multicycle <= '1';
-							else
-								instruction_done <= '1';
-							end if;
-							
-						when "110" => -- bltu
-							if unsigned(rs1_val) < unsigned(rs2_val) then
-								jmp_addr <= unsigned(resize(signed(immediate(12 downto 0)), current_pc'length));
-								instruction_multicycle <= '1';
-							else
-								instruction_done <= '1';
-							end if;
-						
-						when "111" => -- bgeu
-							if unsigned(rs1_val) >= unsigned(rs2_val) then
-								jmp_addr <= unsigned(resize(signed(immediate(12 downto 0)), current_pc'length));
-								instruction_multicycle <= '1';
-							else
-								instruction_done <= '1';
-							end if;
-						
-						when others =>
-							null;
-							instruction_done <= '1';
-							
-					end case;
-				
-				
-				when "0000011" => -- I-type
-					case func3 is -- func3
-						
-						when "000" => -- lb
-							v_immediate := unsigned(resize(signed(immediate(11 downto 0)), dm_addr'length));
-							dm_addr <= std_logic_vector(rs1_val + v_immediate);
-							o_DM_DV <= '1';
-							instruction_multicycle <= '1';
-						
-						when "001" => -- lh
-							v_immediate := unsigned(resize(signed(immediate(11 downto 0)), dm_addr'length));
-							dm_addr <= std_logic_vector(rs1_val + v_immediate);
-							o_DM_DV <= '1';
-							instruction_multicycle <= '1';
-							
-						when "010" => -- lw
-							v_immediate := unsigned(resize(signed(immediate(11 downto 0)), dm_addr'length));
-							dm_addr <= std_logic_vector(rs1_val + v_immediate);
-							o_DM_DV <= '1';
-							instruction_multicycle <= '1';
-						
-						when "100" => -- lbu
-							v_immediate := unsigned(resize(signed(immediate(11 downto 0)), dm_addr'length));
-							dm_addr <= std_logic_vector(rs1_val + v_immediate);
-							o_DM_DV <= '1';
-							instruction_multicycle <= '1';
-						
-						when "101" => -- lhu
-							v_immediate := unsigned(resize(signed(immediate(11 downto 0)), dm_addr'length));
-							dm_addr <= std_logic_vector(rs1_val + v_immediate);
-							o_DM_DV <= '1';
-							instruction_multicycle <= '1';
-						
-						when others =>
-							null;
-							instruction_done <= '1';
-					end case;
-					
-				when "0100011" => -- S-type
-					case func3 is -- func3
-						
-						when "000" => -- sb
-							v_immediate := unsigned(resize(signed(immediate(11 downto 0)), dm_addr'length));
-							v_dm_addr := std_logic_vector(v_immediate + rs1_val);
-							dm_addr <= v_dm_addr;
-							v_dm_write_data_bytes(to_integer(unsigned(v_dm_addr(1 downto 0))))(7 downto 0) := std_logic_vector(rs2_val(7 downto 0));  
-							o_DM_Data(7 downto 0) <= v_dm_write_data_bytes(0); 
-							o_DM_Data(15 downto 8) <= v_dm_write_data_bytes(1); 
-							o_DM_Data(23 downto 16) <= v_dm_write_data_bytes(2); 
-							o_DM_Data(31 downto 24) <= v_dm_write_data_bytes(3);
-							o_DM_Wr_En(to_integer(unsigned(v_dm_addr(1 downto 0)))) <= '1';
-							o_DM_DV <= '1';	
-							instruction_done <= '1';
-							
-						when "001" => -- sh
-							v_immediate := unsigned(resize(signed(immediate(11 downto 0)), dm_addr'length));
-							v_dm_addr := std_logic_vector(v_immediate + rs1_val);
-							dm_addr <= v_dm_addr;
-							v_dm_write_data_2bytes(to_integer(unsigned(v_dm_addr(1 downto 1))))(15 downto 0) := std_logic_vector(rs2_val(15 downto 0));  
-							o_DM_Data(15 downto 0) <= v_dm_write_data_2bytes(0);
-							o_DM_Data(31 downto 16) <= v_dm_write_data_2bytes(1);
-							if (v_dm_addr(1) = '1') then
-								o_DM_Wr_En <= "1100";
-							else
-								o_DM_Wr_En <= "0011";
-							end if;
-							o_DM_DV <= '1';	
-							instruction_done <= '1';
-							
-						when "010" => -- sw
-							v_immediate := unsigned(resize(signed(immediate(11 downto 0)), dm_addr'length));
-							dm_addr <= std_logic_vector(v_immediate + rs1_val);
-							o_DM_Data <= std_logic_vector(rs2_val(31 downto 0));  
-							o_DM_Wr_En(3 downto 0) <= "1111";
-							o_DM_DV <= '1';	
-							instruction_done <= '1';
-						
-						when others =>
-							null;
-							instruction_done <= '1';
-					end case;
-				
-				when "0010011" => -- I-type
-					case func3 is -- func3
-						
-						when "000" => -- addi
-							v_immediate := unsigned(resize(signed(immediate(11 downto 0)), registers(0)'length));
-							registers(rd) <= v_immediate + rs1_val;
-							instruction_done <= '1';
-							
-						when "010" => -- slti
-							registers(rd)(31 downto 0) <= (others => '0');
-							if signed(rs1_val) < signed(immediate(11 downto 0)) then
-								registers(rd)(0) <= '1'; 
-							end if;
-							instruction_done <= '1';
-							
-						when "011" => -- sltiu
-							registers(rd)(31 downto 0) <= (others => '0');
-							if rs1_val < immediate(11 downto 0) then
-								registers(rd)(0) <= '1'; 
-							end if;
-							instruction_done <= '1';
-							
-						when "100" => -- xori
-							v_immediate := unsigned(resize(signed(immediate(11 downto 0)), registers(0)'length));
-							registers(rd) <= rs1_val xor v_immediate;
-							instruction_done <= '1';
-						
-						when "110" => -- ori
-							v_immediate := unsigned(resize(signed(immediate(11 downto 0)), registers(0)'length));
-							registers(rd) <= rs1_val or v_immediate;
-							instruction_done <= '1';
-						
-						when "111" => -- andi
-							v_immediate := unsigned(resize(signed(immediate(11 downto 0)), registers(0)'length));
-							registers(rd) <= rs1_val and v_immediate;
-							instruction_done <= '1';
-						
-						when "001" => -- slli
-							registers(rd)(31 downto 0) <= shift_left(rs1_val, to_integer(immediate(4 downto 0)));
-							instruction_done <= '1';
-						
-						when "101" => -- srli/srai
-							if immediate(10) = '0' then -- srli
-								registers(rd)(31 downto 0) <= shift_right(rs1_val, to_integer(immediate(4 downto 0)));	
-							else	-- srai
-								registers(rd)(31 downto 0) <= unsigned(shift_right(signed(rs1_val), to_integer(immediate(4 downto 0))));
-							end if;			
-							instruction_done <= '1';
-							
-						when others =>
-							null;
-							instruction_done <= '1';
-					
-					end case;
-						
-				when "0110011" => -- R-type
-					case func3 is -- func3
-						
-						when "000" => -- add/sub
-							if immediate(5) = '0' then
-								registers(rd) <= rs1_val + rs2_val;
-							else
-								registers(rd) <= rs1_val - rs2_val;
-							end if;
-							--b_add <= std_logic_vector(rs2_val);
-							
-							instruction_done <= '1';
-							
-						when "001" => -- sll
-							registers(rd)(31 downto 0) <= shift_left(rs1_val, to_integer(rs2_val(4 downto 0)));
-							instruction_done <= '1';
-						
-						when "010" => -- slt
-							registers(rd)(31 downto 0) <= (others => '0');
-							if signed(rs1_val) < signed(rs2_val) then
-								registers(rd)(0) <= '1'; 
-							end if;
-							instruction_done <= '1';
-							
-						when "011" => -- sltu
-							registers(rd)(31 downto 0) <= (others => '0');
-							if unsigned(rs1_val) < unsigned(rs2_val) then
-								registers(rd)(0) <= '1'; 
-							end if;
-							instruction_done <= '1';
-							
-						when "100" => -- xor
-							registers(rd) <= rs1_val xor rs2_val;
-							instruction_done <= '1';
-							
-						when "101" => -- srl/sra
-							if immediate(5) = '0' then -- srl
-								registers(rd)(31 downto 0) <= shift_right(rs1_val, to_integer(rs2_val(4 downto 0)));
-							else	-- sra
-								registers(rd)(31 downto 0) <= unsigned(shift_right(signed(rs1_val), to_integer(rs2_val(4 downto 0))));	
-							end if;
-							instruction_done <= '1';
-							
-						when "110" => -- or
-							registers(rd) <= rs1_val or rs2_val;
-							instruction_done <= '1';
-							
-						when "111" => -- and
-							registers(rd) <= rs1_val and rs2_val;
-							instruction_done <= '1';
-							
-						when others => 
-							null;
-							instruction_done <= '1';
-						
-					end case;
-				
-				when "1110011" => -- I-type
-					if immediate(0) = '1' then -- ebreak;
-						v_return_ctrl_logic_unit := '1';
-						instruction_done <= '1';
-					else -- ecall
-						null;
-						instruction_done <= '1';
+					-- next instruction is in lower instruction_fetch dont care if previous jump or not
+					if instruction_upper(0) = '0' then 
+						v_instruction := instruction_fetch(0);
+						v_decoded.pc := pc(0);
+						next_instruction <= instruction_fetch(1);
+						next_pc <= pc(1);
+						next_instruction_valid <= '1';
+						instruction_read <= '1';
+					-- instruction is on upper instruction_fetch and jumped so not already in next_instruction
+					elsif instruction_jumped = '1' then
+						v_instruction := instruction_fetch(1);
+						v_decoded.pc := pc(1);
+						next_instruction_valid <= '0';
+						instruction_read <= '1';
+					-- upper instruction but no jump before so alredy in next_instruction
+					else
+						v_instruction := next_instruction;
+						v_decoded.pc := next_pc;
+						next_instruction_valid <= '0';
 					end if;
-				when others => 
-					null;
-					instruction_done <= '1';
-			end case;
+					
+					instruction_jumped <= '0';
+					instruction_upper <= not instruction_upper;
+					
+					v_decoded.opcode := v_instruction(6 downto 0);
+					v_decoded.func3 := v_instruction(14 downto 12);
+					v_decoded.func7 := v_instruction(31 downto 25);
+					v_decoded.rs1 := to_integer(v_instruction(19 downto 15));
+					v_decoded.rs2 := to_integer(v_instruction(24 downto 20));
+					v_decoded.rd := to_integer(v_instruction(11 downto 7));
+					
+					v_immediate_i := signed(v_instruction(31 downto 20));
+					-- unsigned' needed for ambiguity on & operator of unsigned or std_logic_vector
+					-- not needed on b/j because v_instruction(31) dictates type as a single bit
+					v_immediate_s := signed(unsigned'(v_instruction(31 downto 25) & v_instruction(11 downto 7)));
+					v_immediate_b := signed(v_instruction(31) & v_instruction(7) & v_instruction(30 downto 25) & v_instruction(11 downto 8) & '0');
+					v_immediate_j := signed(v_instruction(31) & v_instruction(19 downto 12) & v_instruction(20) & v_instruction(30 downto 21) & '0');
+					
+					case v_decoded.opcode is 
+						-- '|' is the logical or and "or" would be bitwise... 
+						when "0110111" | "0010111" => -- lui / auipc (U-type) 
+							v_decoded.imm := v_instruction(31 downto 12) & x"000";
+						-- immediates are *signed* '0' extendet for every instruction!
+						when "1101111" => -- jal (J-type)
+							v_decoded.imm := unsigned(resize(v_immediate_j, 32));
+						when "1100011" => -- branches (B-type)
+							v_decoded.imm := unsigned(resize(v_immediate_b, 32));
+						when "0100011" => -- stores (S-type)
+							v_decoded.imm := unsigned(resize(v_immediate_s, 32));
+						when others => -- I-type / R-type (unused)
+							v_decoded.imm := unsigned(resize(v_immediate_i, 32));
+					end case;
+					
+					iq(to_integer(iq_wr_ptr(C_IQ_WIDTH - 1 downto 0))) <= v_decoded;
+					iq_wr_ptr <= iq_wr_ptr + 1;
+					
+				end if; -- v_take and iq_full = '0'
+			end if; -- reset
+		end if; -- clk'rising_edge
+	end process;
+
+	-- execute process
+	Instructions_Execute_Proc : process (i_Clk)
+		variable v_execute : t_decoded;
+		variable v_rs1 : unsigned(31 downto 0);
+		variable v_rs2 : unsigned(31 downto 0);
+		variable v_addr : unsigned(31 downto 0);
+		variable v_result : unsigned(31 downto 0);
+		variable v_wr_en : boolean;
+		variable v_branch : boolean;
+		variable v_return_ctrl : std_logic;
 		
-		elsif instruction_multicycle = '1' then
+	begin
+		if rising_edge(i_Clk) then
+			o_DM_DV <= '0';
+			o_DM_Wr_En <= (others => '0');
+			instruction_jump <= '0';
+			o_Return_Ctrl_ALU <= '0';
+			v_return_ctrl := '0';
+			v_wr_en := false;
+			v_result := (others => '0');
 			
-			case latched_opcode is --opcode
+			if (i_Sync_nRst = '0') then
+				iq_rd_ptr <= (others => '0');
+				load_pending <= '0';
+				ctrl_arithmetic_logic_unit <= '0';
+			else
+			
+				if load_pending = '1' then -- waiting for data memory data valid signal on load instruction
+					if i_DM_DV = '1' then
+						case load_func3 is 
+							when "000" => -- lb
+								v_result := unsigned(resize(signed(dm_read_data_bytes(to_integer(load_addr_lsb))), 32));
+							when "001" => -- lh
+								v_result := unsigned(resize(signed(dm_read_data_2bytes(to_integer(load_addr_lsb(1 downto 1)))), 32));
+							when "010" => -- lw
+								v_result := unsigned(i_DM_Data);
+							when "100" => -- lbu
+								v_result := resize(unsigned(dm_read_data_bytes(to_integer(load_addr_lsb))), 32);
+							when "101" => -- lhu
+								v_result := resize(unsigned(dm_read_data_2bytes(to_integer(load_addr_lsb(1 downto 1)))), 32);
+							when others =>
+								null;
+						end case;
+						if load_rd /= 0 then
+							registers(load_rd) <= v_result;
+						end if;
+						load_pending <= '0';
+					end if;
 				
-				when "0110111" => -- lui
-					null;
-				
-				when "0010111" => -- auipc
-					null;
-				
-				when "1101111" => -- jal
-					jmp_addr <= jmp_addr + latched_current_pc;
-					instruction_jump <= '1';
-					instruction_done <= '1';
-				
-				when "1100111" => -- jalr
-					jmp_addr <= jmp_addr + latched_rs1_val;
-					-- current_pc(0) has to be 0
-					jmp_addr(0) <= '0';
-					instruction_jump <= '1';
-					instruction_done <= '1';
-				
-				when "1100011" => -- B-type
-					--all B-type jmp instructions are built the same
-					jmp_addr <= latched_current_pc + jmp_addr;
-					instruction_jump <= '1';
-					instruction_done <= '1';
-					--case func3 is -- func3
-					--	
-					--	when "000" => -- beq
-					--		null;
-					--			
-					--	when "001" => -- bne
-					--		null;
-					--	
-					--	when "100" => -- blt
-					--		null;
-					--	
-					--	when "101" => -- bge
-					--		null;
-					--		
-					--	when "110" => -- bltu
-					--		null;
-					--	
-					--	when "111" => -- bgeu
-					--		null;
-					--	
-					--	when others =>
-					--		null;
-					--		--instruction_done <= '1';
-					--		
-					--end case;
-				
-				when "0000011" => -- I-type
-					case latched_func3 is -- func3
-						
-						when "000" => -- lb
-							if i_DM_DV = '1' then
-								registers(latched_rd) <= unsigned(resize(signed(dm_read_data_bytes(to_integer(unsigned(dm_addr(1 downto 0))))), registers(0)'length));
-								instruction_done <= '1';
-							else
-								instruction_multicycle <= '1'; -- wait until load complete
-							end if;
-						
-						when "001" => -- lh
-							if i_DM_DV = '1' then
-								registers(latched_rd) <= unsigned(resize(signed(dm_read_data_2bytes(to_integer(unsigned(dm_addr(1 downto 1))))), registers(0)'length));
-								instruction_done <= '1';
-							else
-								instruction_multicycle <= '1'; -- wait until load complete
-							end if;
-							
-						when "010" => -- lw
-							if i_DM_DV = '1' then
-								registers(latched_rd) <= unsigned(i_DM_Data);
-								instruction_done <= '1';
-							else
-								instruction_multicycle <= '1'; -- wait until load complete
-							end if;
-						
-						when "100" => -- lbu
-							if i_DM_DV = '1' then
-								registers(latched_rd) <= resize(unsigned(dm_read_data_bytes(to_integer(unsigned(dm_addr(1 downto 0))))), registers(0)'length);
-								instruction_done <= '1';
-							else
-								instruction_multicycle <= '1'; -- wait until load complete
-							end if;
-						
-						when "101" => -- lhu
-							if i_DM_DV = '1' then
-								registers(latched_rd) <= resize(unsigned(dm_read_data_2bytes(to_integer(unsigned(dm_addr(1 downto 1))))), registers(0)'length);
-								instruction_done <= '1';
-							else
-								instruction_multicycle <= '1'; -- wait until load complete
-							end if;
-						
-						when others =>
-							null;
-							--instruction_done <= '1';
-					end case;
+				-- instruction queue flushed after jumped
+				elsif instruction_jump = '1' then
+					iq_rd_ptr <= (others => '0');
 					
-				when "0100011" => -- S-type
-					case latched_func3 is -- func3
-						
-						when "000" => -- sb
-							null;
-							
-						when "001" => -- sh
-							null;
-							
-						when "010" => -- sw
-							null;
-						
-						when others =>
-							null;
-							--instruction_done <= '1';
-					end case;
+				-- normal instruction now everything in one clock cycle
+				elsif ctrl_arithmetic_logic_unit = '1' and i_Take_Ctrl_ALU = '0' and iq_empty = '0' then 
 				
-				when "0010011" => -- I-type
-					case latched_func3 is -- func3
-						
-						when "000" => -- addi
-							null;
-							
-						when "010" => -- slti
-							null;
-							
-						when "011" => -- sltiu
-							null;
-							
-						when "100" => -- xori
-							null;
-						
-						when "110" => -- ori
-							null;
-						
-						when "111" => -- andi
-							null;
-						
-						when "001" => -- slli
-							null;
-						
-						when "101" => -- srli/srai
-							null;
-							
+					v_execute := iq(to_integer(iq_rd_ptr(C_IQ_WIDTH - 1 downto 0)));
+					v_rs1 := registers(v_execute.rs1);
+					v_rs2 := registers(v_execute.rs2);
+					iq_rd_ptr <= iq_rd_ptr + 1;
+					
+					case v_execute.opcode is 
+					
+						when "0110111" =>   -- lui
+							v_result := v_execute.imm;
+							v_wr_en  := true;
+
+						when "0010111" =>   -- auipc
+							v_result := v_execute.pc + v_execute.imm;
+							v_wr_en  := true;
+
+						when "1101111" =>   -- jal
+							v_result := v_execute.pc + 4;
+							v_wr_en  := true;
+							jmp_addr         <= v_execute.pc + v_execute.imm;
+							instruction_jump <= '1';
+
+						when "1100111" =>   -- jalr
+							v_result := v_execute.pc + 4;
+							v_wr_en  := true;
+							v_addr    := v_rs1 + v_execute.imm;
+							v_addr(0) := '0';
+							jmp_addr         <= v_addr;
+							instruction_jump <= '1';
+
+						when "1100011" =>   -- B-type / branches
+							case v_execute.func3 is
+								when "000"  => v_branch := (v_rs1 = v_rs2);                     -- beq
+								when "001"  => v_branch := (v_rs1 /= v_rs2);                    -- bne
+								when "100"  => v_branch := (signed(v_rs1) <  signed(v_rs2));    -- blt
+								when "101"  => v_branch := (signed(v_rs1) >= signed(v_rs2));    -- bge
+								when "110"  => v_branch := (v_rs1 <  v_rs2);                    -- bltu
+								when "111"  => v_branch := (v_rs1 >= v_rs2);                    -- bgeu
+								when others => v_branch := false;
+							end case;
+							if v_branch then
+								jmp_addr         <= v_execute.pc + v_execute.imm;
+								instruction_jump <= '1';
+							end if;
+
+						when "0000011" =>   -- I-type / loads
+							v_addr := v_rs1 + v_execute.imm;
+							dm_addr       <= std_logic_vector(v_addr);
+							load_addr_lsb <= v_addr(1 downto 0);
+							load_rd       <= v_execute.rd;
+							load_func3    <= v_execute.func3;
+							o_DM_DV       <= '1';
+							load_pending  <= '1';
+
+						when "0100011" =>   -- S-type / stores
+							v_addr  := v_rs1 + v_execute.imm;
+							dm_addr <= std_logic_vector(v_addr);
+							o_DM_DV <= '1';
+							case v_execute.func3 is
+								when "000" =>   -- sb: replicate the byte, pick the lane
+									o_DM_Data <= std_logic_vector(v_rs2(7 downto 0)) &
+									             std_logic_vector(v_rs2(7 downto 0)) &
+									             std_logic_vector(v_rs2(7 downto 0)) &
+									             std_logic_vector(v_rs2(7 downto 0));
+									o_DM_Wr_En(to_integer(v_addr(1 downto 0))) <= '1';
+								when "001" =>   -- sh
+									o_DM_Data <= std_logic_vector(v_rs2(15 downto 0)) &
+									             std_logic_vector(v_rs2(15 downto 0));
+									if v_addr(1) = '1' then
+										o_DM_Wr_En <= "1100";
+									else
+										o_DM_Wr_En <= "0011";
+									end if;
+								when "010" =>   -- sw
+									o_DM_Data  <= std_logic_vector(v_rs2);
+									o_DM_Wr_En <= "1111";
+								when others =>
+									o_DM_DV <= '0';
+							end case;
+
+						when "0010011" =>   -- I-type / operation immediate
+							case v_execute.func3 is
+								when "000" =>   -- addi
+									v_result := v_rs1 + v_execute.imm;
+								when "010" =>   -- slti
+									if signed(v_rs1) < signed(v_execute.imm) then
+										v_result := to_unsigned(1, 32);
+									else
+										v_result := (others => '0');
+									end if;
+								when "011" =>   -- sltiu (imm is sign extended, compared unsigned)
+									if v_rs1 < v_execute.imm then
+										v_result := to_unsigned(1, 32);
+									else
+										v_result := (others => '0');
+									end if;
+								when "100" =>   -- xori
+									v_result := v_rs1 xor v_execute.imm;
+								when "110" =>   -- ori
+									v_result := v_rs1 or v_execute.imm;
+								when "111" =>   -- andi
+									v_result := v_rs1 and v_execute.imm;
+								when "001" =>   -- slli
+									v_result := shift_left(v_rs1, v_execute.rs2);
+								when "101" =>   -- srli / srai
+									if v_execute.func7(5) = '0' then
+										v_result := shift_right(v_rs1, v_execute.rs2);
+									else
+										v_result := unsigned(shift_right(signed(v_rs1), v_execute.rs2));
+									end if;
+								when others =>
+									null;
+							end case;
+							v_wr_en := true;
+
+						when "0110011" =>   -- R-type / operation
+							case v_execute.func3 is
+								when "000" =>   -- add / sub
+									if v_execute.func7(5) = '0' then
+										v_result := v_rs1 + v_rs2;
+									else
+										v_result := v_rs1 - v_rs2;
+									end if;
+								when "001" =>   -- sll
+									v_result := shift_left(v_rs1, to_integer(v_rs2(4 downto 0)));
+								when "010" =>   -- slt
+									if signed(v_rs1) < signed(v_rs2) then
+										v_result := to_unsigned(1, 32);
+									else
+										v_result := (others => '0');
+									end if;
+								when "011" =>   -- sltu
+									if v_rs1 < v_rs2 then
+										v_result := to_unsigned(1, 32);
+									else
+										v_result := (others => '0');
+									end if;
+								when "100" =>   -- xor
+									v_result := v_rs1 xor v_rs2;
+								when "101" =>   -- srl / sra
+									if v_execute.func7(5) = '0' then
+										v_result := shift_right(v_rs1, to_integer(v_rs2(4 downto 0)));
+									else
+										v_result := unsigned(shift_right(signed(v_rs1), to_integer(v_rs2(4 downto 0))));
+									end if;
+								when "110" =>   -- or
+									v_result := v_rs1 or v_rs2;
+								when "111" =>   -- and
+									v_result := v_rs1 and v_rs2;
+								when others =>
+									null;
+							end case;
+							v_wr_en := true;
+
+						when "1110011" =>   -- I-type / system
+							if v_execute.imm(0) = '1' then -- ebreak
+								v_return_ctrl := '1';
+							end if;
+
 						when others =>
 							null;
-							--instruction_done <= '1';
 					
 					end case;
-						
-				when "0110011" => -- R-type
-					case latched_func3 is -- func3
-						
-						when "000" => -- add/sub
-							null;
-							
-						
-						when "001" => -- sll
-							null;
-						
-						when "010" => -- slt
-							null;
-							
-						when "011" => -- sltu
-							null;
-							
-						when "100" => -- xor
-							null;
-							
-						when "101" => -- srl/sra
-							null;
-							
-						when "110" => -- or
-							null;
-							
-						when "111" => -- and
-							null;
-							
-						when others => 
-							null;
-							--instruction_done <= '1';
-						
-					end case;
 				
-				when "1110011" => -- I-type
-					null;
-				when others => 
-					null;
-					--instruction_done <= '1';
-			end case;
-		end if; -- instruction_multicycle / instruction_decoded
-		
-		if i_Give_Ctrl_ALU = '1' then
-			ctrl_arithmetic_logic_unit <= '1';
-		end if;
-		if v_return_ctrl_logic_unit = '1' then
-			ctrl_arithmetic_logic_unit <= '0';
-			o_Return_Ctrl_ALU <= '1';
-		end if;
-		if i_Take_Ctrl_ALU = '1' then
-			ctrl_arithmetic_logic_unit <= '0';
-		end if;
-		
-		registers(0) <= (others => '0');
-	end if; -- clk'rising_edge
-end process;
-
-
+					-- single write port!!! lets vivado infere distributed RAM for registers
+					-- r0 is not overwritten but just never re assigned
+					if v_wr_en and v_execute.rd /= 0 then
+						registers(v_execute.rd) <= v_result;
+					end if;
+				end if;
+				
+				-- control handover
+				
+				if i_Give_Ctrl_ALU = '1' then
+					ctrl_arithmetic_logic_unit <= '1';
+				end if;
+				if v_return_ctrl = '1' then
+					ctrl_arithmetic_logic_unit <= '0';
+					o_Return_Ctrl_ALU <= '1';
+				end if;
+				if i_Take_Ctrl_ALU = '1' then
+					ctrl_arithmetic_logic_unit <= '0';
+				end if;
+				
+			end if; -- reset
+		end if; -- clk'rising_edge
+	end process;
 
 end Behavioral;
