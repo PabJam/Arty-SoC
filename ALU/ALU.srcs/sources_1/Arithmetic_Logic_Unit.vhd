@@ -53,6 +53,19 @@ end Arithmetic_Logic_Unit;
 
 architecture Behavioral of Arithmetic_Logic_Unit is
 
+	component muldiv 
+		port (
+			i_Clk    : in  std_logic;
+			i_Rst    : in  std_logic;                    -- active high, synchronous
+			i_Start  : in  std_logic;                    -- one cycle pulse
+			i_Func3  : in  unsigned(2 downto 0);
+			i_A      : in  unsigned(31 downto 0);        -- rs1
+			i_B      : in  unsigned(31 downto 0);        -- rs2
+			o_Result : out unsigned(31 downto 0);
+			o_Done   : out std_logic
+		);
+	end component;
+
 	-- registers
 	type t_reg_array is array(natural range 0 to 31) of unsigned(31 downto 0);
 	signal registers : t_reg_array := (others => (others => '0'));
@@ -131,7 +144,30 @@ architecture Behavioral of Arithmetic_Logic_Unit is
 	signal load_func3 : unsigned(2 downto 0) := (others => '0');
 	signal load_addr_lsb : unsigned(1 downto 0) := (others => '0');
 
+	-- multi cycle execute units
+	signal exec_pending : std_logic := '0';
+	signal exec_start : std_logic := '0';
+	signal exec_func3 : unsigned(2 downto 0) := (others => '0');
+	signal exec_a : unsigned(31 downto 0) := (others => '0');
+	signal exec_b : unsigned(31 downto 0) := (others => '0');
+	signal exec_rd : natural range 0 to 31 := 0;
+	signal exec_result : unsigned(31 downto 0);
+	signal exec_done : std_logic;
+
 begin
+
+	inst_muldiv : muldiv
+	port map
+	(
+		i_Clk => i_Clk,
+		i_Rst => not i_Sync_nRst,     -- takes active high reset
+		i_Start => exec_start,
+		i_Func3 => exec_func3,
+		i_A => exec_a,
+		i_B => exec_b,
+		o_Result => exec_result,
+		o_Done => exec_done
+	);
 
 	dm_read_data_bytes(0) <= i_DM_Data(7 downto 0);
 	dm_read_data_bytes(1) <= i_DM_Data(15 downto 8);
@@ -389,11 +425,13 @@ begin
 			v_wr_en := false;
 			v_wr_rd := 0;
 			v_result := (others => '0');
+			exec_start <= '0';
 			
 			if (i_Sync_nRst = '0') then
 				iq_rd_ptr <= (others => '0');
 				mem_pending <= '0';
 				mem_is_load <= '0';
+				exec_pending <= '0';
 				ctrl_arithmetic_logic_unit <= '0';
 			else
 			
@@ -422,7 +460,15 @@ begin
 					mem_pending <= '0';
 				end if;
 
-				if mem_pending = '1' and mem_is_load = '1' then
+				-- multi cycle execute unit completion
+				if exec_pending = '1' and exec_done = '1' then
+					v_result := exec_result;
+					v_wr_en := true;
+					v_wr_rd := exec_rd;
+					exec_pending <= '0';
+				end if;
+
+				if (mem_pending = '1' and mem_is_load = '1') or exec_pending = '1' then
 					-- A pending LOAD blocks everything: rd is not written until the
 					-- data returns, so anything issued now could read a stale
 					-- register. Includes the completion cycle, because the
@@ -562,44 +608,53 @@ begin
 								v_wr_en := true;
 	
 							when "0110011" =>   -- R-type / operation
-								case v_execute.func3 is
-									when "000" =>   -- add / sub
-										if v_execute.func7(5) = '0' then
-											v_result := v_rs1 + v_rs2;
-										else
-											v_result := v_rs1 - v_rs2;
-										end if;
-									when "001" =>   -- sll
-										v_result := shift_left(v_rs1, to_integer(v_rs2(4 downto 0)));
-									when "010" =>   -- slt
-										if signed(v_rs1) < signed(v_rs2) then
-											v_result := to_unsigned(1, 32);
-										else
-											v_result := (others => '0');
-										end if;
-									when "011" =>   -- sltu
-										if v_rs1 < v_rs2 then
-											v_result := to_unsigned(1, 32);
-										else
-											v_result := (others => '0');
-										end if;
-									when "100" =>   -- xor
-										v_result := v_rs1 xor v_rs2;
-									when "101" =>   -- srl / sra
-										if v_execute.func7(5) = '0' then
-											v_result := shift_right(v_rs1, to_integer(v_rs2(4 downto 0)));
-										else
-											v_result := unsigned(shift_right(signed(v_rs1), to_integer(v_rs2(4 downto 0))));
-										end if;
-									when "110" =>   -- or
-										v_result := v_rs1 or v_rs2;
-									when "111" =>   -- and
-										v_result := v_rs1 and v_rs2;
-									when others =>
-										null;
-								end case;
-								v_wr_en := true;
-	
+								if v_execute.func7 = "0000001" then   -- RV32M
+									exec_start <= '1';
+									exec_func3 <= v_execute.func3;
+									exec_a <= v_rs1;
+									exec_b <= v_rs2;
+									exec_rd <= v_execute.rd;
+									exec_pending <= '1';
+								else
+									case v_execute.func3 is
+										when "000" =>   -- add / sub
+											if v_execute.func7(5) = '0' then
+												v_result := v_rs1 + v_rs2;
+											else
+												v_result := v_rs1 - v_rs2;
+											end if;
+										when "001" =>   -- sll
+											v_result := shift_left(v_rs1, to_integer(v_rs2(4 downto 0)));
+										when "010" =>   -- slt
+											if signed(v_rs1) < signed(v_rs2) then
+												v_result := to_unsigned(1, 32);
+											else
+												v_result := (others => '0');
+											end if;
+										when "011" =>   -- sltu
+											if v_rs1 < v_rs2 then
+												v_result := to_unsigned(1, 32);
+											else
+												v_result := (others => '0');
+											end if;
+										when "100" =>   -- xor
+											v_result := v_rs1 xor v_rs2;
+										when "101" =>   -- srl / sra
+											if v_execute.func7(5) = '0' then
+												v_result := shift_right(v_rs1, to_integer(v_rs2(4 downto 0)));
+											else
+												v_result := unsigned(shift_right(signed(v_rs1), to_integer(v_rs2(4 downto 0))));
+											end if;
+										when "110" =>   -- or
+											v_result := v_rs1 or v_rs2;
+										when "111" =>   -- and
+											v_result := v_rs1 and v_rs2;
+										when others =>
+											null;
+									end case;
+									v_wr_en := true;
+								end if;
+							
 							when "1110011" =>   -- I-type / system
 								if v_execute.imm(0) = '1' then -- ebreak
 									v_return_ctrl := '1';
