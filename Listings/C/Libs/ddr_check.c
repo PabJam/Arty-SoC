@@ -4,8 +4,7 @@
 #define PERIPH_STATUS (*(volatile unsigned int *)0x80000018)
 #define DDR_BASE      0x40000000u
 
-extern void uart_puts(const char *s);
-extern void uart_hex(unsigned int v);
+#include "printf.h"
 
 /* Returns 0 on success, or the address of the first failing word. */
 unsigned int ddr_memtest(unsigned int base, unsigned int words)
@@ -45,37 +44,29 @@ void ddr_report(void)
     unsigned int st, bad, f, u, n;
 
     st = PERIPH_STATUS;
-    uart_puts("calib="); uart_hex(st & 1u);
-    uart_puts(" rst=");  uart_hex((st >> 1) & 1u);
-    uart_puts(" err=");  uart_hex((st >> 2) & 1u);
-    uart_puts("\r\n");
+    printf("calib=%u rst=%u err=%u\r\n", st & 1u, (st >> 1) & 1u, (st >> 2) & 1u);
 
-    if (!(st & 1u)) { uart_puts("DDR NOT CALIBRATED\r\n"); return; }
+    if (!(st & 1u)) { printf("DDR NOT CALIBRATED\r\n"); return; }
 
     bad = ddr_memtest(DDR_BASE, 1024);       /* first 4 KB */
-    if (bad) { uart_puts("MEMTEST FAIL at "); uart_hex(bad); uart_puts("\r\n"); return; }
-    uart_puts("memtest ok\r\n");
+    if (bad) { printf("MEMTEST FAIL at %#010x\r\n", bad); return; }
+    printf("memtest ok\r\n");
 
     heap_stats(&f, &u, &n);
-    uart_puts("heap free="); uart_hex(f);
-    uart_puts(" used=");     uart_hex(u);
-    uart_puts(" blocks=");   uart_hex(n);
-    uart_puts("\r\n");
+    printf("heap free=%u used=%u blocks=%u\r\n", f, u, n);
 
     {
         unsigned int *a = (unsigned int *)malloc(256);
         unsigned int *b = (unsigned int *)malloc(1024);
-        if (!a || !b) { uart_puts("malloc FAILED\r\n"); return; }
-        uart_puts("a="); uart_hex((unsigned int)a);
-        uart_puts(" b="); uart_hex((unsigned int)b);
-        uart_puts("\r\n");
+        if (!a || !b) { printf("malloc FAILED\r\n"); return; }
+        printf("a=%p b=%p\r\n", a, b);
         a[0] = 0xA5A5A5A5u; b[0] = 0x5A5A5A5Au;
         if (a[0] != 0xA5A5A5A5u || b[0] != 0x5A5A5A5Au) {
-            uart_puts("heap readback FAILED\r\n"); return;
+            printf("heap readback FAILED\r\n"); return;
         }
         free(a); free(b);
         heap_stats(&f, &u, &n);
-        uart_puts("after free blocks="); uart_hex(n); uart_puts("\r\n");
+        printf("after free blocks=%u\r\n", n);
     }
-    uart_puts("DDR HEAP OK\r\n");
+    printf("DDR HEAP OK\r\n");
 }
