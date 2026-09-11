@@ -12,7 +12,8 @@ entity Top_of_Arty_SoC is
 	(
 		SW : in std_logic_vector (3 downto 0);
 		BTN : in  std_logic_vector (3 downto 0);
-		CLK : in  std_logic;
+		CLK100MHZ : in std_logic;
+		CLK12MHZ : in std_logic;
 		LED : out  std_logic_vector (3 downto 0);
 		o_Uart_TXD : out  std_logic;
 		i_Uart_RXD : in std_logic;
@@ -27,12 +28,79 @@ entity Top_of_Arty_SoC is
 		jc : inout std_logic_vector(7 downto 0);
 		jd : inout std_logic_vector(7 downto 0);
 		ck_scl : inout std_logic;
-		ck_sda : inout std_logic
+		ck_sda : inout std_logic;
+		
+		-- DDR3 physical interface
+		ddr3_dq      : inout std_logic_vector(15 downto 0);
+		ddr3_dqs_p   : inout std_logic_vector(1 downto 0);
+		ddr3_dqs_n   : inout std_logic_vector(1 downto 0);
+		ddr3_addr    : out   std_logic_vector(13 downto 0);
+		ddr3_ba      : out   std_logic_vector(2 downto 0);
+		ddr3_ras_n   : out   std_logic;
+		ddr3_cas_n   : out   std_logic;
+		ddr3_we_n    : out   std_logic;
+		ddr3_reset_n : out   std_logic;
+		ddr3_ck_p    : out   std_logic_vector(0 downto 0);
+		ddr3_ck_n    : out   std_logic_vector(0 downto 0);
+		ddr3_cke     : out   std_logic_vector(0 downto 0);
+		ddr3_cs_n    : out   std_logic_vector(0 downto 0);
+		ddr3_dm      : out   std_logic_vector(1 downto 0);
+		ddr3_odt     : out   std_logic_vector(0 downto 0)
 	);
 end Top_of_Arty_SoC;
 
 architecture Behavioral of Top_of_Arty_SoC is
 
+	component ddr3_controller
+		port (
+			ddr3_dq             : inout std_logic_vector(15 downto 0);
+			ddr3_dqs_p          : inout std_logic_vector(1 downto 0);
+			ddr3_dqs_n          : inout std_logic_vector(1 downto 0);
+			ddr3_addr           : out   std_logic_vector(13 downto 0);
+			ddr3_ba             : out   std_logic_vector(2 downto 0);
+			ddr3_ras_n          : out   std_logic;
+			ddr3_cas_n          : out   std_logic;
+			ddr3_we_n           : out   std_logic;
+			ddr3_reset_n        : out   std_logic;
+			ddr3_ck_p           : out   std_logic_vector(0 downto 0);
+			ddr3_ck_n           : out   std_logic_vector(0 downto 0);
+			ddr3_cke            : out   std_logic_vector(0 downto 0);
+			ddr3_cs_n           : out   std_logic_vector(0 downto 0);
+			ddr3_dm             : out   std_logic_vector(1 downto 0);
+			ddr3_odt            : out   std_logic_vector(0 downto 0);
+			app_addr            : in    std_logic_vector(27 downto 0);
+			app_cmd             : in    std_logic_vector(2 downto 0);
+			app_en              : in    std_logic;
+			app_wdf_data        : in    std_logic_vector(127 downto 0);
+			app_wdf_end         : in    std_logic;
+			app_wdf_mask        : in    std_logic_vector(15 downto 0);
+			app_wdf_wren        : in    std_logic;
+			app_rd_data         : out   std_logic_vector(127 downto 0);
+			app_rd_data_end     : out   std_logic;
+			app_rd_data_valid   : out   std_logic;
+			app_rdy             : out   std_logic;
+			app_wdf_rdy         : out   std_logic;
+			app_sr_req          : in    std_logic;
+			app_ref_req         : in    std_logic;
+			app_zq_req          : in    std_logic;
+			app_sr_active       : out   std_logic;
+			app_ref_ack         : out   std_logic;
+			app_zq_ack          : out   std_logic;
+			ui_clk              : out   std_logic;
+			ui_clk_sync_rst     : out   std_logic;
+			init_calib_complete : out   std_logic;
+			sys_clk_i           : in    std_logic;
+			clk_ref_i           : in    std_logic;
+			sys_rst             : in    std_logic
+		);
+	end component;
+
+	component clk_wiz_200
+		port (
+			clk_out1 : out std_logic;
+			clk_in1  : in  std_logic
+		);
+	end component;
 
 	component Arithmetic_Logic_Unit
 		port 
@@ -126,15 +194,38 @@ architecture Behavioral of Top_of_Arty_SoC is
 	end component;
 	
 	component debouncer
-	Generic(
-			DEBNC_CLOCKS : integer;
-			PORT_WIDTH : integer);
-	Port(
-			SIGNAL_I : in std_logic_vector(3 downto 0);
-			CLK_I : in std_logic;          
-			SIGNAL_O : out std_logic_vector(3 downto 0)
-			);
+		Generic(
+				DEBNC_CLOCKS : integer;
+				PORT_WIDTH : integer);
+		Port(
+				SIGNAL_I : in std_logic_vector(3 downto 0);
+				CLK_I : in std_logic;          
+				SIGNAL_O : out std_logic_vector(3 downto 0)
+				);
 	end component;
+	
+	-- MIG native user interface
+	signal app_addr          : std_logic_vector(27 downto 0)  := (others => '0');
+	signal app_cmd           : std_logic_vector(2 downto 0)   := (others => '0');
+	signal app_en            : std_logic := '0';
+	signal app_wdf_data      : std_logic_vector(127 downto 0) := (others => '0');
+	signal app_wdf_end       : std_logic := '0';
+	signal app_wdf_mask      : std_logic_vector(15 downto 0)  := (others => '0');
+	signal app_wdf_wren      : std_logic := '0';
+	signal app_rd_data       : std_logic_vector(127 downto 0);
+	signal app_rd_data_end   : std_logic;
+	signal app_rd_data_valid : std_logic;
+	signal app_rdy           : std_logic;
+	signal app_wdf_rdy       : std_logic;
+
+	signal ui_clk            : std_logic;
+	signal ui_clk_sync_rst   : std_logic;
+	signal init_calib_done   : std_logic;
+	signal clk_ref_200       : std_logic;
+	signal sys_rst_n         : std_logic := '1';
+
+	constant C_CMD_WRITE : std_logic_vector(2 downto 0) := "000";
+	constant C_CMD_READ  : std_logic_vector(2 downto 0) := "001";
 	
 	--Used to determine when a button press has occured
 	signal btnReg : std_logic_vector (3 downto 0) := "0000";
@@ -213,7 +304,7 @@ architecture Behavioral of Top_of_Arty_SoC is
 	
 	
 	-- Registers
-	signal cntr_100MHZ : unsigned(31 downto 0) := (others => '0');
+	signal cntr_81250kHz : unsigned(31 downto 0) := (others => '0');
 	
 	-- GPIO for PMOD ports
 	signal ja_out : std_logic_vector(7 downto 0) := (others => '0');
@@ -264,10 +355,13 @@ architecture Behavioral of Top_of_Arty_SoC is
 	signal i2c_slave_rx_register_empty : std_logic;
 	
 	--attribute MARK_DEBUG : string;
-	--
-	--attribute MARK_DEBUG of i2c_slave_tx_register : signal is "TRUE";
-	--attribute MARK_DEBUG of i2c_slave_tx_register_cntr : signal is "TRUE";
-	--attribute MARK_DEBUG of i2c_slave_rx_register : signal is "TRUE";
+	
+	--attribute MARK_DEBUG of ui_clk : signal is "TRUE";
+	--attribute MARK_DEBUG of btnReg : signal is "TRUE";
+	--attribute MARK_DEBUG of btnDeBnc : signal is "TRUE";
+	--attribute MARK_DEBUG of uart_RX_Data : signal is "TRUE";
+	--attribute MARK_DEBUG of uart_RX_DV : signal is "TRUE";
+	--attribute MARK_DEBUG of uart_RX : signal is "TRUE";
 	--attribute MARK_DEBUG of i2c_slave_rx_register_cntr : signal is "TRUE";
 	--attribute MARK_DEBUG of i2c_slave_rx_byte : signal is "TRUE";
 	--attribute MARK_DEBUG of i2c_slave_rx_dv : signal is "TRUE";
@@ -277,6 +371,59 @@ architecture Behavioral of Top_of_Arty_SoC is
 	--attribute MARK_DEBUG of i2c_slave_rx_register_empty : signal is "TRUE";
 
 begin
+	
+	----------------------------------------------------------
+	------              D-Ram Control                  -------
+	----------------------------------------------------------
+	
+	u_clk_ref : clk_wiz_200
+		port map (
+			clk_in1 => CLK12MHZ,
+			clk_out1 => clk_ref_200
+		);
+
+	u_mig : ddr3_controller
+		port map (
+			ddr3_dq => ddr3_dq,
+			ddr3_dqs_p => ddr3_dqs_p,
+			ddr3_dqs_n => ddr3_dqs_n,
+			ddr3_addr => ddr3_addr,
+			ddr3_ba => ddr3_ba,
+			ddr3_ras_n => ddr3_ras_n,
+			ddr3_cas_n => ddr3_cas_n,
+			ddr3_we_n => ddr3_we_n,
+			ddr3_reset_n => ddr3_reset_n,
+			ddr3_ck_p => ddr3_ck_p,
+			ddr3_ck_n => ddr3_ck_n,
+			ddr3_cke => ddr3_cke,
+			ddr3_cs_n => ddr3_cs_n,
+			ddr3_dm => ddr3_dm,
+			ddr3_odt => ddr3_odt,
+			app_addr => app_addr,
+			app_cmd => app_cmd,
+			app_en => app_en,
+			app_wdf_data => app_wdf_data,
+			app_wdf_end => app_wdf_end,
+			app_wdf_mask => app_wdf_mask,
+			app_wdf_wren => app_wdf_wren,
+			app_rd_data => app_rd_data,
+			app_rd_data_end => app_rd_data_end,
+			app_rd_data_valid => app_rd_data_valid,
+			app_rdy => app_rdy,
+			app_wdf_rdy => app_wdf_rdy,
+			app_sr_req => '0',
+			app_ref_req => '0',
+			app_zq_req => '0',
+			app_sr_active => open,
+			app_ref_ack => open,
+			app_zq_ack => open,
+			ui_clk => ui_clk,
+			ui_clk_sync_rst => ui_clk_sync_rst,
+			init_calib_complete => init_calib_done,
+			sys_clk_i => CLK100MHZ,
+			clk_ref_i => clk_ref_200,
+			sys_rst => sys_rst_n
+		);
 	
 	----------------------------------------------------------
 	------              Button Control                 -------
@@ -292,14 +439,14 @@ begin
 			PORT_WIDTH => 4)
 		port map(
 			SIGNAL_I => BTN,
-			CLK_I => CLK,
+			CLK_I => ui_clk,
 			SIGNAL_O => btnDeBnc
 		);
 	
 	--Registers the debounced button signals, for edge detection.
-	btn_reg_process : process (CLK)
+	btn_reg_process : process (ui_clk)
 	begin
-		if (rising_edge(CLK)) then
+		if (rising_edge(ui_clk)) then
 			btnReg <= btnDeBnc(3 downto 0);
 		end if;
 	end process;
@@ -319,10 +466,10 @@ begin
 	----------------------------------------------------------
 	
 	Inst_UART_TX_CTRL: UART_TX_CTRL 
-	generic map (g_CLKS_PER_BIT => 868)
+	generic map (g_CLKS_PER_BIT => 705)
 	port map
 	(
-		i_Clk => CLK,
+		i_Clk => ui_clk,
 		i_TX_DV => uart_TX_DV,
 		i_TX_Byte(7 downto 0) => uart_TX_Data(7 downto 0),
 		o_TX_Active => uart_TX_Active,
@@ -334,10 +481,10 @@ begin
 	o_Uart_TXD <= uart_TX when uart_TX_Active = '1' else '1';
 	
 	Inst_UART_RX_CTRL: UART_RX_CTRL 
-	generic map (g_CLKS_PER_BIT => 868)
+	generic map (g_CLKS_PER_BIT => 705)
 	port map
 	(
-		i_Clk => CLK,
+		i_Clk => ui_clk,
 		i_RX_Serial => uart_RX,
 		o_RX_DV => uart_RX_DV,
 		o_RX_Byte => uart_RX_Data
@@ -348,7 +495,7 @@ begin
 	Inst_UART_Fifo: UART_Fifo
 	port map
 	(
-		clk => CLK,
+		clk => ui_clk,
 		srst => uart_fifo_srst,
 		din => uart_fifo_din,
 		wr_en => uart_fifo_wr_en,
@@ -368,7 +515,7 @@ begin
 	inst_I2C_Slave: I2C_Slave 
 	port map
 	(
-			i_Clk => clk,
+			i_Clk => ui_clk,
 			i_SDA => i2c_sda_in,
 			i_SCL => i2c_scl_in,
 			o_SDA => i2c_slave_sda_out,
@@ -412,9 +559,9 @@ begin
 		T => i2c_sda_io
 	);
 	
-	i2c_read_register_proc : process (CLK)
+	i2c_read_register_proc : process (ui_clk)
 	begin
-		if (rising_edge(CLK)) then
+		if (rising_edge(ui_clk)) then
 			
 			if (i2c_slave_rx_dv = '1') then
 				case i2c_slave_rx_register_cntr is
@@ -545,7 +692,7 @@ begin
 	inst_Arithmetic_Logic_Unit: Arithmetic_Logic_Unit
 	port map
 	(
-		i_Clk => clk,
+		i_Clk => ui_clk,
 		i_Sync_nRst => sync_nRst_alu,
 		i_Give_Ctrl_ALU => give_ctrl_logic_unit,
 		i_Take_Ctrl_ALU => take_ctrl_logic_unit,
@@ -566,9 +713,9 @@ begin
 	alu_read_data <= peripherals_read_data when peripherals_read_dv = '1' else dm_data_out;
 	ProgRam_dv <= '1' when progRam_addr_alu = latched_progRam_addr_alu else '0';
 	
-	Ctrl_ALU_Proc : process(clk)
+	Ctrl_ALU_Proc : process(ui_clk)
 	begin
-		if rising_edge(clk) then
+		if rising_edge(ui_clk) then
 			take_ctrl_logic_unit <= '0';
 			give_ctrl_logic_unit <= '0';
 			sync_nRst_alu <= '1';
@@ -615,21 +762,21 @@ begin
 	inst_ProgRam: ProgRam
 	port map
 	(
-		clka => clk,
+		clka => ui_clk,
 		wea => progRam_Wr_En,
 		addra => progRam_Addr,
 		dina => progRam_Data_In,
 		douta => progRam_Data_Out,
-		clkb => clk,
+		clkb => ui_clk,
 		web => dm_wr_ram_en,
 		addrb => dm_addr(16 downto 2),
 		dinb => dm_data_in,
 		doutb => dm_data_out
 	);
 	
-	Prog_Ram_Proc : process(CLK)
+	Prog_Ram_Proc : process(ui_clk)
 	begin
-		if rising_edge(CLK) then
+		if rising_edge(ui_clk) then
 		
 			progRam_Wr_En <= (others => '0'); -- default assignment
 			uart_TX_DV <= '0';
@@ -709,9 +856,9 @@ begin
 	------   Peripherals adress map & ALU ram access   -------
 	----------------------------------------------------------
 	
-	address_map_proc: process(clk)
+	address_map_proc: process(ui_clk)
 	begin
-		if rising_edge(clk) then
+		if rising_edge(ui_clk) then
 		
 			uart_fifo_wr_en <= '0';
 			peripherals_read_data <= (others => '0');
@@ -727,16 +874,16 @@ begin
 				saved_rgb_leds_r1 <= '0';
 				saved_rgb_leds_g1 <= '0';
 				saved_rgb_leds_b1 <= '0';
-				cntr_100MHZ <= (others => '0');
+				cntr_81250kHz <= (others => '0');
 			else 
 				
-				cntr_100MHZ <= cntr_100MHZ + 1; 
+				cntr_81250kHz <= cntr_81250kHz + 1; 
 				if dm_alu_addr_dv = '1' and dm_addr(31) = '1' then -- peripherals
 					if dm_wr_en = "0000" then -- read 
 						case dm_addr(7 downto 2) is
 							
 							when "000000" =>
-								peripherals_read_data <= std_logic_vector(cntr_100MHZ);
+								peripherals_read_data <= std_logic_vector(cntr_81250kHz);
 								peripherals_read_dv <= '1';
 							
 							when "000011" =>
@@ -813,9 +960,9 @@ begin
 		end if;
 	end process;
 	
-	ram_access_proc: process(clk)
+	ram_access_proc: process(ui_clk)
 	begin
-		if rising_edge(clk) then
+		if rising_edge(ui_clk) then
 			dm_read_dv <= '0';
 			case dm_read_state is
 				when state_dm_read_idle =>
@@ -857,9 +1004,9 @@ begin
 	------             LED Control                  -------
 	----------------------------------------------------------
 	
-	led_proc: process (clk)
+	led_proc: process (ui_clk)
 	begin
-		if rising_edge(clk) then
+		if rising_edge(ui_clk) then
 			LED <= saved_leds;
 			led0_r <= saved_rgb_leds_r0;
 			led0_g <= saved_rgb_leds_g0;

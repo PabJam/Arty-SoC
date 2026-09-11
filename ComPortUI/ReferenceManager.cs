@@ -22,7 +22,7 @@ namespace ComPortUI
         public static readonly string appPath = AppDomain.CurrentDomain.BaseDirectory;
         public static string settingsPath { get; } 
 
-        const string portName = "COM7";
+        const string portName = "COM3";
         const int baudRate = 115200;
         const Parity parity = Parity.None;
         const int dataBits = 8;

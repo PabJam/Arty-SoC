@@ -14,8 +14,8 @@ int main(void) {
     while (1)
     {
         timer = read_timer();
-        int dif = timer - timerStart;
-        if (dif > 1000000000) { break; } // 100MHZ * 1sec
+        unsigned int dif = timer - timerStart;
+        if (dif > CLOCK_FREQ_HZ * 10) { break; } // 81.25MHZ * 10sec
         print_int(n);
         print(": ");
         print_int(result);

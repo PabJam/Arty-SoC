@@ -13,8 +13,8 @@
 #define I2C_SLAVE_REG 0x80000020
 #define I2C_SLAVE_REG_CNTR 0x80000024
 
-#define CLOCK_FREQ_HZ 100000000 //100MHz
-#define CYCLES_PER_MS 100000  
+#define CLOCK_FREQ_HZ 81250000 //100MHz
+#define CYCLES_PER_MS 81250  
 
 // Write to memory-mapped register
 static inline void write_reg(unsigned int addr, unsigned int value) {
