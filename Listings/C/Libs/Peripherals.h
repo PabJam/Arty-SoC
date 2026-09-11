@@ -12,6 +12,7 @@
 #define TIMER_BASE 0x80000000
 #define I2C_SLAVE_REG 0x80000020
 #define I2C_SLAVE_REG_CNTR 0x80000024
+#define STATUS_CTRL_REG 0x80000018
 
 #define CLOCK_FREQ_HZ 81250000 //100MHz
 #define CYCLES_PER_MS 81250  
@@ -102,6 +103,11 @@ static inline char get_i2c_slave_tx_counter(void)
 static inline char get_uart_fifo_full(void)
 {
     return (char)(read_reg(UART_FIFO_FULL_BASE));
+}
+
+static inline unsigned int get_status_ctrl_reg(void)
+{
+    return read_reg(STATUS_CTRL_REG);
 }
 
 // print message containing up to 255 char 

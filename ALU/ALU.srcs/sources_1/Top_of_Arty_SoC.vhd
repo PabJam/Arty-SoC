@@ -95,6 +95,36 @@ architecture Behavioral of Top_of_Arty_SoC is
 		);
 	end component;
 
+	component ddr_port
+		port (
+			i_Clk    : in  std_logic;
+			i_Rst    : in  std_logic;                       -- active high (ui_clk_sync_rst)
+	
+			-- CPU side
+			i_Addr   : in  std_logic_vector(31 downto 0);
+			i_Data   : in  std_logic_vector(31 downto 0);
+			i_Wr_En  : in  std_logic_vector(3 downto 0);
+			i_DV     : in  std_logic;
+			o_Data   : out std_logic_vector(31 downto 0);
+			o_DV     : out std_logic;
+			o_Error  : out std_logic;                       -- sticky: access before calibration
+	
+			-- MIG native user interface
+			i_Calib_Done      : in  std_logic;
+			o_app_addr        : out std_logic_vector(27 downto 0);
+			o_app_cmd         : out std_logic_vector(2 downto 0);
+			o_app_en          : out std_logic;
+			i_app_rdy         : in  std_logic;
+			o_app_wdf_data    : out std_logic_vector(127 downto 0);
+			o_app_wdf_end     : out std_logic;
+			o_app_wdf_mask    : out std_logic_vector(15 downto 0);
+			o_app_wdf_wren    : out std_logic;
+			i_app_wdf_rdy     : in  std_logic;
+			i_app_rd_data     : in  std_logic_vector(127 downto 0);
+			i_app_rd_data_valid : in std_logic
+		);
+	end component;
+
 	component clk_wiz_200
 		port (
 			clk_out1 : out std_logic;
@@ -224,8 +254,14 @@ architecture Behavioral of Top_of_Arty_SoC is
 	signal clk_ref_200       : std_logic;
 	signal sys_rst_n         : std_logic := '1';
 
-	constant C_CMD_WRITE : std_logic_vector(2 downto 0) := "000";
-	constant C_CMD_READ  : std_logic_vector(2 downto 0) := "001";
+	signal sel_bram      : std_logic;
+	signal sel_ddr       : std_logic;
+	signal sel_perip     : std_logic;
+	signal ddr_req_dv    : std_logic;
+	signal ddr_read_data : std_logic_vector(31 downto 0);
+	signal ddr_read_dv   : std_logic;
+	signal ddr_error     : std_logic;
+	signal mem_wr_ack    : std_logic;
 	
 	--Used to determine when a button press has occured
 	signal btnReg : std_logic_vector (3 downto 0) := "0000";
@@ -376,13 +412,13 @@ begin
 	------              D-Ram Control                  -------
 	----------------------------------------------------------
 	
-	u_clk_ref : clk_wiz_200
+	inst_clk_ref : clk_wiz_200
 		port map (
 			clk_in1 => CLK12MHZ,
 			clk_out1 => clk_ref_200
 		);
 
-	u_mig : ddr3_controller
+	inst_mig : ddr3_controller
 		port map (
 			ddr3_dq => ddr3_dq,
 			ddr3_dqs_p => ddr3_dqs_p,
@@ -423,6 +459,33 @@ begin
 			sys_clk_i => CLK100MHZ,
 			clk_ref_i => clk_ref_200,
 			sys_rst => sys_rst_n
+		);
+	
+	inst_ddr_port : ddr_port
+		port map (
+			i_Clk => ui_clk,
+			i_Rst => ui_clk_sync_rst,
+			
+			i_Addr => dm_addr, 
+			i_Data => dm_data_in,
+			i_Wr_En => dm_wr_en,
+			i_DV => ddr_req_dv,
+			o_Data => ddr_read_data, 
+			o_DV => ddr_read_dv, 
+			o_Error => ddr_error,
+			
+			i_Calib_Done => init_calib_done,
+			o_app_addr => app_addr, 
+			o_app_cmd => app_cmd,
+			o_app_en => app_en,
+			i_app_rdy => app_rdy,
+			o_app_wdf_data => app_wdf_data,
+			o_app_wdf_end => app_wdf_end,
+			o_app_wdf_mask => app_wdf_mask,
+			o_app_wdf_wren => app_wdf_wren,
+			i_app_wdf_rdy => app_wdf_rdy,
+			i_app_rd_data => app_rd_data,
+			i_app_rd_data_valid => app_rd_data_valid
 		);
 	
 	----------------------------------------------------------
@@ -709,8 +772,11 @@ begin
 		i_DM_DV => alu_read_dv
 	);
 	
-	alu_read_dv <= '1' when (dm_read_dv = '1' or peripherals_read_dv = '1') else '0';
-	alu_read_data <= peripherals_read_data when peripherals_read_dv = '1' else dm_data_out;
+	alu_read_dv <= '1' when (dm_read_dv = '1' or peripherals_read_dv = '1' or ddr_read_dv = '1' or mem_wr_ack = '1') else '0';
+
+	alu_read_data <= peripherals_read_data when peripherals_read_dv = '1'
+		else ddr_read_data when ddr_read_dv = '1'
+		else dm_data_out;
 	ProgRam_dv <= '1' when progRam_addr_alu = latched_progRam_addr_alu else '0';
 	
 	Ctrl_ALU_Proc : process(ui_clk)
@@ -756,7 +822,16 @@ begin
 	------              PM Bram Control                -------
 	----------------------------------------------------------
 	
-	dm_wr_ram_en <= dm_wr_en when dm_addr(31) = '0' else (others => '0');
+	sel_bram  <= '1' when dm_addr(31 downto 30) = "00" else '0';   -- 0x0000_0000
+	sel_ddr   <= '1' when dm_addr(31 downto 30) = "01" else '0';   -- 0x4000_0000
+	sel_perip <= dm_addr(31);                                      -- 0x8000_0000
+
+	dm_wr_ram_en <= dm_wr_en when sel_bram = '1' else (others => '0');
+	ddr_req_dv   <= dm_alu_addr_dv and sel_ddr;
+
+	-- BRAM and peripherals always accept a write, so acknowledge in the same
+	-- cycle. Only DDR needs a real handshake.
+	mem_wr_ack <= '1' when dm_alu_addr_dv = '1' and dm_wr_en /= "0000" and sel_ddr = '0' else '0';
 	progRam_Addr <= progRam_addr_alu when ctrl_arithmetic_logic_unit = '1' else progRam_addr_uart;
 	
 	inst_ProgRam: ProgRam
@@ -898,6 +973,12 @@ begin
 								peripherals_read_data <= jd_io(7 downto 0) & jc_io(7 downto 0) & jb_io(7 downto 0) & ja_io(7 downto 0);
 								peripherals_read_dv <= '1';
 							
+							when "000110" =>
+								peripherals_read_data(0) <= init_calib_done;
+								peripherals_read_data(1) <= ui_clk_sync_rst;
+								peripherals_read_data(2) <= ddr_error;   
+								peripherals_read_dv      <= '1';
+							
 							when "001000" =>
 								peripherals_read_data(31 downto 0) <= i2c_slave_rx_register(31 downto 0);
 								i2c_slave_rx_register_empty <= '1';
@@ -966,7 +1047,7 @@ begin
 			dm_read_dv <= '0';
 			case dm_read_state is
 				when state_dm_read_idle =>
-					if dm_alu_addr_dv = '1' and dm_wr_en = "0000" and dm_addr(31) = '0' then
+					if dm_alu_addr_dv = '1' and dm_wr_en = "0000" and sel_bram = '1' then
 						dm_read_state <= state_dm_read_wait;
 					else
 						dm_read_state <= state_dm_read_idle;

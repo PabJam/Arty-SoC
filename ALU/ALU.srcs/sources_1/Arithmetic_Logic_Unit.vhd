@@ -125,7 +125,8 @@ architecture Behavioral of Arithmetic_Logic_Unit is
 	signal jmp_addr : unsigned(31 downto 0);
 	signal instruction_jump : std_logic := '0';
 
-	signal load_pending : std_logic := '0';
+	signal mem_pending : std_logic := '0';
+	signal mem_is_load : std_logic := '0';
 	signal load_rd : natural range 0 to 31 := 0;
 	signal load_func3 : unsigned(2 downto 0) := (others => '0');
 	signal load_addr_lsb : unsigned(1 downto 0) := (others => '0');
@@ -372,6 +373,9 @@ begin
 		variable v_addr : unsigned(31 downto 0);
 		variable v_result : unsigned(31 downto 0);
 		variable v_wr_en : boolean;
+		variable v_wr_rd : natural range 0 to 31;
+		variable v_mem_busy : std_logic;
+		variable v_is_mem : boolean;
 		variable v_branch : boolean;
 		variable v_return_ctrl : std_logic;
 		
@@ -383,17 +387,22 @@ begin
 			o_Return_Ctrl_ALU <= '0';
 			v_return_ctrl := '0';
 			v_wr_en := false;
+			v_wr_rd := 0;
 			v_result := (others => '0');
 			
 			if (i_Sync_nRst = '0') then
 				iq_rd_ptr <= (others => '0');
-				load_pending <= '0';
+				mem_pending <= '0';
+				mem_is_load <= '0';
 				ctrl_arithmetic_logic_unit <= '0';
 			else
 			
-				if load_pending = '1' then -- waiting for data memory data valid signal on load instruction
-					if i_DM_DV = '1' then
-						case load_func3 is 
+				v_mem_busy := mem_pending;
+
+				if mem_pending = '1' and i_DM_DV = '1' then
+					v_mem_busy := '0';
+					if mem_is_load = '1' then
+						case load_func3 is
 							when "000" => -- lb
 								v_result := unsigned(resize(signed(dm_read_data_bytes(to_integer(load_addr_lsb))), 32));
 							when "001" => -- lh
@@ -407,187 +416,208 @@ begin
 							when others =>
 								null;
 						end case;
-						if load_rd /= 0 then
-							registers(load_rd) <= v_result;
-						end if;
-						load_pending <= '0';
+						v_wr_en := true;
+						v_wr_rd := load_rd;
 					end if;
-				
+					mem_pending <= '0';
+				end if;
+
+				if mem_pending = '1' and mem_is_load = '1' then
+					-- A pending LOAD blocks everything: rd is not written until the
+					-- data returns, so anything issued now could read a stale
+					-- register. Includes the completion cycle, because the
+					-- writeback owns the single write port.
+					null;
+
 				-- instruction queue flushed after jumped
 				elsif instruction_jump = '1' then
 					iq_rd_ptr <= (others => '0');
-					
-				-- normal instruction now everything in one clock cycle
-				elsif ctrl_arithmetic_logic_unit = '1' and i_Take_Ctrl_ALU = '0' and iq_empty = '0' then 
-				
+
+				elsif ctrl_arithmetic_logic_unit = '1' and i_Take_Ctrl_ALU = '0' and iq_empty = '0' then
+
 					v_execute := iq(to_integer(iq_rd_ptr(C_IQ_WIDTH - 1 downto 0)));
-					v_rs1 := registers(v_execute.rs1);
-					v_rs2 := registers(v_execute.rs2);
-					iq_rd_ptr <= iq_rd_ptr + 1;
+					v_is_mem  := (v_execute.opcode = "0000011") or (v_execute.opcode = "0100011");
+
+					if v_is_mem and v_mem_busy = '1' then
+						-- A pending STORE writes no register, so only another
+						-- memory op has to wait for it.
+						null;
+					else
+						v_rs1 := registers(v_execute.rs1);
+						v_rs2 := registers(v_execute.rs2);
+						iq_rd_ptr <= iq_rd_ptr + 1;
+
+						case v_execute.opcode is
 					
-					case v_execute.opcode is 
-					
-						when "0110111" =>   -- lui
-							v_result := v_execute.imm;
-							v_wr_en  := true;
-
-						when "0010111" =>   -- auipc
-							v_result := v_execute.pc + v_execute.imm;
-							v_wr_en  := true;
-
-						when "1101111" =>   -- jal
-							v_result := v_execute.pc + 4;
-							v_wr_en  := true;
-							jmp_addr         <= v_execute.pc + v_execute.imm;
-							instruction_jump <= '1';
-
-						when "1100111" =>   -- jalr
-							v_result := v_execute.pc + 4;
-							v_wr_en  := true;
-							v_addr    := v_rs1 + v_execute.imm;
-							v_addr(0) := '0';
-							jmp_addr         <= v_addr;
-							instruction_jump <= '1';
-
-						when "1100011" =>   -- B-type / branches
-							case v_execute.func3 is
-								when "000"  => v_branch := (v_rs1 = v_rs2);                     -- beq
-								when "001"  => v_branch := (v_rs1 /= v_rs2);                    -- bne
-								when "100"  => v_branch := (signed(v_rs1) <  signed(v_rs2));    -- blt
-								when "101"  => v_branch := (signed(v_rs1) >= signed(v_rs2));    -- bge
-								when "110"  => v_branch := (v_rs1 <  v_rs2);                    -- bltu
-								when "111"  => v_branch := (v_rs1 >= v_rs2);                    -- bgeu
-								when others => v_branch := false;
-							end case;
-							if v_branch then
+							when "0110111" =>   -- lui
+								v_result := v_execute.imm;
+								v_wr_en  := true;
+	
+							when "0010111" =>   -- auipc
+								v_result := v_execute.pc + v_execute.imm;
+								v_wr_en  := true;
+	
+							when "1101111" =>   -- jal
+								v_result := v_execute.pc + 4;
+								v_wr_en  := true;
 								jmp_addr         <= v_execute.pc + v_execute.imm;
 								instruction_jump <= '1';
-							end if;
-
-						when "0000011" =>   -- I-type / loads
-							v_addr := v_rs1 + v_execute.imm;
-							dm_addr       <= std_logic_vector(v_addr);
-							load_addr_lsb <= v_addr(1 downto 0);
-							load_rd       <= v_execute.rd;
-							load_func3    <= v_execute.func3;
-							o_DM_DV       <= '1';
-							load_pending  <= '1';
-
-						when "0100011" =>   -- S-type / stores
-							v_addr  := v_rs1 + v_execute.imm;
-							dm_addr <= std_logic_vector(v_addr);
-							o_DM_DV <= '1';
-							case v_execute.func3 is
-								when "000" =>   -- sb: replicate the byte, pick the lane
-									o_DM_Data <= std_logic_vector(v_rs2(7 downto 0)) &
-									             std_logic_vector(v_rs2(7 downto 0)) &
-									             std_logic_vector(v_rs2(7 downto 0)) &
-									             std_logic_vector(v_rs2(7 downto 0));
-									o_DM_Wr_En(to_integer(v_addr(1 downto 0))) <= '1';
-								when "001" =>   -- sh
-									o_DM_Data <= std_logic_vector(v_rs2(15 downto 0)) &
-									             std_logic_vector(v_rs2(15 downto 0));
-									if v_addr(1) = '1' then
-										o_DM_Wr_En <= "1100";
-									else
-										o_DM_Wr_En <= "0011";
-									end if;
-								when "010" =>   -- sw
-									o_DM_Data  <= std_logic_vector(v_rs2);
-									o_DM_Wr_En <= "1111";
-								when others =>
-									o_DM_DV <= '0';
-							end case;
-
-						when "0010011" =>   -- I-type / operation immediate
-							case v_execute.func3 is
-								when "000" =>   -- addi
-									v_result := v_rs1 + v_execute.imm;
-								when "010" =>   -- slti
-									if signed(v_rs1) < signed(v_execute.imm) then
-										v_result := to_unsigned(1, 32);
-									else
-										v_result := (others => '0');
-									end if;
-								when "011" =>   -- sltiu (imm is sign extended, compared unsigned)
-									if v_rs1 < v_execute.imm then
-										v_result := to_unsigned(1, 32);
-									else
-										v_result := (others => '0');
-									end if;
-								when "100" =>   -- xori
-									v_result := v_rs1 xor v_execute.imm;
-								when "110" =>   -- ori
-									v_result := v_rs1 or v_execute.imm;
-								when "111" =>   -- andi
-									v_result := v_rs1 and v_execute.imm;
-								when "001" =>   -- slli
-									v_result := shift_left(v_rs1, v_execute.rs2);
-								when "101" =>   -- srli / srai
-									if v_execute.func7(5) = '0' then
-										v_result := shift_right(v_rs1, v_execute.rs2);
-									else
-										v_result := unsigned(shift_right(signed(v_rs1), v_execute.rs2));
-									end if;
-								when others =>
-									null;
-							end case;
-							v_wr_en := true;
-
-						when "0110011" =>   -- R-type / operation
-							case v_execute.func3 is
-								when "000" =>   -- add / sub
-									if v_execute.func7(5) = '0' then
-										v_result := v_rs1 + v_rs2;
-									else
-										v_result := v_rs1 - v_rs2;
-									end if;
-								when "001" =>   -- sll
-									v_result := shift_left(v_rs1, to_integer(v_rs2(4 downto 0)));
-								when "010" =>   -- slt
-									if signed(v_rs1) < signed(v_rs2) then
-										v_result := to_unsigned(1, 32);
-									else
-										v_result := (others => '0');
-									end if;
-								when "011" =>   -- sltu
-									if v_rs1 < v_rs2 then
-										v_result := to_unsigned(1, 32);
-									else
-										v_result := (others => '0');
-									end if;
-								when "100" =>   -- xor
-									v_result := v_rs1 xor v_rs2;
-								when "101" =>   -- srl / sra
-									if v_execute.func7(5) = '0' then
-										v_result := shift_right(v_rs1, to_integer(v_rs2(4 downto 0)));
-									else
-										v_result := unsigned(shift_right(signed(v_rs1), to_integer(v_rs2(4 downto 0))));
-									end if;
-								when "110" =>   -- or
-									v_result := v_rs1 or v_rs2;
-								when "111" =>   -- and
-									v_result := v_rs1 and v_rs2;
-								when others =>
-									null;
-							end case;
-							v_wr_en := true;
-
-						when "1110011" =>   -- I-type / system
-							if v_execute.imm(0) = '1' then -- ebreak
-								v_return_ctrl := '1';
-							end if;
-
-						when others =>
-							null;
+	
+							when "1100111" =>   -- jalr
+								v_result := v_execute.pc + 4;
+								v_wr_en  := true;
+								v_addr    := v_rs1 + v_execute.imm;
+								v_addr(0) := '0';
+								jmp_addr         <= v_addr;
+								instruction_jump <= '1';
+	
+							when "1100011" =>   -- B-type / branches
+								case v_execute.func3 is
+									when "000"  => v_branch := (v_rs1 = v_rs2);                     -- beq
+									when "001"  => v_branch := (v_rs1 /= v_rs2);                    -- bne
+									when "100"  => v_branch := (signed(v_rs1) <  signed(v_rs2));    -- blt
+									when "101"  => v_branch := (signed(v_rs1) >= signed(v_rs2));    -- bge
+									when "110"  => v_branch := (v_rs1 <  v_rs2);                    -- bltu
+									when "111"  => v_branch := (v_rs1 >= v_rs2);                    -- bgeu
+									when others => v_branch := false;
+								end case;
+								if v_branch then
+									jmp_addr         <= v_execute.pc + v_execute.imm;
+									instruction_jump <= '1';
+								end if;
+	
+							when "0000011" =>   -- I-type / loads
+								v_addr := v_rs1 + v_execute.imm;
+								dm_addr       <= std_logic_vector(v_addr);
+								load_addr_lsb <= v_addr(1 downto 0);
+								load_rd       <= v_execute.rd;
+								load_func3    <= v_execute.func3;
+								o_DM_DV       <= '1';
+								mem_pending   <= '1';
+								mem_is_load   <= '1';
+	
+							when "0100011" =>   -- S-type / stores
+								v_addr  := v_rs1 + v_execute.imm;
+								dm_addr <= std_logic_vector(v_addr);
+								o_DM_DV <= '1';
+								mem_pending <= '1';        
+								mem_is_load <= '0';       
+								
+								case v_execute.func3 is
+									when "000" =>   -- sb: replicate the byte, pick the lane
+										o_DM_Data <= std_logic_vector(v_rs2(7 downto 0)) &
+													std_logic_vector(v_rs2(7 downto 0)) &
+													std_logic_vector(v_rs2(7 downto 0)) &
+													std_logic_vector(v_rs2(7 downto 0));
+										o_DM_Wr_En(to_integer(v_addr(1 downto 0))) <= '1';
+									when "001" =>   -- sh
+										o_DM_Data <= std_logic_vector(v_rs2(15 downto 0)) &
+													std_logic_vector(v_rs2(15 downto 0));
+										if v_addr(1) = '1' then
+											o_DM_Wr_En <= "1100";
+										else
+											o_DM_Wr_En <= "0011";
+										end if;
+									when "010" =>   -- sw
+										o_DM_Data  <= std_logic_vector(v_rs2);
+										o_DM_Wr_En <= "1111";
+									when others =>
+										o_DM_DV     <= '0';
+										mem_pending <= '0'; -- malformed store, don't stall
+								end case;
+	
+							when "0010011" =>   -- I-type / operation immediate
+								case v_execute.func3 is
+									when "000" =>   -- addi
+										v_result := v_rs1 + v_execute.imm;
+									when "010" =>   -- slti
+										if signed(v_rs1) < signed(v_execute.imm) then
+											v_result := to_unsigned(1, 32);
+										else
+											v_result := (others => '0');
+										end if;
+									when "011" =>   -- sltiu (imm is sign extended, compared unsigned)
+										if v_rs1 < v_execute.imm then
+											v_result := to_unsigned(1, 32);
+										else
+											v_result := (others => '0');
+										end if;
+									when "100" =>   -- xori
+										v_result := v_rs1 xor v_execute.imm;
+									when "110" =>   -- ori
+										v_result := v_rs1 or v_execute.imm;
+									when "111" =>   -- andi
+										v_result := v_rs1 and v_execute.imm;
+									when "001" =>   -- slli
+										v_result := shift_left(v_rs1, v_execute.rs2);
+									when "101" =>   -- srli / srai
+										if v_execute.func7(5) = '0' then
+											v_result := shift_right(v_rs1, v_execute.rs2);
+										else
+											v_result := unsigned(shift_right(signed(v_rs1), v_execute.rs2));
+										end if;
+									when others =>
+										null;
+								end case;
+								v_wr_en := true;
+	
+							when "0110011" =>   -- R-type / operation
+								case v_execute.func3 is
+									when "000" =>   -- add / sub
+										if v_execute.func7(5) = '0' then
+											v_result := v_rs1 + v_rs2;
+										else
+											v_result := v_rs1 - v_rs2;
+										end if;
+									when "001" =>   -- sll
+										v_result := shift_left(v_rs1, to_integer(v_rs2(4 downto 0)));
+									when "010" =>   -- slt
+										if signed(v_rs1) < signed(v_rs2) then
+											v_result := to_unsigned(1, 32);
+										else
+											v_result := (others => '0');
+										end if;
+									when "011" =>   -- sltu
+										if v_rs1 < v_rs2 then
+											v_result := to_unsigned(1, 32);
+										else
+											v_result := (others => '0');
+										end if;
+									when "100" =>   -- xor
+										v_result := v_rs1 xor v_rs2;
+									when "101" =>   -- srl / sra
+										if v_execute.func7(5) = '0' then
+											v_result := shift_right(v_rs1, to_integer(v_rs2(4 downto 0)));
+										else
+											v_result := unsigned(shift_right(signed(v_rs1), to_integer(v_rs2(4 downto 0))));
+										end if;
+									when "110" =>   -- or
+										v_result := v_rs1 or v_rs2;
+									when "111" =>   -- and
+										v_result := v_rs1 and v_rs2;
+									when others =>
+										null;
+								end case;
+								v_wr_en := true;
+	
+							when "1110011" =>   -- I-type / system
+								if v_execute.imm(0) = '1' then -- ebreak
+									v_return_ctrl := '1';
+								end if;
+	
+							when others =>
+								null;
 					
-					end case;
-				
-					-- single write port!!! lets vivado infere distributed RAM for registers
-					-- r0 is not overwritten but just never re assigned
-					if v_wr_en and v_execute.rd /= 0 then
-						registers(v_execute.rd) <= v_result;
+						end case;
+
+						v_wr_rd := v_execute.rd;
 					end if;
+				end if;
+
+				-- single write port!!! lets vivado infere distributed RAM for registers
+				-- r0 is not overwritten but just never re assigned
+				if v_wr_en and v_wr_rd /= 0 then
+					registers(v_wr_rd) <= v_result;
 				end if;
 				
 				-- control handover
