@@ -46,7 +46,7 @@ architecture rtl of muldiv is
 	signal m_prod  : signed(65 downto 0) := (others => '0');
 	signal m_f3_1  : unsigned(2 downto 0) := (others => '0');
 	signal m_f3_2  : unsigned(2 downto 0) := (others => '0');
-	signal m_vld   : std_logic_vector(2 downto 0) := (others => '0');
+	signal m_vld   : std_logic_vector(2 downto 0) := (others => '0'); -- multiplication shift register to track state
 	signal m_res   : unsigned(31 downto 0) := (others => '0');
 
 	-- ---------------- divide ----------------
@@ -103,10 +103,10 @@ begin
 							m_a <= resize(signed(i_A), 33);
 							m_b <= resize(signed(i_B), 33);
 					end case;
-					m_f3_1 <= i_Func3;
+					m_f3_1 <= i_Func3; -- keep the original i_Func3
 				end if;
 
-				m_vld <= m_vld(1 downto 0) & (i_Start and not i_Func3(2));
+				m_vld <= m_vld(1 downto 0) & (i_Start and not i_Func3(2)); -- shifts the i_Start flag up if iFunc3(2) = '0' (multiplication)
 
 				-- stage 1: the multiply itself
 				m_prod <= m_a * m_b;
@@ -174,19 +174,19 @@ begin
 							d_state <= D_RUN;
 						end if;
 
-					when D_RUN =>
+					when D_RUN => -- long division in binary
 						if d_by0 = '1' or d_ovf = '1' then
 							d_state <= D_FIX;              -- result is fixed, skip the loop
 						else
-							v_rem := d_rem(31 downto 0) & d_num(31);
-							if v_rem >= ('0' & d_den) then
+							v_rem := d_rem(31 downto 0) & d_num(31); -- append msb of numerator as lsb of remainder
+							if v_rem >= ('0' & d_den) then	-- if denominator fits into remainder subtract denominator from remainder and shift in 1 to the lsb of the quotient
 								d_rem  <= v_rem - ('0' & d_den);
 								d_quot <= d_quot(30 downto 0) & '1';
-							else
+							else	-- denominator < remainder => keep remainder and shift in 0 to quotient
 								d_rem  <= v_rem;
 								d_quot <= d_quot(30 downto 0) & '0';
 							end if;
-							d_num <= d_num(30 downto 0) & '0';
+							d_num <= d_num(30 downto 0) & '0'; -- shift in 0 to lsb from numerator because we handled the msb in this cycle
 
 							if d_cnt = 31 then
 								d_state <= D_FIX;
