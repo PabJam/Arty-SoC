@@ -29,9 +29,9 @@ namespace ComPortUI
             LibPath = string.Empty;
             LinkerPath = string.Empty;
             GccPath = string.Empty;
-            asmBaseArguments = new string[] { "-march=rv32i", "-mabi=ilp32" };
-            cBaseArguments = new string[] { "-march=rv32i", "-mabi=ilp32", "-ffreestanding", "-nostdlib" };
-            linkerArguments = new string[] { "-march=rv32i", "-mabi=ilp32", "-nostdlib" };
+            asmBaseArguments = new string[] { "-march=rv32im", "-mabi=ilp32" };
+            cBaseArguments = new string[] { "-march=rv32im", "-mabi=ilp32", "-ffreestanding", "-nostdlib" };
+            linkerArguments = new string[] { "-march=rv32im", "-mabi=ilp32", "-nostdlib" };
             stdLibs = new string[] { "gcc" };
             LibOptLevel = "-O2";
             mainOptLevel = "-O2";
