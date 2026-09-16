@@ -51,7 +51,7 @@ namespace ComPortUI
                 serialPort.Close();
             }
 
-            ReferenceManager.SaveToXml(ReferenceManager.settings, ReferenceManager.settingsPath);
+            Settings.Save(ReferenceManager.settingsPath, ReferenceManager.settings);
         }
 
         private void Input_TB_KeyDown(object sender, KeyEventArgs e)

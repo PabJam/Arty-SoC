@@ -36,7 +36,7 @@ namespace ComPortUI
             serialPort.DataReceived += new SerialDataReceivedEventHandler(SerialDataRecievedHandler);
             dataQueue = new ConcurrentQueue<byte[]>();
             settingsPath = $"{appPath}Settings.xml";
-            Settings? loadedSettings = LoadFromXml<Settings>(settingsPath);
+            Settings? loadedSettings = Settings.Load(settingsPath, out _);
             settings = loadedSettings == null? new Settings() : loadedSettings; 
         }
 
@@ -76,15 +76,38 @@ namespace ComPortUI
             return $"if %errorlevel% neq 0 (\r\n    echo {Path.GetFileName(file)} compilation failed!  \r\n    exit /b 1\r\n)";
         }
 
+        /// <summary>
+        /// Registers the object file a source will produce. Throws if two sources map
+        /// to the same object name, which would otherwise be silently overwritten.
+        /// </summary>
+        private static void AddObject(Dictionary<string, string> objOwners, List<string> objPaths, string sourceFile, string buildPath)
+        {
+            string objName = Path.GetFileNameWithoutExtension(sourceFile) + ".o";
+
+            string? existingOwner;
+            if (objOwners.TryGetValue(objName, out existingOwner))
+            {
+                throw new InvalidOperationException(
+                    "Object file name collision: both\r\n" +
+                    "    " + existingOwner + "\r\n" +
+                    "    " + sourceFile + "\r\n" +
+                    "produce " + objName + " in " + buildPath + ".\r\n" +
+                    "Rename one of them, they cannot share a build directory.");
+            }
+
+            objOwners.Add(objName, sourceFile);
+            objPaths.Add(Path.Combine(buildPath, objName));
+        }
+
         private static string GetCompilerCall(string file, string buildPath, string[] arguments, string optLevel, string includes)
         {
             string fileName = Path.GetFileName(file);
-            string message = $"echo Compiling {fileName}...";
             StringBuilder compilerCall = new StringBuilder();
+            compilerCall.AppendLine($"echo Compiling {fileName}...");
             compilerCall.Append("riscv-none-elf-gcc.exe");
             for (int i = 0; i < arguments.Length; i++)
             {
-                compilerCall.Append($" {arguments[i]}" );
+                compilerCall.Append($" {arguments[i]}");
             }
             if (string.IsNullOrEmpty(optLevel) == false)
             {
@@ -96,19 +119,24 @@ namespace ComPortUI
             {
                 compilerCall.Append($" -I{allIncludes[i]}");
             }
-            compilerCall.Append($" -c {file} -o {Path.Combine(buildPath, fileName.Substring(0, fileName.Length - 2))}.o");
+            compilerCall.Append($" -c {file} -o {Path.Combine(buildPath, Path.GetFileNameWithoutExtension(file))}.o");
             compilerCall.Append($"\r\n{GetErrorCheck(file)}");
-   
+
             return compilerCall.ToString();
         }
 
-        private static string GetLinkerCall(string linkerPath, string binaryName, string[] arguments, List<string> objectPaths, string[] stdLibs)
+        private static string GetLinkerCall(string linkerPath, string binaryName, string[] arguments, List<string> objectPaths, string[] stdLibs, bool createMap)
         {
             StringBuilder linkerCall = new StringBuilder();
+            linkerCall.AppendLine("echo Linking...");
             linkerCall.Append("riscv-none-elf-gcc.exe");
             for (int i = 0; i < arguments.Length; i++)
             {
                 linkerCall.Append($" {arguments[i]}");
+            }
+            if (createMap == true)
+            {
+                linkerCall.Append($" -Wl,-Map={binaryName}.map");
             }
             linkerCall.Append($" -T {linkerPath} -o {binaryName}.elf");
             for (int i = 0; i < objectPaths.Count; i++)
@@ -124,45 +152,73 @@ namespace ComPortUI
             return linkerCall.ToString();
         }
 
+        /// <summary>
+        /// Echoes the flags the batch was generated with.
+        /// </summary>
+        private static string GetFlagBanner(Settings s)
+        {
+            StringBuilder banner = new StringBuilder();
+            banner.AppendLine("echo ========================================");
+            banner.AppendLine($"echo Settings version : {s.Version}");
+            banner.AppendLine($"echo asm   : {string.Join(" ", s.asmBaseArguments)}");
+            banner.AppendLine($"echo c     : {string.Join(" ", s.cBaseArguments)} {s.LibOptLevel}");
+            banner.AppendLine($"echo link  : {string.Join(" ", s.linkerArguments)}");
+            banner.AppendLine("echo ========================================");
+            return banner.ToString();
+        }
+
         public static string GenerateBatchFile(string mainPath)
         {
+            // Migration happens in Settings.Load. This only re-checks the things
+            // migration cannot fix, such as an arch that differs between steps.
+            settings.ValidateOrThrow();
+
             StringBuilder batchContent = new StringBuilder();
             List<string> objPaths = new List<string>();
+            Dictionary<string, string> objOwners = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
             batchContent.AppendLine("@echo off");
             batchContent.AppendLine($"set \"PATH={settings.GccPath};%PATH%\"");
+            batchContent.AppendLine(GetFlagBanner(settings));
+
+            // startup
             string startUpPath = Path.Combine(settings.BuildPath, "startup.s");
-            batchContent.AppendLine(GetCompilerCall(startUpPath, settings.BuildPath, settings.asmBaseArguments, string.Empty, settings.LibPath)); // start up
-            objPaths.Add($"{startUpPath.Substring(0, startUpPath.Length - 2)}.o");
-            batchContent.AppendLine(GetCompilerCall(mainPath, settings.BuildPath, settings.cBaseArguments, settings.mainOptLevel, settings.LibPath)); // main
-            string mainFileName = Path.GetFileName(mainPath);
-            objPaths.Add($"{Path.Combine(settings.BuildPath, mainFileName.Substring(0, mainFileName.Length - 2))}.o");
+            batchContent.AppendLine(GetCompilerCall(startUpPath, settings.BuildPath, settings.asmBaseArguments, string.Empty, settings.LibPath));
+            AddObject(objOwners, objPaths, startUpPath, settings.BuildPath);
+
+            // main
+            batchContent.AppendLine(GetCompilerCall(mainPath, settings.BuildPath, settings.cBaseArguments, settings.mainOptLevel, settings.LibPath));
+            AddObject(objOwners, objPaths, mainPath, settings.BuildPath);
+
             string[] allASMFiles = Directory.GetFiles(settings.LibPath, "*.s", SearchOption.AllDirectories);
             string[] allCFiles = Directory.GetFiles(settings.LibPath, "*.c", SearchOption.AllDirectories);
-            string fileName = string.Empty;
-            for (int i = 0; i < allASMFiles.Length ; i++) 
-            {   
-                fileName = Path.GetFileName(allASMFiles[i]);
+
+            for (int i = 0; i < allASMFiles.Length; i++)
+            {
                 batchContent.AppendLine(GetCompilerCall(allASMFiles[i], settings.BuildPath, settings.asmBaseArguments, string.Empty, settings.LibPath));
-                objPaths.Add($"{Path.Combine(settings.BuildPath, fileName.Substring(0, fileName.Length - 2))}.o");
+                AddObject(objOwners, objPaths, allASMFiles[i], settings.BuildPath);
             }
             for (int i = 0; i < allCFiles.Length; i++)
             {
-                fileName = Path.GetFileName(allCFiles[i]);
                 batchContent.AppendLine(GetCompilerCall(allCFiles[i], settings.BuildPath, settings.cBaseArguments, settings.LibOptLevel, settings.LibPath));
-                objPaths.Add($"{Path.Combine(settings.BuildPath, fileName.Substring(0, fileName.Length - 2))}.o");
+                AddObject(objOwners, objPaths, allCFiles[i], settings.BuildPath);
             }
 
-            //Linker Call
-            string binaryPath = $"{Path.Combine(settings.BuildPath, mainFileName.Substring(0, mainFileName.Length - 2))}";
-            batchContent.AppendLine(GetLinkerCall(settings.LinkerPath, binaryPath, settings.linkerArguments, objPaths, settings.stdLibs)); 
-            //.elf -> .bin
+            // Linker Call
+            string binaryPath = Path.Combine(settings.BuildPath, Path.GetFileNameWithoutExtension(mainPath));
+            batchContent.AppendLine(GetLinkerCall(settings.LinkerPath, binaryPath, settings.linkerArguments, objPaths, settings.stdLibs, settings.createMap));
+
+            // .elf -> .bin
             batchContent.AppendLine($"riscv-none-elf-objcopy.exe -O binary {binaryPath}.elf {binaryPath}.bin");
 
             batchContent.AppendLine("echo ========================================\r\necho Build complete!\r\necho ========================================");
+
             if (settings.createDis == true)
             {
-                batchContent.AppendLine($"riscv-none-elf-objdump.exe -d {binaryPath}.elf > {binaryPath}.dis");
+                // -S interleaves source, which needs -g on the compile line
+                batchContent.AppendLine($"riscv-none-elf-objdump.exe -d -S {binaryPath}.elf > {binaryPath}.dis");
             }
+
             batchContent.AppendLine($"riscv-none-elf-size.exe {binaryPath}.elf");
 
             string batchPath = Path.Combine(settings.BuildPath, "build.bat");
@@ -170,31 +226,31 @@ namespace ComPortUI
             return batchPath;
         }
 
-        public static void SaveToXml<T>(T obj, string filePath)
-        {
-            XmlSerializer serializer = new XmlSerializer(typeof(T));
-            using (StreamWriter writer = new StreamWriter(filePath))
-            {
-                serializer.Serialize(writer, obj);
-            }
-        }
-
-        public static T? LoadFromXml<T>(string filePath)
-        {
-            XmlSerializer serializer = new XmlSerializer(typeof(T));
-            try
-            {
-                using (StreamReader reader = new StreamReader(filePath))
-                {
-                    return (T?)serializer.Deserialize(reader);
-                }
-            }
-            catch
-            {
-                return (T?)(object?)null;
-            }
-
-        }
+        //public static void SaveToXml<T>(T obj, string filePath)
+        //{
+        //    XmlSerializer serializer = new XmlSerializer(typeof(T));
+        //    using (StreamWriter writer = new StreamWriter(filePath))
+        //    {
+        //        serializer.Serialize(writer, obj);
+        //    }
+        //}
+        //
+        //public static T? LoadFromXml<T>(string filePath)
+        //{
+        //    XmlSerializer serializer = new XmlSerializer(typeof(T));
+        //    try
+        //    {
+        //        using (StreamReader reader = new StreamReader(filePath))
+        //        {
+        //            return (T?)serializer.Deserialize(reader);
+        //        }
+        //    }
+        //    catch
+        //    {
+        //        return (T?)(object?)null;
+        //    }
+        //
+        //}
 
     }
 }

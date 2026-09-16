@@ -1,0 +1,279 @@
+
+Discarded input sections
+
+ .text          0x00000000        0x0 D:\delete_me\Arty-SoC\Listings\Build\startup.o
+ .data          0x00000000        0x0 D:\delete_me\Arty-SoC\Listings\Build\startup.o
+ .bss           0x00000000        0x0 D:\delete_me\Arty-SoC\Listings\Build\startup.o
+ .riscv.attributes
+                0x00000000       0x28 D:\delete_me\Arty-SoC\Listings\Build\startup.o
+ .text          0x00000000        0x0 D:\delete_me\Arty-SoC\Listings\Build\DramTest.o
+ .data          0x00000000        0x0 D:\delete_me\Arty-SoC\Listings\Build\DramTest.o
+ .bss           0x00000000        0x0 D:\delete_me\Arty-SoC\Listings\Build\DramTest.o
+ .comment       0x00000000       0x34 D:\delete_me\Arty-SoC\Listings\Build\DramTest.o
+ .note.GNU-stack
+                0x00000000        0x0 D:\delete_me\Arty-SoC\Listings\Build\DramTest.o
+ .riscv.attributes
+                0x00000000       0x2a D:\delete_me\Arty-SoC\Listings\Build\DramTest.o
+ .text          0x00000000        0x0 D:\delete_me\Arty-SoC\Listings\Build\ddr_check.o
+ .data          0x00000000        0x0 D:\delete_me\Arty-SoC\Listings\Build\ddr_check.o
+ .bss           0x00000000        0x0 D:\delete_me\Arty-SoC\Listings\Build\ddr_check.o
+ .comment       0x00000000       0x34 D:\delete_me\Arty-SoC\Listings\Build\ddr_check.o
+ .note.GNU-stack
+                0x00000000        0x0 D:\delete_me\Arty-SoC\Listings\Build\ddr_check.o
+ .riscv.attributes
+                0x00000000       0x2a D:\delete_me\Arty-SoC\Listings\Build\ddr_check.o
+ .text          0x00000000        0x0 D:\delete_me\Arty-SoC\Listings\Build\heap.o
+ .data          0x00000000        0x0 D:\delete_me\Arty-SoC\Listings\Build\heap.o
+ .bss           0x00000000        0x0 D:\delete_me\Arty-SoC\Listings\Build\heap.o
+ .text.calloc   0x00000000       0xa8 D:\delete_me\Arty-SoC\Listings\Build\heap.o
+ .comment       0x00000000       0x34 D:\delete_me\Arty-SoC\Listings\Build\heap.o
+ .note.GNU-stack
+                0x00000000        0x0 D:\delete_me\Arty-SoC\Listings\Build\heap.o
+ .riscv.attributes
+                0x00000000       0x2a D:\delete_me\Arty-SoC\Listings\Build\heap.o
+ .text          0x00000000        0x0 D:\delete_me\Arty-SoC\Listings\Build\Peripherals.o
+ .data          0x00000000        0x0 D:\delete_me\Arty-SoC\Listings\Build\Peripherals.o
+ .bss           0x00000000        0x0 D:\delete_me\Arty-SoC\Listings\Build\Peripherals.o
+ .text.set_pin  0x00000000       0x34 D:\delete_me\Arty-SoC\Listings\Build\Peripherals.o
+ .text.set_pins
+                0x00000000       0x14 D:\delete_me\Arty-SoC\Listings\Build\Peripherals.o
+ .text.pin_mode
+                0x00000000       0x2c D:\delete_me\Arty-SoC\Listings\Build\Peripherals.o
+ .text.wait_ms  0x00000000       0x50 D:\delete_me\Arty-SoC\Listings\Build\Peripherals.o
+ .text.wait_us  0x00000000       0x28 D:\delete_me\Arty-SoC\Listings\Build\Peripherals.o
+ .sbss.gpio_out_shadow
+                0x00000000        0x4 D:\delete_me\Arty-SoC\Listings\Build\Peripherals.o
+ .debug_info    0x00000000      0x4b7 D:\delete_me\Arty-SoC\Listings\Build\Peripherals.o
+ .debug_abbrev  0x00000000      0x17f D:\delete_me\Arty-SoC\Listings\Build\Peripherals.o
+ .debug_loclists
+                0x00000000      0x1ae D:\delete_me\Arty-SoC\Listings\Build\Peripherals.o
+ .debug_aranges
+                0x00000000       0x40 D:\delete_me\Arty-SoC\Listings\Build\Peripherals.o
+ .debug_rnglists
+                0x00000000       0x79 D:\delete_me\Arty-SoC\Listings\Build\Peripherals.o
+ .debug_line    0x00000000      0x43a D:\delete_me\Arty-SoC\Listings\Build\Peripherals.o
+ .debug_str     0x00000000      0x164 D:\delete_me\Arty-SoC\Listings\Build\Peripherals.o
+ .debug_line_str
+                0x00000000       0xc1 D:\delete_me\Arty-SoC\Listings\Build\Peripherals.o
+ .comment       0x00000000       0x34 D:\delete_me\Arty-SoC\Listings\Build\Peripherals.o
+ .note.GNU-stack
+                0x00000000        0x0 D:\delete_me\Arty-SoC\Listings\Build\Peripherals.o
+ .debug_frame   0x00000000       0x60 D:\delete_me\Arty-SoC\Listings\Build\Peripherals.o
+ .riscv.attributes
+                0x00000000       0x2a D:\delete_me\Arty-SoC\Listings\Build\Peripherals.o
+ .text          0x00000000        0x0 D:\delete_me\Arty-SoC\Listings\Build\printf.o
+ .data          0x00000000        0x0 D:\delete_me\Arty-SoC\Listings\Build\printf.o
+ .bss           0x00000000        0x0 D:\delete_me\Arty-SoC\Listings\Build\printf.o
+ .text.snprintf
+                0x00000000       0x88 D:\delete_me\Arty-SoC\Listings\Build\printf.o
+ .text.puts     0x00000000       0x80 D:\delete_me\Arty-SoC\Listings\Build\printf.o
+ .comment       0x00000000       0x34 D:\delete_me\Arty-SoC\Listings\Build\printf.o
+ .note.GNU-stack
+                0x00000000        0x0 D:\delete_me\Arty-SoC\Listings\Build\printf.o
+ .riscv.attributes
+                0x00000000       0x2a D:\delete_me\Arty-SoC\Listings\Build\printf.o
+ .text          0x00000000        0x0 D:\delete_me\Arty-SoC\Listings\Build\uart_glue.o
+ .data          0x00000000        0x0 D:\delete_me\Arty-SoC\Listings\Build\uart_glue.o
+ .bss           0x00000000        0x0 D:\delete_me\Arty-SoC\Listings\Build\uart_glue.o
+ .comment       0x00000000       0x34 D:\delete_me\Arty-SoC\Listings\Build\uart_glue.o
+ .note.GNU-stack
+                0x00000000        0x0 D:\delete_me\Arty-SoC\Listings\Build\uart_glue.o
+ .riscv.attributes
+                0x00000000       0x2a D:\delete_me\Arty-SoC\Listings\Build\uart_glue.o
+
+Memory Configuration
+
+Name             Origin             Length             Attributes
+RAM              0x00000000         0x00020000         xrw
+DDR              0x40000000         0x10000000         rw
+*default*        0x00000000         0xffffffff
+
+Linker script and memory map
+
+LOAD D:\delete_me\Arty-SoC\Listings\Build\startup.o
+LOAD D:\delete_me\Arty-SoC\Listings\Build\DramTest.o
+LOAD D:\delete_me\Arty-SoC\Listings\Build\ddr_check.o
+LOAD D:\delete_me\Arty-SoC\Listings\Build\heap.o
+LOAD D:\delete_me\Arty-SoC\Listings\Build\Peripherals.o
+LOAD D:\delete_me\Arty-SoC\Listings\Build\printf.o
+LOAD D:\delete_me\Arty-SoC\Listings\Build\uart_glue.o
+LOAD D:/delete_me/xpack-riscv-none-elf-gcc-15.2.0-1/bin/../lib/gcc/riscv-none-elf/15.2.0/rv32im/ilp32\libgcc.a
+
+.text           0x00000000     0x238c
+ *(.text.start)
+ .text.start    0x00000000       0x34 D:\delete_me\Arty-SoC\Listings\Build\startup.o
+                0x00000000                _start
+ *(.text*)
+ .text.startup.main
+                0x00000034       0x1c D:\delete_me\Arty-SoC\Listings\Build\DramTest.o
+                0x00000034                main
+ .text.ddr_report
+                0x00000050      0xd34 D:\delete_me\Arty-SoC\Listings\Build\ddr_check.o
+                0x00000050                ddr_report
+ .text.heap_init
+                0x00000d84       0x44 D:\delete_me\Arty-SoC\Listings\Build\heap.o
+                0x00000d84                heap_init
+ .text.malloc   0x00000dc8      0x148 D:\delete_me\Arty-SoC\Listings\Build\heap.o
+                0x00000dc8                malloc
+ .text.free     0x00000f10      0x13c D:\delete_me\Arty-SoC\Listings\Build\heap.o
+                0x00000f10                free
+ .text.heap_stats
+                0x0000104c       0xc4 D:\delete_me\Arty-SoC\Listings\Build\heap.o
+                0x0000104c                heap_stats
+ .text.vfmt.constprop.0
+                0x00001110      0xda8 D:\delete_me\Arty-SoC\Listings\Build\printf.o
+ .text.printf   0x00001eb8       0x54 D:\delete_me\Arty-SoC\Listings\Build\printf.o
+                0x00001eb8                printf
+ .text.uart_putc
+                0x00001f0c       0x1c D:\delete_me\Arty-SoC\Listings\Build\uart_glue.o
+                0x00001f0c                uart_putc
+ *(.rodata*)
+ .rodata.ddr_report.str1.4
+                0x00001f28      0x399 D:\delete_me\Arty-SoC\Listings\Build\ddr_check.o
+                                0x35f (size before relaxing)
+ .rodata.vfmt.constprop.0.str1.4
+                0x000022c1        0x0 D:\delete_me\Arty-SoC\Listings\Build\printf.o
+                                 0x41 (size before relaxing)
+ *fill*         0x000022c1        0x3 
+ .rodata.vfmt.constprop.0
+                0x000022c4       0xc8 D:\delete_me\Arty-SoC\Listings\Build\printf.o
+                0x0000238c                        . = ALIGN (0x4)
+
+.rela.dyn       0x0000238c        0x0
+ .rela.text.start
+                0x0000238c        0x0 D:\delete_me\Arty-SoC\Listings\Build\startup.o
+ .rela.text.heap_init
+                0x0000238c        0x0 D:\delete_me\Arty-SoC\Listings\Build\startup.o
+ .rela.text.malloc
+                0x0000238c        0x0 D:\delete_me\Arty-SoC\Listings\Build\startup.o
+ .rela.text.heap_stats
+                0x0000238c        0x0 D:\delete_me\Arty-SoC\Listings\Build\startup.o
+
+.data           0x0000238c        0x0
+                0x0000238c                        . = ALIGN (0x4)
+                0x0000238c                        _data_start = .
+ *(.data*)
+                0x0000238c                        . = ALIGN (0x4)
+                0x0000238c                        _data_end = .
+
+.bss            0x0000238c      0x400
+                0x0000238c                        . = ALIGN (0x4)
+                0x0000238c                        _bss_start = .
+ *(.bss*)
+ .bss.blocks    0x0000238c      0x400 D:\delete_me\Arty-SoC\Listings\Build\heap.o
+ *(COMMON)
+                0x0000278c                        . = ALIGN (0x4)
+                0x0000278c                        _bss_end = .
+                0x00020000                        _stack_top = (ORIGIN (RAM) + LENGTH (RAM))
+                0x40000000                        _heap_start = ORIGIN (DDR)
+                0x50000000                        _heap_end = (ORIGIN (DDR) + LENGTH (DDR))
+
+.sbss.fails     0x0000278c        0x4
+ .sbss.fails    0x0000278c        0x4 D:\delete_me\Arty-SoC\Listings\Build\ddr_check.o
+
+.sbss.inited    0x00002790        0x4
+ .sbss.inited   0x00002790        0x4 D:\delete_me\Arty-SoC\Listings\Build\heap.o
+
+.sbss.nblocks   0x00002794        0x4
+ .sbss.nblocks  0x00002794        0x4 D:\delete_me\Arty-SoC\Listings\Build\heap.o
+
+/DISCARD/
+ *(.comment)
+ *(.note*)
+ *(.eh_frame*)
+ *(.riscv.attributes)
+OUTPUT(D:\delete_me\Arty-SoC\Listings\Build\DramTest.elf elf32-littleriscv)
+
+.debug_info     0x00000000     0x2d7f
+ .debug_info    0x00000000       0x5f D:\delete_me\Arty-SoC\Listings\Build\DramTest.o
+ .debug_info    0x0000005f     0x1b29 D:\delete_me\Arty-SoC\Listings\Build\ddr_check.o
+ .debug_info    0x00001b88      0x4bc D:\delete_me\Arty-SoC\Listings\Build\heap.o
+ .debug_info    0x00002044      0xc2f D:\delete_me\Arty-SoC\Listings\Build\printf.o
+ .debug_info    0x00002c73      0x10c D:\delete_me\Arty-SoC\Listings\Build\uart_glue.o
+
+.debug_abbrev   0x00000000      0x942
+ .debug_abbrev  0x00000000       0x5e D:\delete_me\Arty-SoC\Listings\Build\DramTest.o
+ .debug_abbrev  0x0000005e      0x249 D:\delete_me\Arty-SoC\Listings\Build\ddr_check.o
+ .debug_abbrev  0x000002a7      0x292 D:\delete_me\Arty-SoC\Listings\Build\heap.o
+ .debug_abbrev  0x00000539      0x323 D:\delete_me\Arty-SoC\Listings\Build\printf.o
+ .debug_abbrev  0x0000085c       0xe6 D:\delete_me\Arty-SoC\Listings\Build\uart_glue.o
+
+.debug_aranges  0x00000000       0xd8
+ .debug_aranges
+                0x00000000       0x20 D:\delete_me\Arty-SoC\Listings\Build\DramTest.o
+ .debug_aranges
+                0x00000020       0x20 D:\delete_me\Arty-SoC\Listings\Build\ddr_check.o
+ .debug_aranges
+                0x00000040       0x40 D:\delete_me\Arty-SoC\Listings\Build\heap.o
+ .debug_aranges
+                0x00000080       0x38 D:\delete_me\Arty-SoC\Listings\Build\printf.o
+ .debug_aranges
+                0x000000b8       0x20 D:\delete_me\Arty-SoC\Listings\Build\uart_glue.o
+
+.debug_rnglists
+                0x00000000      0x881
+ .debug_rnglists
+                0x00000000       0x13 D:\delete_me\Arty-SoC\Listings\Build\DramTest.o
+ .debug_rnglists
+                0x00000013      0x4e6 D:\delete_me\Arty-SoC\Listings\Build\ddr_check.o
+ .debug_rnglists
+                0x000004f9       0x93 D:\delete_me\Arty-SoC\Listings\Build\heap.o
+ .debug_rnglists
+                0x0000058c      0x2ca D:\delete_me\Arty-SoC\Listings\Build\printf.o
+ .debug_rnglists
+                0x00000856       0x2b D:\delete_me\Arty-SoC\Listings\Build\uart_glue.o
+
+.debug_line     0x00000000     0x44f5
+ .debug_line    0x00000000       0x78 D:\delete_me\Arty-SoC\Listings\Build\DramTest.o
+ .debug_line    0x00000078     0x1736 D:\delete_me\Arty-SoC\Listings\Build\ddr_check.o
+ .debug_line    0x000017ae      0x9f7 D:\delete_me\Arty-SoC\Listings\Build\heap.o
+ .debug_line    0x000021a5     0x2273 D:\delete_me\Arty-SoC\Listings\Build\printf.o
+ .debug_line    0x00004418       0xdd D:\delete_me\Arty-SoC\Listings\Build\uart_glue.o
+
+.debug_str      0x00000000      0x2cc
+ .debug_str     0x00000000      0x2cc D:\delete_me\Arty-SoC\Listings\Build\DramTest.o
+                                 0x8d (size before relaxing)
+ .debug_str     0x000002cc        0x0 D:\delete_me\Arty-SoC\Listings\Build\ddr_check.o
+                                0x148 (size before relaxing)
+ .debug_str     0x000002cc        0x0 D:\delete_me\Arty-SoC\Listings\Build\heap.o
+                                0x17e (size before relaxing)
+ .debug_str     0x000002cc        0x0 D:\delete_me\Arty-SoC\Listings\Build\printf.o
+                                0x166 (size before relaxing)
+ .debug_str     0x000002cc        0x0 D:\delete_me\Arty-SoC\Listings\Build\uart_glue.o
+                                 0xca (size before relaxing)
+
+.debug_line_str
+                0x00000000      0x206
+ .debug_line_str
+                0x00000000      0x206 D:\delete_me\Arty-SoC\Listings\Build\DramTest.o
+                                 0xaf (size before relaxing)
+ .debug_line_str
+                0x00000206        0x0 D:\delete_me\Arty-SoC\Listings\Build\ddr_check.o
+                                 0x99 (size before relaxing)
+ .debug_line_str
+                0x00000206        0x0 D:\delete_me\Arty-SoC\Listings\Build\heap.o
+                                 0x7f (size before relaxing)
+ .debug_line_str
+                0x00000206        0x0 D:\delete_me\Arty-SoC\Listings\Build\printf.o
+                                 0xe1 (size before relaxing)
+ .debug_line_str
+                0x00000206        0x0 D:\delete_me\Arty-SoC\Listings\Build\uart_glue.o
+                                 0x97 (size before relaxing)
+
+.debug_frame    0x00000000      0x248
+ .debug_frame   0x00000000       0x2c D:\delete_me\Arty-SoC\Listings\Build\DramTest.o
+ .debug_frame   0x0000002c       0x84 D:\delete_me\Arty-SoC\Listings\Build\ddr_check.o
+ .debug_frame   0x000000b0       0x74 D:\delete_me\Arty-SoC\Listings\Build\heap.o
+ .debug_frame   0x00000124      0x104 D:\delete_me\Arty-SoC\Listings\Build\printf.o
+ .debug_frame   0x00000228       0x20 D:\delete_me\Arty-SoC\Listings\Build\uart_glue.o
+
+.debug_loclists
+                0x00000000     0x3e97
+ .debug_loclists
+                0x00000000     0x1846 D:\delete_me\Arty-SoC\Listings\Build\ddr_check.o
+ .debug_loclists
+                0x00001846      0x3b4 D:\delete_me\Arty-SoC\Listings\Build\heap.o
+ .debug_loclists
+                0x00001bfa     0x2266 D:\delete_me\Arty-SoC\Listings\Build\printf.o
+ .debug_loclists
+                0x00003e60       0x37 D:\delete_me\Arty-SoC\Listings\Build\uart_glue.o
