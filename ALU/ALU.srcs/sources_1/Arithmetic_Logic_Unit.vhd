@@ -110,6 +110,9 @@ architecture Behavioral of Arithmetic_Logic_Unit is
 		rd : natural range 0 to 31;
 		imm : unsigned(31 downto 0);
 		pc : unsigned(31 downto 0);
+		-- jal & branch with negative offset (likely loop) predict that the branch will be taken.
+		-- It is saved here so the execute step can varify and correct if neccessary
+		predicted_taken : std_logic; 
 	end record;
 	
 	constant C_DECODED_RST : t_decoded := 
@@ -121,7 +124,8 @@ architecture Behavioral of Arithmetic_Logic_Unit is
 		rs2 => 0,
 		rd => 0,
 		imm => (others => '0'),
-		pc => (others => '0')
+		pc => (others => '0'),
+		predicted_taken => '0'
 	);
 	
 	-- fifo to queue instructions
@@ -137,6 +141,11 @@ architecture Behavioral of Arithmetic_Logic_Unit is
 	signal ctrl_arithmetic_logic_unit : std_logic := '0';
 	signal jmp_addr : unsigned(31 downto 0);
 	signal instruction_jump : std_logic := '0';
+
+	-- decode stage branch prediction. predict_jump redirects the fetch stage
+	-- instruction_jump from execute always overrides it.
+	signal predict_jump : std_logic := '0';
+	signal predict_addr : unsigned(31 downto 0) := (others => '0');
 
 	signal mem_pending : std_logic := '0';
 	signal mem_is_load : std_logic := '0';
@@ -208,10 +217,17 @@ begin
 			
 			elsif ctrl_arithmetic_logic_unit = '1' and i_Take_Ctrl_ALU = '0' then
 				
+				-- a correction from execute always beats a guess from decode
 				if (instruction_jump = '1') then
 					o_PM_Addr <= std_logic_vector(jmp_addr(16 downto 3)); -- jmp_addr(2) decides if lower or upper 32bit 
 					pc_fetch(0) <= jmp_addr(31 downto 3) & '0' & jmp_addr(1 downto 0);
 					pc_fetch(1) <= jmp_addr(31 downto 3) & '1' & jmp_addr(1 downto 0);
+					fetch_state <= fetch_state_next;
+					instruction_ready <= '0';
+				elsif (predict_jump = '1') then
+					o_PM_Addr <= std_logic_vector(predict_addr(16 downto 3));
+					pc_fetch(0) <= predict_addr(31 downto 3) & '0' & predict_addr(1 downto 0);
+					pc_fetch(1) <= predict_addr(31 downto 3) & '1' & predict_addr(1 downto 0);
 					fetch_state <= fetch_state_next;
 					instruction_ready <= '0';
 				else
@@ -306,9 +322,12 @@ begin
 		variable v_immediate_s : signed(11 downto 0);
 		variable v_immediate_b : signed(12 downto 0);
 		variable v_immediate_j : signed(20 downto 0);
+		variable v_predict : boolean;
+		variable v_target : unsigned(31 downto 0);
 	begin
 		if rising_edge(i_Clk) then
 			instruction_read <= '0';
+			predict_jump <= '0';
 	
 			if (i_Sync_nRst = '0') then
 				instruction_upper <= (others => '0');
@@ -322,9 +341,15 @@ begin
 				instruction_jumped <= '1';
 				instruction_upper(0) <= jmp_addr(2); -- jumped to higher or lower instruction of 64bit block
 				
+			elsif predict_jump = '1' then
+				-- Stall one cycle because 
+				-- instruction_ready is still high
+				-- from the old instruction_fetch and it still holds the old pair.
+				null;
+
 			elsif ctrl_arithmetic_logic_unit = '1' and i_Take_Ctrl_ALU = '0' then
 				
-				-- take a new instruction from programm memory or nex instruction from instruction fetch
+				-- take a new instruction from programm memory or next instruction from instruction fetch
 				v_from_pm := (instruction_upper(0) = '0') or (instruction_jumped = '1');
 				
 				if v_from_pm then
@@ -392,6 +417,34 @@ begin
 						when others => -- I-type / R-type (unused)
 							v_decoded.imm := unsigned(resize(v_immediate_i, 32));
 					end case;
+					
+					-- STATIC BRANCH PREDICTION
+					-- A backward conditional branch is essentially always a loop,
+					-- so guess taken. A forward one usually skips an if body, so
+					-- guess not taken.
+					-- jal is unconditional, so it is always "predicted" taken and
+					-- can never mispredict.
+					-- The target is pc + imm
+					v_predict := false;
+					if v_decoded.opcode = "1101111" then
+						v_predict := true;                          -- jal
+					elsif v_decoded.opcode = "1100011" and v_decoded.imm(31) = '1' then
+						v_predict := true;                          -- backward branch
+					end if;
+
+					if v_predict then
+						v_target := v_decoded.pc + v_decoded.imm;
+						v_decoded.predicted_taken := '1';
+						predict_addr <= v_target;
+						predict_jump <= '1';
+						-- same as instruction_jump, because
+						-- the fetch is being redirected the same way. 
+						next_instruction_valid <= '0';
+						instruction_jumped <= '1';
+						instruction_upper(0) <= v_target(2);
+					else
+						v_decoded.predicted_taken := '0';
+					end if;
 					
 					iq(to_integer(iq_wr_ptr(C_IQ_WIDTH - 1 downto 0))) <= v_decoded;
 					iq_wr_ptr <= iq_wr_ptr + 1;
@@ -469,9 +522,8 @@ begin
 				end if;
 
 				if (mem_pending = '1' and mem_is_load = '1') or exec_pending = '1' then
-					-- A pending LOAD blocks everything: rd is not written until the
-					-- data returns, so anything issued now could read a stale
-					-- register. Includes the completion cycle, because the
+					-- A pending LOAD blocks everything. 
+					-- Includes the completion cycle, because the
 					-- writeback owns the single write port.
 					null;
 
@@ -485,7 +537,7 @@ begin
 					v_is_mem  := (v_execute.opcode = "0000011") or (v_execute.opcode = "0100011");
 
 					if v_is_mem and v_mem_busy = '1' then
-						-- A pending STORE writes no register, so only another
+						-- A pending store writes no register, so only another
 						-- memory op has to wait for it.
 						null;
 					else
@@ -506,8 +558,13 @@ begin
 							when "1101111" =>   -- jal
 								v_result := v_execute.pc + 4;
 								v_wr_en  := true;
-								jmp_addr         <= v_execute.pc + v_execute.imm;
-								instruction_jump <= '1';
+								-- decode always predicts jal taken and has already
+								-- redirected fetch, so there should be nothing to correct
+								-- but just in case
+								if v_execute.predicted_taken = '0' then
+									jmp_addr         <= v_execute.pc + v_execute.imm;
+									instruction_jump <= '1';
+								end if;
 	
 							when "1100111" =>   -- jalr
 								v_result := v_execute.pc + 4;
@@ -527,8 +584,13 @@ begin
 									when "111"  => v_branch := (v_rs1 >= v_rs2);                    -- bgeu
 									when others => v_branch := false;
 								end case;
-								if v_branch then
-									jmp_addr         <= v_execute.pc + v_execute.imm;
+								-- redirects if branch prediction was wrong
+								if v_branch /= (v_execute.predicted_taken = '1') then
+									if v_branch then
+										jmp_addr <= v_execute.pc + v_execute.imm;
+									else
+										jmp_addr <= v_execute.pc + 4;
+									end if;
 									instruction_jump <= '1';
 								end if;
 	

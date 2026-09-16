@@ -13,10 +13,16 @@ if %errorlevel% neq 0 (
     echo startup.s compilation failed!  
     exit /b 1
 )
-echo Compiling DramTest.c...
-riscv-none-elf-gcc.exe -march=rv32im -mabi=ilp32 -ffreestanding -Wall -Wextra -g -ffunction-sections -fdata-sections -O2 -ID:\delete_me\Arty-SoC\Listings\C\Libs -c D:\delete_me\Arty-SoC\Listings\C\DramTest.c -o D:\delete_me\Arty-SoC\Listings\Build\DramTest.o
+echo Compiling BenchMarks.c...
+riscv-none-elf-gcc.exe -march=rv32im -mabi=ilp32 -ffreestanding -Wall -Wextra -g -ffunction-sections -fdata-sections -O2 -ID:\delete_me\Arty-SoC\Listings\C\Libs -c D:\delete_me\Arty-SoC\Listings\C\BenchMarks.c -o D:\delete_me\Arty-SoC\Listings\Build\BenchMarks.o
 if %errorlevel% neq 0 (
-    echo DramTest.c compilation failed!  
+    echo BenchMarks.c compilation failed!  
+    exit /b 1
+)
+echo Compiling bench.c...
+riscv-none-elf-gcc.exe -march=rv32im -mabi=ilp32 -ffreestanding -Wall -Wextra -g -ffunction-sections -fdata-sections -O2 -ID:\delete_me\Arty-SoC\Listings\C\Libs -c D:\delete_me\Arty-SoC\Listings\C\Libs\bench.c -o D:\delete_me\Arty-SoC\Listings\Build\bench.o
+if %errorlevel% neq 0 (
+    echo bench.c compilation failed!  
     exit /b 1
 )
 echo Compiling ddr_check.c...
@@ -50,14 +56,14 @@ if %errorlevel% neq 0 (
     exit /b 1
 )
 echo Linking...
-riscv-none-elf-gcc.exe -march=rv32im -mabi=ilp32 -nostdlib -Wl,--gc-sections -Wl,--no-warn-rwx-segments -Wl,-Map=D:\delete_me\Arty-SoC\Listings\Build\DramTest.map -T D:\delete_me\Arty-SoC\Listings\Build\linker.ld -o D:\delete_me\Arty-SoC\Listings\Build\DramTest.elf D:\delete_me\Arty-SoC\Listings\Build\startup.o D:\delete_me\Arty-SoC\Listings\Build\DramTest.o D:\delete_me\Arty-SoC\Listings\Build\ddr_check.o D:\delete_me\Arty-SoC\Listings\Build\heap.o D:\delete_me\Arty-SoC\Listings\Build\Peripherals.o D:\delete_me\Arty-SoC\Listings\Build\printf.o D:\delete_me\Arty-SoC\Listings\Build\uart_glue.o -lgcc
+riscv-none-elf-gcc.exe -march=rv32im -mabi=ilp32 -nostdlib -Wl,--gc-sections -Wl,--no-warn-rwx-segments -Wl,-Map=D:\delete_me\Arty-SoC\Listings\Build\BenchMarks.map -T D:\delete_me\Arty-SoC\Listings\Build\linker.ld -o D:\delete_me\Arty-SoC\Listings\Build\BenchMarks.elf D:\delete_me\Arty-SoC\Listings\Build\startup.o D:\delete_me\Arty-SoC\Listings\Build\BenchMarks.o D:\delete_me\Arty-SoC\Listings\Build\bench.o D:\delete_me\Arty-SoC\Listings\Build\ddr_check.o D:\delete_me\Arty-SoC\Listings\Build\heap.o D:\delete_me\Arty-SoC\Listings\Build\Peripherals.o D:\delete_me\Arty-SoC\Listings\Build\printf.o D:\delete_me\Arty-SoC\Listings\Build\uart_glue.o -lgcc
 if %errorlevel% neq 0 (
     echo Linking failed!
     exit /b 1
 )
-riscv-none-elf-objcopy.exe -O binary D:\delete_me\Arty-SoC\Listings\Build\DramTest.elf D:\delete_me\Arty-SoC\Listings\Build\DramTest.bin
+riscv-none-elf-objcopy.exe -O binary D:\delete_me\Arty-SoC\Listings\Build\BenchMarks.elf D:\delete_me\Arty-SoC\Listings\Build\BenchMarks.bin
 echo ========================================
 echo Build complete!
 echo ========================================
-riscv-none-elf-objdump.exe -d -S D:\delete_me\Arty-SoC\Listings\Build\DramTest.elf > D:\delete_me\Arty-SoC\Listings\Build\DramTest.dis
-riscv-none-elf-size.exe D:\delete_me\Arty-SoC\Listings\Build\DramTest.elf
+riscv-none-elf-objdump.exe -d -S D:\delete_me\Arty-SoC\Listings\Build\BenchMarks.elf > D:\delete_me\Arty-SoC\Listings\Build\BenchMarks.dis
+riscv-none-elf-size.exe D:\delete_me\Arty-SoC\Listings\Build\BenchMarks.elf
