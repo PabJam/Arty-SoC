@@ -1,0 +1,303 @@
+
+Discarded input sections
+
+ .text          0x00000000        0x0 D:\delete_me\Arty-SoC\Listings\Build\startup.o
+ .data          0x00000000        0x0 D:\delete_me\Arty-SoC\Listings\Build\startup.o
+ .bss           0x00000000        0x0 D:\delete_me\Arty-SoC\Listings\Build\startup.o
+ .riscv.attributes
+                0x00000000       0x28 D:\delete_me\Arty-SoC\Listings\Build\startup.o
+ .text          0x00000000        0x0 D:\delete_me\Arty-SoC\Listings\Build\Fibonacci.o
+ .data          0x00000000        0x0 D:\delete_me\Arty-SoC\Listings\Build\Fibonacci.o
+ .bss           0x00000000        0x0 D:\delete_me\Arty-SoC\Listings\Build\Fibonacci.o
+ .comment       0x00000000       0x34 D:\delete_me\Arty-SoC\Listings\Build\Fibonacci.o
+ .note.GNU-stack
+                0x00000000        0x0 D:\delete_me\Arty-SoC\Listings\Build\Fibonacci.o
+ .riscv.attributes
+                0x00000000       0x2a D:\delete_me\Arty-SoC\Listings\Build\Fibonacci.o
+ .text          0x00000000        0x0 D:\delete_me\Arty-SoC\Listings\Build\bench.o
+ .data          0x00000000        0x0 D:\delete_me\Arty-SoC\Listings\Build\bench.o
+ .bss           0x00000000        0x0 D:\delete_me\Arty-SoC\Listings\Build\bench.o
+ .text.fib      0x00000000      0x3e8 D:\delete_me\Arty-SoC\Listings\Build\bench.o
+ .rodata.run_benchmarks.str1.4
+                0x00000000      0x2d9 D:\delete_me\Arty-SoC\Listings\Build\bench.o
+ .text.run_benchmarks
+                0x00000000     0x1d0c D:\delete_me\Arty-SoC\Listings\Build\bench.o
+ .sbss.sink     0x00000000        0x4 D:\delete_me\Arty-SoC\Listings\Build\bench.o
+ .sbss.ddr_buf  0x00000000        0x4 D:\delete_me\Arty-SoC\Listings\Build\bench.o
+ .bss.bram_buf  0x00000000      0x800 D:\delete_me\Arty-SoC\Listings\Build\bench.o
+ .debug_info    0x00000000     0x2f17 D:\delete_me\Arty-SoC\Listings\Build\bench.o
+ .debug_abbrev  0x00000000      0x377 D:\delete_me\Arty-SoC\Listings\Build\bench.o
+ .debug_loclists
+                0x00000000     0x1bbb D:\delete_me\Arty-SoC\Listings\Build\bench.o
+ .debug_aranges
+                0x00000000       0x28 D:\delete_me\Arty-SoC\Listings\Build\bench.o
+ .debug_rnglists
+                0x00000000      0x4c7 D:\delete_me\Arty-SoC\Listings\Build\bench.o
+ .debug_line    0x00000000     0x3392 D:\delete_me\Arty-SoC\Listings\Build\bench.o
+ .debug_str     0x00000000      0x1ab D:\delete_me\Arty-SoC\Listings\Build\bench.o
+ .debug_line_str
+                0x00000000       0x9f D:\delete_me\Arty-SoC\Listings\Build\bench.o
+ .comment       0x00000000       0x34 D:\delete_me\Arty-SoC\Listings\Build\bench.o
+ .note.GNU-stack
+                0x00000000        0x0 D:\delete_me\Arty-SoC\Listings\Build\bench.o
+ .debug_frame   0x00000000       0xc4 D:\delete_me\Arty-SoC\Listings\Build\bench.o
+ .riscv.attributes
+                0x00000000       0x2a D:\delete_me\Arty-SoC\Listings\Build\bench.o
+ .text          0x00000000        0x0 D:\delete_me\Arty-SoC\Listings\Build\ddr_check.o
+ .data          0x00000000        0x0 D:\delete_me\Arty-SoC\Listings\Build\ddr_check.o
+ .bss           0x00000000        0x0 D:\delete_me\Arty-SoC\Listings\Build\ddr_check.o
+ .rodata.ddr_report.str1.4
+                0x00000000      0x35f D:\delete_me\Arty-SoC\Listings\Build\ddr_check.o
+ .text.ddr_report
+                0x00000000      0xe14 D:\delete_me\Arty-SoC\Listings\Build\ddr_check.o
+ .sbss.fails    0x00000000        0x4 D:\delete_me\Arty-SoC\Listings\Build\ddr_check.o
+ .debug_info    0x00000000     0x1b29 D:\delete_me\Arty-SoC\Listings\Build\ddr_check.o
+ .debug_abbrev  0x00000000      0x249 D:\delete_me\Arty-SoC\Listings\Build\ddr_check.o
+ .debug_loclists
+                0x00000000     0x1846 D:\delete_me\Arty-SoC\Listings\Build\ddr_check.o
+ .debug_aranges
+                0x00000000       0x20 D:\delete_me\Arty-SoC\Listings\Build\ddr_check.o
+ .debug_rnglists
+                0x00000000      0x4e6 D:\delete_me\Arty-SoC\Listings\Build\ddr_check.o
+ .debug_line    0x00000000     0x1736 D:\delete_me\Arty-SoC\Listings\Build\ddr_check.o
+ .debug_str     0x00000000      0x148 D:\delete_me\Arty-SoC\Listings\Build\ddr_check.o
+ .debug_line_str
+                0x00000000       0x99 D:\delete_me\Arty-SoC\Listings\Build\ddr_check.o
+ .comment       0x00000000       0x34 D:\delete_me\Arty-SoC\Listings\Build\ddr_check.o
+ .note.GNU-stack
+                0x00000000        0x0 D:\delete_me\Arty-SoC\Listings\Build\ddr_check.o
+ .debug_frame   0x00000000       0x84 D:\delete_me\Arty-SoC\Listings\Build\ddr_check.o
+ .riscv.attributes
+                0x00000000       0x2a D:\delete_me\Arty-SoC\Listings\Build\ddr_check.o
+ .text          0x00000000        0x0 D:\delete_me\Arty-SoC\Listings\Build\heap.o
+ .data          0x00000000        0x0 D:\delete_me\Arty-SoC\Listings\Build\heap.o
+ .bss           0x00000000        0x0 D:\delete_me\Arty-SoC\Listings\Build\heap.o
+ .text.malloc   0x00000000      0x148 D:\delete_me\Arty-SoC\Listings\Build\heap.o
+ .text.free     0x00000000      0x13c D:\delete_me\Arty-SoC\Listings\Build\heap.o
+ .text.calloc   0x00000000       0xa8 D:\delete_me\Arty-SoC\Listings\Build\heap.o
+ .text.heap_stats
+                0x00000000       0xc4 D:\delete_me\Arty-SoC\Listings\Build\heap.o
+ .comment       0x00000000       0x34 D:\delete_me\Arty-SoC\Listings\Build\heap.o
+ .note.GNU-stack
+                0x00000000        0x0 D:\delete_me\Arty-SoC\Listings\Build\heap.o
+ .riscv.attributes
+                0x00000000       0x2a D:\delete_me\Arty-SoC\Listings\Build\heap.o
+ .text          0x00000000        0x0 D:\delete_me\Arty-SoC\Listings\Build\Peripherals.o
+ .data          0x00000000        0x0 D:\delete_me\Arty-SoC\Listings\Build\Peripherals.o
+ .bss           0x00000000        0x0 D:\delete_me\Arty-SoC\Listings\Build\Peripherals.o
+ .text.set_pin  0x00000000       0x34 D:\delete_me\Arty-SoC\Listings\Build\Peripherals.o
+ .text.set_pins
+                0x00000000       0x14 D:\delete_me\Arty-SoC\Listings\Build\Peripherals.o
+ .text.pin_mode
+                0x00000000       0x2c D:\delete_me\Arty-SoC\Listings\Build\Peripherals.o
+ .text.wait_ms  0x00000000       0x50 D:\delete_me\Arty-SoC\Listings\Build\Peripherals.o
+ .text.wait_us  0x00000000       0x28 D:\delete_me\Arty-SoC\Listings\Build\Peripherals.o
+ .sbss.gpio_out_shadow
+                0x00000000        0x4 D:\delete_me\Arty-SoC\Listings\Build\Peripherals.o
+ .debug_info    0x00000000      0x4b7 D:\delete_me\Arty-SoC\Listings\Build\Peripherals.o
+ .debug_abbrev  0x00000000      0x17f D:\delete_me\Arty-SoC\Listings\Build\Peripherals.o
+ .debug_loclists
+                0x00000000      0x1ae D:\delete_me\Arty-SoC\Listings\Build\Peripherals.o
+ .debug_aranges
+                0x00000000       0x40 D:\delete_me\Arty-SoC\Listings\Build\Peripherals.o
+ .debug_rnglists
+                0x00000000       0x79 D:\delete_me\Arty-SoC\Listings\Build\Peripherals.o
+ .debug_line    0x00000000      0x43a D:\delete_me\Arty-SoC\Listings\Build\Peripherals.o
+ .debug_str     0x00000000      0x164 D:\delete_me\Arty-SoC\Listings\Build\Peripherals.o
+ .debug_line_str
+                0x00000000       0xc1 D:\delete_me\Arty-SoC\Listings\Build\Peripherals.o
+ .comment       0x00000000       0x34 D:\delete_me\Arty-SoC\Listings\Build\Peripherals.o
+ .note.GNU-stack
+                0x00000000        0x0 D:\delete_me\Arty-SoC\Listings\Build\Peripherals.o
+ .debug_frame   0x00000000       0x60 D:\delete_me\Arty-SoC\Listings\Build\Peripherals.o
+ .riscv.attributes
+                0x00000000       0x2a D:\delete_me\Arty-SoC\Listings\Build\Peripherals.o
+ .text          0x00000000        0x0 D:\delete_me\Arty-SoC\Listings\Build\printf.o
+ .data          0x00000000        0x0 D:\delete_me\Arty-SoC\Listings\Build\printf.o
+ .bss           0x00000000        0x0 D:\delete_me\Arty-SoC\Listings\Build\printf.o
+ .text.snprintf
+                0x00000000       0x88 D:\delete_me\Arty-SoC\Listings\Build\printf.o
+ .text.puts     0x00000000       0x80 D:\delete_me\Arty-SoC\Listings\Build\printf.o
+ .comment       0x00000000       0x34 D:\delete_me\Arty-SoC\Listings\Build\printf.o
+ .note.GNU-stack
+                0x00000000        0x0 D:\delete_me\Arty-SoC\Listings\Build\printf.o
+ .riscv.attributes
+                0x00000000       0x2a D:\delete_me\Arty-SoC\Listings\Build\printf.o
+ .text          0x00000000        0x0 D:\delete_me\Arty-SoC\Listings\Build\uart_glue.o
+ .data          0x00000000        0x0 D:\delete_me\Arty-SoC\Listings\Build\uart_glue.o
+ .bss           0x00000000        0x0 D:\delete_me\Arty-SoC\Listings\Build\uart_glue.o
+ .comment       0x00000000       0x34 D:\delete_me\Arty-SoC\Listings\Build\uart_glue.o
+ .note.GNU-stack
+                0x00000000        0x0 D:\delete_me\Arty-SoC\Listings\Build\uart_glue.o
+ .riscv.attributes
+                0x00000000       0x2a D:\delete_me\Arty-SoC\Listings\Build\uart_glue.o
+
+Memory Configuration
+
+Name             Origin             Length             Attributes
+RAM              0x00000000         0x00020000         xrw
+DDR              0x40000000         0x10000000         rw
+*default*        0x00000000         0xffffffff
+
+Linker script and memory map
+
+LOAD D:\delete_me\Arty-SoC\Listings\Build\startup.o
+LOAD D:\delete_me\Arty-SoC\Listings\Build\Fibonacci.o
+LOAD D:\delete_me\Arty-SoC\Listings\Build\bench.o
+LOAD D:\delete_me\Arty-SoC\Listings\Build\ddr_check.o
+LOAD D:\delete_me\Arty-SoC\Listings\Build\heap.o
+LOAD D:\delete_me\Arty-SoC\Listings\Build\Peripherals.o
+LOAD D:\delete_me\Arty-SoC\Listings\Build\printf.o
+LOAD D:\delete_me\Arty-SoC\Listings\Build\uart_glue.o
+LOAD D:/delete_me/xpack-riscv-none-elf-gcc-15.2.0-1/bin/../lib/gcc/riscv-none-elf/15.2.0/rv32im/ilp32\libgcc.a
+
+.text           0x00000000     0x1374
+ *(.text.start)
+ .text.start    0x00000000       0x34 D:\delete_me\Arty-SoC\Listings\Build\startup.o
+                0x00000000                _start
+ *(.text*)
+ .text.Fibonacci
+                0x00000034      0x25c D:\delete_me\Arty-SoC\Listings\Build\Fibonacci.o
+ .text.startup.main
+                0x00000290       0xfc D:\delete_me\Arty-SoC\Listings\Build\Fibonacci.o
+                0x00000290                main
+ .text.heap_init
+                0x0000038c       0x44 D:\delete_me\Arty-SoC\Listings\Build\heap.o
+                0x0000038c                heap_init
+ .text.vfmt.constprop.0
+                0x000003d0      0xda8 D:\delete_me\Arty-SoC\Listings\Build\printf.o
+ .text.printf   0x00001178       0x54 D:\delete_me\Arty-SoC\Listings\Build\printf.o
+                0x00001178                printf
+ .text.uart_putc
+                0x000011cc       0x1c D:\delete_me\Arty-SoC\Listings\Build\uart_glue.o
+                0x000011cc                uart_putc
+ *(.rodata*)
+ .rodata.main.str1.4
+                0x000011e8       0xc1 D:\delete_me\Arty-SoC\Listings\Build\Fibonacci.o
+                                 0x81 (size before relaxing)
+ .rodata.vfmt.constprop.0.str1.4
+                0x000012a9        0x0 D:\delete_me\Arty-SoC\Listings\Build\printf.o
+                                 0x41 (size before relaxing)
+ *fill*         0x000012a9        0x3 
+ .rodata.vfmt.constprop.0
+                0x000012ac       0xc8 D:\delete_me\Arty-SoC\Listings\Build\printf.o
+                0x00001374                        . = ALIGN (0x4)
+
+.rela.dyn       0x00001374        0x0
+ .rela.text.start
+                0x00001374        0x0 D:\delete_me\Arty-SoC\Listings\Build\startup.o
+ .rela.text.heap_init
+                0x00001374        0x0 D:\delete_me\Arty-SoC\Listings\Build\startup.o
+
+.data           0x00001374        0x0
+                0x00001374                        . = ALIGN (0x4)
+                0x00001374                        _data_start = .
+ *(.data*)
+                0x00001374                        . = ALIGN (0x4)
+                0x00001374                        _data_end = .
+
+.bss            0x00001374      0x400
+                0x00001374                        . = ALIGN (0x4)
+                0x00001374                        _bss_start = .
+ *(.bss*)
+ .bss.blocks    0x00001374      0x400 D:\delete_me\Arty-SoC\Listings\Build\heap.o
+ *(COMMON)
+                0x00001774                        . = ALIGN (0x4)
+                0x00001774                        _bss_end = .
+                0x00020000                        _stack_top = (ORIGIN (RAM) + LENGTH (RAM))
+                0x40000000                        _heap_start = ORIGIN (DDR)
+                0x50000000                        _heap_end = (ORIGIN (DDR) + LENGTH (DDR))
+
+.sbss.inited    0x00001774        0x4
+ .sbss.inited   0x00001774        0x4 D:\delete_me\Arty-SoC\Listings\Build\heap.o
+
+.sbss.nblocks   0x00001778        0x4
+ .sbss.nblocks  0x00001778        0x4 D:\delete_me\Arty-SoC\Listings\Build\heap.o
+
+/DISCARD/
+ *(.comment)
+ *(.note*)
+ *(.eh_frame*)
+ *(.riscv.attributes)
+OUTPUT(D:\delete_me\Arty-SoC\Listings\Build\Fibonacci.elf elf32-littleriscv)
+
+.debug_info     0x00000000     0x152c
+ .debug_info    0x00000000      0x335 D:\delete_me\Arty-SoC\Listings\Build\Fibonacci.o
+ .debug_info    0x00000335      0x4bc D:\delete_me\Arty-SoC\Listings\Build\heap.o
+ .debug_info    0x000007f1      0xc2f D:\delete_me\Arty-SoC\Listings\Build\printf.o
+ .debug_info    0x00001420      0x10c D:\delete_me\Arty-SoC\Listings\Build\uart_glue.o
+
+.debug_abbrev   0x00000000      0x7f8
+ .debug_abbrev  0x00000000      0x15d D:\delete_me\Arty-SoC\Listings\Build\Fibonacci.o
+ .debug_abbrev  0x0000015d      0x292 D:\delete_me\Arty-SoC\Listings\Build\heap.o
+ .debug_abbrev  0x000003ef      0x323 D:\delete_me\Arty-SoC\Listings\Build\printf.o
+ .debug_abbrev  0x00000712       0xe6 D:\delete_me\Arty-SoC\Listings\Build\uart_glue.o
+
+.debug_loclists
+                0x00000000     0x28f7
+ .debug_loclists
+                0x00000000      0x2a6 D:\delete_me\Arty-SoC\Listings\Build\Fibonacci.o
+ .debug_loclists
+                0x000002a6      0x3b4 D:\delete_me\Arty-SoC\Listings\Build\heap.o
+ .debug_loclists
+                0x0000065a     0x2266 D:\delete_me\Arty-SoC\Listings\Build\printf.o
+ .debug_loclists
+                0x000028c0       0x37 D:\delete_me\Arty-SoC\Listings\Build\uart_glue.o
+
+.debug_aranges  0x00000000       0xc0
+ .debug_aranges
+                0x00000000       0x28 D:\delete_me\Arty-SoC\Listings\Build\Fibonacci.o
+ .debug_aranges
+                0x00000028       0x40 D:\delete_me\Arty-SoC\Listings\Build\heap.o
+ .debug_aranges
+                0x00000068       0x38 D:\delete_me\Arty-SoC\Listings\Build\printf.o
+ .debug_aranges
+                0x000000a0       0x20 D:\delete_me\Arty-SoC\Listings\Build\uart_glue.o
+
+.debug_rnglists
+                0x00000000      0x497
+ .debug_rnglists
+                0x00000000      0x10f D:\delete_me\Arty-SoC\Listings\Build\Fibonacci.o
+ .debug_rnglists
+                0x0000010f       0x93 D:\delete_me\Arty-SoC\Listings\Build\heap.o
+ .debug_rnglists
+                0x000001a2      0x2ca D:\delete_me\Arty-SoC\Listings\Build\printf.o
+ .debug_rnglists
+                0x0000046c       0x2b D:\delete_me\Arty-SoC\Listings\Build\uart_glue.o
+
+.debug_line     0x00000000     0x3567
+ .debug_line    0x00000000      0x820 D:\delete_me\Arty-SoC\Listings\Build\Fibonacci.o
+ .debug_line    0x00000820      0x9f7 D:\delete_me\Arty-SoC\Listings\Build\heap.o
+ .debug_line    0x00001217     0x2273 D:\delete_me\Arty-SoC\Listings\Build\printf.o
+ .debug_line    0x0000348a       0xdd D:\delete_me\Arty-SoC\Listings\Build\uart_glue.o
+
+.debug_str      0x00000000      0x268
+ .debug_str     0x00000000      0x268 D:\delete_me\Arty-SoC\Listings\Build\Fibonacci.o
+                                 0xed (size before relaxing)
+ .debug_str     0x00000268        0x0 D:\delete_me\Arty-SoC\Listings\Build\heap.o
+                                0x17e (size before relaxing)
+ .debug_str     0x00000268        0x0 D:\delete_me\Arty-SoC\Listings\Build\printf.o
+                                0x166 (size before relaxing)
+ .debug_str     0x00000268        0x0 D:\delete_me\Arty-SoC\Listings\Build\uart_glue.o
+                                 0xca (size before relaxing)
+
+.debug_line_str
+                0x00000000      0x1c2
+ .debug_line_str
+                0x00000000      0x1c2 D:\delete_me\Arty-SoC\Listings\Build\Fibonacci.o
+                                 0xbc (size before relaxing)
+ .debug_line_str
+                0x000001c2        0x0 D:\delete_me\Arty-SoC\Listings\Build\heap.o
+                                 0x7f (size before relaxing)
+ .debug_line_str
+                0x000001c2        0x0 D:\delete_me\Arty-SoC\Listings\Build\printf.o
+                                 0xe1 (size before relaxing)
+ .debug_line_str
+                0x000001c2        0x0 D:\delete_me\Arty-SoC\Listings\Build\uart_glue.o
+                                 0x97 (size before relaxing)
+
+.debug_frame    0x00000000      0x264
+ .debug_frame   0x00000000       0xcc D:\delete_me\Arty-SoC\Listings\Build\Fibonacci.o
+ .debug_frame   0x000000cc       0x74 D:\delete_me\Arty-SoC\Listings\Build\heap.o
+ .debug_frame   0x00000140      0x104 D:\delete_me\Arty-SoC\Listings\Build\printf.o
+ .debug_frame   0x00000244       0x20 D:\delete_me\Arty-SoC\Listings\Build\uart_glue.o

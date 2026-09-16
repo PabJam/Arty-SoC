@@ -326,8 +326,6 @@ architecture Behavioral of Top_of_Arty_SoC is
 	signal peripherals_read_data : std_logic_vector(31 downto 0) := (others => '0');
 	signal alu_read_data : std_logic_vector(31 downto 0) := (others => '0');
 	signal dm_alu_addr_dv : std_logic := '0';
-	type t_dm_read_states is (state_dm_read_idle, state_dm_read_wait, state_dm_read);
-	signal dm_read_state : t_dm_read_states := state_dm_read_idle;
 	--Logic Unit Signal
 	signal ctrl_arithmetic_logic_unit : std_logic := '0';
 	signal latched_ctrl_arithmetic_logic_unit : std_logic := '0';
@@ -392,13 +390,12 @@ architecture Behavioral of Top_of_Arty_SoC is
 	
 	--attribute MARK_DEBUG : string;
 	
-	--attribute MARK_DEBUG of ui_clk : signal is "TRUE";
-	--attribute MARK_DEBUG of btnReg : signal is "TRUE";
-	--attribute MARK_DEBUG of btnDeBnc : signal is "TRUE";
-	--attribute MARK_DEBUG of uart_RX_Data : signal is "TRUE";
-	--attribute MARK_DEBUG of uart_RX_DV : signal is "TRUE";
-	--attribute MARK_DEBUG of uart_RX : signal is "TRUE";
-	--attribute MARK_DEBUG of i2c_slave_rx_register_cntr : signal is "TRUE";
+	--attribute MARK_DEBUG of sel_bram : signal is "TRUE";
+	--attribute MARK_DEBUG of dm_wr_en : signal is "TRUE";
+	--attribute MARK_DEBUG of dm_alu_addr_dv : signal is "TRUE";
+	--attribute MARK_DEBUG of dm_read_dv : signal is "TRUE";
+	--attribute MARK_DEBUG of dm_data_out : signal is "TRUE";
+	--attribute MARK_DEBUG of alu_read_data : signal is "TRUE";
 	--attribute MARK_DEBUG of i2c_slave_rx_byte : signal is "TRUE";
 	--attribute MARK_DEBUG of i2c_slave_rx_dv : signal is "TRUE";
 	--attribute MARK_DEBUG of i2c_slave_tx_byte : signal is "TRUE";
@@ -1045,21 +1042,9 @@ begin
 	begin
 		if rising_edge(ui_clk) then
 			dm_read_dv <= '0';
-			case dm_read_state is
-				when state_dm_read_idle =>
-					if dm_alu_addr_dv = '1' and dm_wr_en = "0000" and sel_bram = '1' then
-						dm_read_state <= state_dm_read_wait;
-					else
-						dm_read_state <= state_dm_read_idle;
-					end if;
-				when state_dm_read_wait => 
-					dm_read_state <= state_dm_read;
-				when state_dm_read =>
-					dm_read_state <= state_dm_read_idle;
-					dm_read_dv <= '1';
-				when others =>
-					null;
-			end case;	
+			if dm_alu_addr_dv = '1' and dm_wr_en = "0000" and sel_bram = '1' then
+				dm_read_dv <= '1';
+			end if;
 		end if;
 	end process;
 	

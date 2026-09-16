@@ -74,13 +74,6 @@ architecture Behavioral of I2C_Slave is
 	signal data_cntr : natural range 0 to DATA_MAX := DATA_MAX;
 	signal wait_read_ack : std_logic := '0';
 	
-	
-	attribute MARK_DEBUG : string;
-
-	attribute MARK_DEBUG of rx_address : signal is "TRUE";
-	attribute MARK_DEBUG of i2c_state : signal is "TRUE";
-	attribute MARK_DEBUG of rw_state : signal is "TRUE";
-	
 begin
 
 	p_I2C_RX : process(i_Clk)
