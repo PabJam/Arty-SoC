@@ -78,24 +78,72 @@ architecture Behavioral of Arithmetic_Logic_Unit is
 	signal dm_addr : std_logic_vector(31 downto 0);
 
 	-- fetch stage
-	type t_fetch_states is (fetch_state_idle, fetch_state_next, fetch_state_next_2);
-	signal fetch_state : t_fetch_states := fetch_state_next;
+	--
+	-- Whole 64 bit words are buffered. decode takes the
+	-- whole word with a 1 bit index to pick the lower/upper 32bit instruction
+	--
+	-- The buffer doubles as a loop cache. A taken backward branch whose target
+	-- is still held there needs no refetch at all! decode just moves its read
+	-- pointer back.
+	constant C_IF_WIDTH : natural := 3;              -- 8 words = 16 instructions
+	constant C_IF_DEPTH : natural := 2**C_IF_WIDTH;
+	-- imm(31 downto 7) all ones means a backward offset of at most 128 bytes,
+	-- which is the most an 8 word buffer could possibly hold
+	constant C_IMM_FAR : unsigned(24 downto 0) := (others => '1');
 
-	type t_pm_fetch_array is array(0 to 3) of unsigned(31 downto 0);
-	type t_2_u32 is array(0 to 1) of unsigned(31 downto 0);
+	type t_if_entry is record
+		word : std_logic_vector(63 downto 0);
+		base_pc : unsigned(31 downto 0);             -- pc of instruction 0 of the word
+	end record;
+	type t_if_array is array (0 to C_IF_DEPTH - 1) of t_if_entry;
 
-	signal pc : t_2_u32;
-	signal pc_fetch : t_pm_fetch_array;
-	signal instruction_fetch : t_pm_fetch_array;
-	signal instruction_ready : std_logic := '0';
-	signal instruction_read : std_logic := '0';
-	
-	-- decode stage
-	signal instruction_upper : unsigned(0 downto 0) := (others => '0');
-	signal next_instruction : unsigned(31 downto 0) := (others => '0');
-	signal next_pc : unsigned(31 downto 0) := (others => '0');
-	signal next_instruction_valid : std_logic := '0';
-	signal instruction_jumped : std_logic := '0';
+	-- Instruction Fetch Queue
+	signal ifq : t_if_array;
+	signal ifq_wr : unsigned(C_IF_WIDTH downto 0) := (others => '0'); -- fetch owns
+	signal ifq_rd : unsigned(C_IF_WIDTH downto 0) := (others => '0'); -- decode owns
+	signal ifq_idx : unsigned(0 downto 0) := (others => '0');         -- decode bit to decide between lower/upper instruction
+	signal ifq_empty : std_logic;
+	signal ifq_room : std_logic;
+
+	signal pc_fetch : unsigned(31 downto 0) := (others => '0');
+
+	-- set by decode when it rewinds into the ifq buffer. Fetch stops while it is
+	-- high, because every instruction the loop needs is already held and any
+	-- further fetching would overwrite it.
+	signal loop_mode : std_logic := '0';
+
+	-- words pushed since the last flush. Tells the
+	-- rewind whether the slot it wants to jump back to has actually been
+	-- written yet, which matters for the first iteration of a loop.
+	signal ifq_filled : unsigned(C_IF_WIDTH downto 0) := (others => '0');
+
+	-- return address stack
+	--
+	-- jalr cannot be predicted from the
+	-- instruction itself, because its target is in a register. Calls and
+	-- returns nest, so the target of a return is almost always the address
+	-- pushed by the matching call.
+	--
+	-- The stack is an array and a pointer. So a wrong prediction can be reversed
+	-- and does not destroy the whole stack. For example a forward branch is never 
+	-- predicted to be taken so a structure with different return paths:
+	-- fib: slti a5, a0, 2
+    --      beq  a5, x0, +8     <- forward branch, prediction: not taken
+    -- 		ret                 <- fib+8
+    -- 		addi sp, sp, -16    <- fib+12, the recursive path
+    -- 		...
+    -- 		ret                 <- the real return for this path
+	-- would always assume the first return is taken and with an array the return address is not lost 
+	-- and can be restored when execute signals that the prediction was wrong.
+	-- ras_sp is the speculative pointer, ras_sp_commit tracks if execute actually pushed/poped 
+	-- an address. A flush restores the speculative from the commit, which undoes every
+	-- wrong path push and pop in a single assignment.
+	constant C_RAS_WIDTH : natural := 3;
+	type t_ras is array (0 to 2**C_RAS_WIDTH - 1) of unsigned(31 downto 0);
+	signal ras : t_ras := (others => (others => '0'));
+	signal ras_sp : unsigned(C_RAS_WIDTH - 1 downto 0) := (others => '0');
+	signal ras_sp_commit : unsigned(C_RAS_WIDTH - 1 downto 0) := (others => '0');
+	signal ras_top : unsigned(31 downto 0) := (others => '0'); -- registerd, so the ras does not need to be indexed behind alot of conditional logic
 	
 	-- decoded instruction queue
 	constant C_IQ_WIDTH : natural := 2;
@@ -110,9 +158,12 @@ architecture Behavioral of Arithmetic_Logic_Unit is
 		rd : natural range 0 to 31;
 		imm : unsigned(31 downto 0);
 		pc : unsigned(31 downto 0);
-		-- jal & branch with negative offset (likely loop) predict that the branch will be taken.
-		-- It is saved here so the execute step can varify and correct if neccessary
-		predicted_taken : std_logic; 
+		-- what the decode stage guessed for this instruction, so execute knows
+		-- what it is comparing against. Only ever set for backwards branches (likely loops) and jal.
+		predicted_taken : std_logic;
+		-- what the return address stack supplied for a jalr. Execute compares
+		-- the real rs1 + imm against it and only redirects when they differ.
+		pred_addr : unsigned(31 downto 0);
 	end record;
 	
 	constant C_DECODED_RST : t_decoded := 
@@ -125,7 +176,8 @@ architecture Behavioral of Arithmetic_Logic_Unit is
 		rd => 0,
 		imm => (others => '0'),
 		pc => (others => '0'),
-		predicted_taken => '0'
+		predicted_taken => '0',
+		pred_addr => (others => '0')
 	);
 	
 	-- fifo to queue instructions
@@ -190,124 +242,62 @@ begin
 	
 	-- same read/write pointer => empty
 	-- same read/write pointer with different msb => full
+	ifq_empty <= '1' when ifq_wr = ifq_rd else '0';
+	-- leave a slot spare so a push that is already committed always has room
+	ifq_room <= '1' when (ifq_wr - ifq_rd) < (C_IF_DEPTH - 1) else '0';
+
 	iq_empty <= '1' when iq_wr_ptr = iq_rd_ptr else '0';
 	iq_full <= '1' when (iq_wr_ptr(C_IQ_WIDTH) /= iq_rd_ptr(C_IQ_WIDTH)) and 
 		(iq_wr_ptr(C_IQ_WIDTH - 1 downto 0) = iq_rd_ptr(C_IQ_WIDTH - 1 downto 0))
 		else '0';
 
 	-- fetch stage
+	--
+	-- fetches two instructions at once and writes them to the ifq 
 	Instruction_Fetch_Proc : process(i_Clk)
-		variable v_addr_p8 : unsigned(31 downto 0);
+		variable v_target : unsigned(31 downto 0);
+		variable v_next : unsigned(31 downto 0);
 	begin
 		if rising_edge(i_Clk) then
 			if (i_Sync_nRst = '0') then
-				pc_fetch(0) <= x"0000000" & "0000";
-				pc_fetch(1) <= x"0000000" & "0100";
-				pc_fetch(2) <= x"0000000" & "1000";
-				pc_fetch(3) <= x"0000000" & "1100";
-				pc(0) <= (others => '0');
-				pc(1) <= (others => '0');
-				instruction_fetch(0) <= (others => '0'); 
-				instruction_fetch(1) <= (others => '0'); 
-				instruction_fetch(2) <= (others => '0'); 
-				instruction_fetch(3) <= (others => '0'); 
+				pc_fetch <= (others => '0');
+				ifq_wr <= (others => '0');
 				o_PM_Addr <= (others => '0');
-				fetch_state <= fetch_state_next;
-				instruction_ready <= '0';
-			
+				ifq_filled <= (others => '0');
+
 			elsif ctrl_arithmetic_logic_unit = '1' and i_Take_Ctrl_ALU = '0' then
-				
+
 				-- a correction from execute always beats a guess from decode
-				if (instruction_jump = '1') then
-					o_PM_Addr <= std_logic_vector(jmp_addr(16 downto 3)); -- jmp_addr(2) decides if lower or upper 32bit 
-					pc_fetch(0) <= jmp_addr(31 downto 3) & '0' & jmp_addr(1 downto 0);
-					pc_fetch(1) <= jmp_addr(31 downto 3) & '1' & jmp_addr(1 downto 0);
-					fetch_state <= fetch_state_next;
-					instruction_ready <= '0';
-				elsif (predict_jump = '1') then
-					o_PM_Addr <= std_logic_vector(predict_addr(16 downto 3));
-					pc_fetch(0) <= predict_addr(31 downto 3) & '0' & predict_addr(1 downto 0);
-					pc_fetch(1) <= predict_addr(31 downto 3) & '1' & predict_addr(1 downto 0);
-					fetch_state <= fetch_state_next;
-					instruction_ready <= '0';
-				else
-					case fetch_state is 
-						
-						when fetch_state_next =>
-							instruction_ready <= '0';
-							o_PM_Addr <= std_logic_vector(pc_fetch(0)(16 downto 3));
-							if i_PM_DV = '1' then
-								instruction_fetch(0) <= unsigned(i_PM_Data(31 downto 0));
-								instruction_fetch(1) <= unsigned(i_PM_Data(63 downto 32));
-								pc(0) <= pc_fetch(0);
-								pc(1) <= pc_fetch(1);
-								instruction_ready <= '1';
-								v_addr_p8 := pc_fetch(0) + 8;
-								o_PM_Addr <= std_logic_vector(v_addr_p8(16 downto 3));	
-								pc_fetch(2) <= v_addr_p8;
-								pc_fetch(3) <= pc_fetch(1) + 8;
-								
-								fetch_state <= fetch_state_next_2;
-							else
-								fetch_state <= fetch_state_next;
-							end if;
-						
-						when fetch_state_next_2 =>
-							instruction_ready <= '1';
-							o_PM_Addr <= std_logic_vector(pc_fetch(2)(16 downto 3));
-							if i_PM_DV = '1' then
-								if instruction_read = '1' then
-									instruction_fetch(0) <= unsigned(i_PM_Data(31 downto 0));
-									instruction_fetch(1) <= unsigned(i_PM_Data(63 downto 32));
-									pc_fetch(0) <= pc_fetch(2);
-									pc_fetch(1) <= pc_fetch(3);
-									pc(0) <= pc_fetch(2);
-									pc(1) <= pc_fetch(3);
-									v_addr_p8 := pc_fetch(2) + 8;
-									pc_fetch(2) <= v_addr_p8;
-									pc_fetch(3) <= pc_fetch(3) + 8;
-									o_PM_Addr <= std_logic_vector(v_addr_p8(16 downto 3));
-									fetch_state <= fetch_state_next_2;
-								else
-									instruction_fetch(2) <= unsigned(i_PM_Data(31 downto 0));
-									instruction_fetch(3) <= unsigned(i_PM_Data(63 downto 32));
-									fetch_state <= fetch_state_idle;
-								end if;
-							elsif instruction_read = '1' then
-								instruction_ready <= '0';
-								pc_fetch(0) <= pc_fetch(2);
-								pc_fetch(1) <= pc_fetch(3);
-								fetch_state <= fetch_state_next;
-							else
-								fetch_state <= fetch_state_next_2;
-							end if;
-							
-						when fetch_state_idle =>
-							instruction_ready <= '1';
-							if instruction_read = '1' then 
-								pc_fetch(0) <= pc_fetch(2);
-								pc_fetch(1) <= pc_fetch(3);
-								pc(0) <= pc_fetch(2);
-								pc(1) <= pc_fetch(3);
-								instruction_fetch(0) <= instruction_fetch(2);
-								instruction_fetch(1) <= instruction_fetch(3);
-								v_addr_p8 := pc_fetch(2) + 8;
-								pc_fetch(2) <= v_addr_p8;
-								pc_fetch(3) <= pc_fetch(3) + 8;
-								o_PM_Addr <= std_logic_vector(v_addr_p8(16 downto 3));
-								
-								fetch_state <= fetch_state_next_2;
-							else
-								fetch_state <= fetch_state_idle;
-							end if;
-						
-						when others =>
-							null;
-							fetch_state <= fetch_state_next;
-					end case;
+				if instruction_jump = '1' or predict_jump = '1' then
+					if instruction_jump = '1' then
+						v_target := jmp_addr;
+					else
+						v_target := predict_addr;
+					end if;
+					-- Everything buffered is on the not taken path so it needs to be flushed.
+					-- ifq_filled is cleared so a potential loopback does not target invalid instructions
+					pc_fetch <= v_target(31 downto 3) & "000";
+					o_PM_Addr <= std_logic_vector(v_target(16 downto 3));
+					ifq_wr <= (others => '0');
+					ifq_filled <= (others => '0');
+
+				elsif loop_mode = '1' then
+					-- the loop is entirely inside the buffer, fetching would only
+					-- overwrite instructions decode still needs
+					null;
+
+				elsif i_PM_DV = '1' and ifq_room = '1' then
+					ifq(to_integer(ifq_wr(C_IF_WIDTH - 1 downto 0))).word <= i_PM_Data;
+					ifq(to_integer(ifq_wr(C_IF_WIDTH - 1 downto 0))).base_pc <= pc_fetch;
+					ifq_wr <= ifq_wr + 1;
+					if ifq_filled < C_IF_DEPTH then
+						ifq_filled <= ifq_filled + 1;
+					end if;
+
+					v_next := pc_fetch + 8;
+					pc_fetch <= v_next;
+					o_PM_Addr <= std_logic_vector(v_next(16 downto 3));
 				end if;
-			else -- logic unit does not have control
-				null; 
 			end if;
 		end if;
 	end process;
@@ -316,79 +306,62 @@ begin
 	instruction_Decode_Proc : process (i_Clk)
 		variable v_instruction : unsigned(31 downto 0);
 		variable v_decoded : t_decoded;
-		variable v_take : boolean;
-		variable v_from_pm : boolean;
 		variable v_immediate_i : signed(11 downto 0);
 		variable v_immediate_s : signed(11 downto 0);
 		variable v_immediate_b : signed(12 downto 0);
 		variable v_immediate_j : signed(20 downto 0);
 		variable v_predict : boolean;
+		variable v_backward : boolean;
+		variable v_is_ret : boolean;
 		variable v_target : unsigned(31 downto 0);
+		variable v_idx : natural range 0 to 1;
+		variable v_ok : boolean;
+		variable v_s : signed(9 downto 0);
+		variable v_back : natural range 0 to 31;
+		variable v_occ : natural range 0 to 2*C_IF_DEPTH;
 	begin
 		if rising_edge(i_Clk) then
-			instruction_read <= '0';
 			predict_jump <= '0';
-	
+
 			if (i_Sync_nRst = '0') then
-				instruction_upper <= (others => '0');
-				next_instruction_valid <= '0';
-				instruction_jumped <= '0';
+				ifq_rd <= (others => '0');
+				ifq_idx <= (others => '0');
 				iq_wr_ptr <= (others => '0');
-			
-			elsif instruction_jump = '1' then -- flush instruction queue fifo
+				loop_mode <= '0';
+
+			elsif instruction_jump = '1' then
+				-- misprediction, or a jump decode could not predict. Everything
+				-- after the branch is wrong, so the decoded queue goes too, and
+				-- the return stack winds back to what actually executed.
+				ras_sp <= ras_sp_commit;
+				ras_top <= ras(to_integer(ras_sp_commit - 1));
 				iq_wr_ptr <= (others => '0');
-				next_instruction_valid <= '0';
-				instruction_jumped <= '1';
-				instruction_upper(0) <= jmp_addr(2); -- jumped to higher or lower instruction of 64bit block
-				
+				ifq_rd <= (others => '0');
+				ifq_idx <= jmp_addr(2 downto 2);
+				loop_mode <= '0';
+
 			elsif predict_jump = '1' then
-				-- Stall one cycle because 
-				-- instruction_ready is still high
-				-- from the old instruction_fetch and it still holds the old pair.
-				null;
+				-- only the fetch buffer is stale. Instructions already decoded sit
+				-- before the branch in program order and stay valid, so the decoded
+				-- queue is NOT flushed here.
+				ifq_rd <= (others => '0');
+				ifq_idx <= predict_addr(2 downto 2);
 
 			elsif ctrl_arithmetic_logic_unit = '1' and i_Take_Ctrl_ALU = '0' then
-				
-				-- take a new instruction from programm memory or next instruction from instruction fetch
-				v_from_pm := (instruction_upper(0) = '0') or (instruction_jumped = '1');
-				
-				if v_from_pm then
-					-- instruction is ready from programm memory and 
-					-- no instruction was taken on the previous edge. 
-					-- on jump to an upper instruction the instruction_ready is still '1'
-					-- even though the lower instruction is the previous instruction and 
-					-- not the next in a new 64bit block
-					v_take := (instruction_ready = '1') and (instruction_read = '0');
-				else
-					v_take := (next_instruction_valid = '1');
-				end if;
-				
-				if v_take and iq_full = '0' then
-				
-					-- next instruction is in lower instruction_fetch dont care if previous jump or not
-					if instruction_upper(0) = '0' then 
-						v_instruction := instruction_fetch(0);
-						v_decoded.pc := pc(0);
-						next_instruction <= instruction_fetch(1);
-						next_pc <= pc(1);
-						next_instruction_valid <= '1';
-						instruction_read <= '1';
-					-- instruction is on upper instruction_fetch and jumped so not already in next_instruction
-					elsif instruction_jumped = '1' then
-						v_instruction := instruction_fetch(1);
-						v_decoded.pc := pc(1);
-						next_instruction_valid <= '0';
-						instruction_read <= '1';
-					-- upper instruction but no jump before so alredy in next_instruction
+
+				if ifq_empty = '0' and iq_full = '0' then
+
+					v_idx := to_integer(ifq_idx);
+					v_instruction := unsigned(ifq(to_integer(ifq_rd(C_IF_WIDTH - 1 downto 0))).word(32*v_idx + 31 downto 32*v_idx));
+					v_decoded.pc := ifq(to_integer(ifq_rd(C_IF_WIDTH - 1 downto 0))).base_pc + to_unsigned(4*v_idx, 32);
+
+					if ifq_idx = "1" then
+						ifq_idx <= "0";
+						ifq_rd <= ifq_rd + 1;
 					else
-						v_instruction := next_instruction;
-						v_decoded.pc := next_pc;
-						next_instruction_valid <= '0';
+						ifq_idx <= "1";
 					end if;
-					
-					instruction_jumped <= '0';
-					instruction_upper <= not instruction_upper;
-					
+
 					v_decoded.opcode := v_instruction(6 downto 0);
 					v_decoded.func3 := v_instruction(14 downto 12);
 					v_decoded.func7 := v_instruction(31 downto 25);
@@ -419,37 +392,94 @@ begin
 					end case;
 					
 					-- STATIC BRANCH PREDICTION
-					-- A backward conditional branch is essentially always a loop,
-					-- so guess taken. A forward one usually skips an if body, so
-					-- guess not taken.
-					-- jal is unconditional, so it is always "predicted" taken and
-					-- can never mispredict.
-					-- The target is pc + imm
+					-- A backward conditional branch is essentially always a loop, so
+					-- branch predicted. A forward one usually skips an if body, so prediction: branch
+					-- not taken, which is what plain sequential fetch already does.
+					-- jal is unconditional and can never mispredict.
+					-- The target is pc + imm and both are known here.
 					v_predict := false;
-					if v_decoded.opcode = "1101111" then
-						v_predict := true;                          -- jal
-					elsif v_decoded.opcode = "1100011" and v_decoded.imm(31) = '1' then
-						v_predict := true;                          -- backward branch
+					v_backward := false;
+					v_is_ret := false;
+					if v_decoded.opcode = "1100111" and v_decoded.rd = 0
+					   and v_decoded.rs1 = 1 then
+						-- jalr x0, 0(x1) is the standard return.
+						v_is_ret := true;
+					end if;
+
+					if v_decoded.opcode = "1101111" and v_decoded.rd = 1 then
+						-- a call: push the return address
+						ras(to_integer(ras_sp)) <= v_decoded.pc + 4;
+						ras_top <= v_decoded.pc + 4;
+						ras_sp <= ras_sp + 1;
+					elsif v_is_ret then
+						-- a return: the entry stays put, only the pointer moves
+						ras_sp <= ras_sp - 1;
+						ras_top <= ras(to_integer(ras_sp - 2));
+					end if;
+
+					if v_is_ret then
+						v_decoded.predicted_taken := '1';
+						v_decoded.pred_addr := ras_top;
+						loop_mode <= '0';
+						predict_addr <= ras_top;
+						predict_jump <= '1';
+					end if;
+
+					if v_decoded.opcode = "1101111" then -- jal
+						v_predict := true;
+						v_backward := (v_decoded.imm(31) = '1');
+					elsif v_decoded.opcode = "1100011" and v_decoded.imm(31) = '1' then -- branch backwards
+						v_predict := true;
+						v_backward := true;
 					end if;
 
 					if v_predict then
 						v_target := v_decoded.pc + v_decoded.imm;
 						v_decoded.predicted_taken := '1';
-						predict_addr <= v_target;
-						predict_jump <= '1';
-						-- same as instruction_jump, because
-						-- the fetch is being redirected the same way. 
-						next_instruction_valid <= '0';
-						instruction_jumped <= '1';
-						instruction_upper(0) <= v_target(2);
-					else
+
+						-- loop buffer
+						--
+						-- Words sit consecutively in the buffer, so the targets
+						-- index is just an offset from the current one. With
+						--     s = (byte offset of this instruction in its word) + imm
+						-- the target word is floor(s/8) words away and the target
+						-- instruction is at bit 2 of s mod 8. 
+						-- Only meaningful for a backwards target within 128 bytes;
+						-- anything further cannot be in an 8 word buffer anyway.
+						v_ok := false;
+						v_back := 0;
+						if v_backward and v_decoded.imm(31 downto 7) = C_IMM_FAR then -- backwards and <= 128byte offset? is v_backward even needed here since its signed
+							v_s := to_signed(4 * to_integer(ifq_idx), 10) + resize(signed(v_decoded.imm(7 downto 0)), 10);
+							-- floor division by 8, so an arithmetic shift
+							v_back := to_integer(-shift_right(v_s, 3));
+							v_occ := to_integer(ifq_wr - ifq_rd);
+
+							-- the slot must already hold this loop's words, and must
+							-- not be the one fetch is about to overwrite
+							if v_back >= 1 and (v_occ + v_back) <= (C_IF_DEPTH - 1) and (v_occ + v_back) <= to_integer(ifq_filled) then
+								v_ok := true;
+							end if;
+						end if;
+
+						if v_ok then
+							-- rewind: no flush, no refetch, no cost at all
+							ifq_rd <= ifq_rd - to_unsigned(v_back, C_IF_WIDTH + 1);
+							ifq_idx <= unsigned(std_logic_vector(v_s(2 downto 2)));
+							loop_mode <= '1'; -- tells fetch process to stop 
+						else
+							-- ordinary redirect => flush fetch but not instruction queue
+							loop_mode <= '0';
+							predict_addr <= v_target;
+							predict_jump <= '1';
+						end if;
+					elsif not v_is_ret then
 						v_decoded.predicted_taken := '0';
 					end if;
-					
+
 					iq(to_integer(iq_wr_ptr(C_IQ_WIDTH - 1 downto 0))) <= v_decoded;
 					iq_wr_ptr <= iq_wr_ptr + 1;
-					
-				end if; -- v_take and iq_full = '0'
+
+				end if;
 			end if; -- reset
 		end if; -- clk'rising_edge
 	end process;
@@ -481,6 +511,7 @@ begin
 			exec_start <= '0';
 			
 			if (i_Sync_nRst = '0') then
+				ras_sp_commit <= (others => '0');
 				iq_rd_ptr <= (others => '0');
 				mem_pending <= '0';
 				mem_is_load <= '0';
@@ -522,8 +553,7 @@ begin
 				end if;
 
 				if (mem_pending = '1' and mem_is_load = '1') or exec_pending = '1' then
-					-- A pending LOAD blocks everything. 
-					-- Includes the completion cycle, because the
+					-- A pending load blocks everything! Includes the completion cycle, because the
 					-- writeback owns the single write port.
 					null;
 
@@ -558,9 +588,11 @@ begin
 							when "1101111" =>   -- jal
 								v_result := v_execute.pc + 4;
 								v_wr_en  := true;
+								if v_execute.rd = 1 then
+									ras_sp_commit <= ras_sp_commit + 1;
+								end if;
 								-- decode always predicts jal taken and has already
-								-- redirected fetch, so there should be nothing to correct
-								-- but just in case
+								-- redirected fetch, so there is nothing to correct
 								if v_execute.predicted_taken = '0' then
 									jmp_addr         <= v_execute.pc + v_execute.imm;
 									instruction_jump <= '1';
@@ -571,8 +603,15 @@ begin
 								v_wr_en  := true;
 								v_addr    := v_rs1 + v_execute.imm;
 								v_addr(0) := '0';
-								jmp_addr         <= v_addr;
-								instruction_jump <= '1';
+								if v_execute.rd = 0 and v_execute.rs1 = 1 then
+									ras_sp_commit <= ras_sp_commit - 1;
+								end if;
+								-- the return stack may already have sent fetch to the
+								-- right place, in which case there is nothing to correct
+								if not (v_execute.predicted_taken = '1' and v_addr = v_execute.pred_addr) then
+									jmp_addr         <= v_addr;
+									instruction_jump <= '1';
+								end if;
 	
 							when "1100011" =>   -- B-type / branches
 								case v_execute.func3 is
@@ -584,7 +623,7 @@ begin
 									when "111"  => v_branch := (v_rs1 >= v_rs2);                    -- bgeu
 									when others => v_branch := false;
 								end case;
-								-- redirects if branch prediction was wrong
+								-- Only redirect when reality disagrees with the prediction
 								if v_branch /= (v_execute.predicted_taken = '1') then
 									if v_branch then
 										jmp_addr <= v_execute.pc + v_execute.imm;

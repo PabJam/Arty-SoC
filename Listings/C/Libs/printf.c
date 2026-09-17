@@ -1,28 +1,16 @@
-/* printf.c - freestanding formatted output for the RV32I softcore.
+/* printf.c - formatted output for RV32IM softcore.
  *
- * No libc, no FPU, and crucially NO HARDWARE DIVIDE. This core is RV32I with
- * no M extension, so every `/` or `%` on a variable becomes a call into
- * libgcc's __divsi3 / __modsi3, which is a 32-iteration shift-subtract loop.
- * Converting one 10-digit number that way costs ten of them.
- *
- * Decimal conversion here uses a shift-and-add reciprocal instead: udiv10()
- * below is branch-free apart from one correction and compiles to a handful of
- * shifts and adds. Hex, octal and binary are pure shifts.
+ * Freestanding, no libc, no FPU.
+ * Uses RV32IM hardware multiply/divide instructions (mul, mulh, divu, remu).
  *
  * Supported: %d %i %u %x %X %o %b %c %s %p %%
- *            flags  - 0 + space #
- *            width  number or *
- *            prec   .number or .*
- *            length h hh l z   (accepted and ignored: all 32-bit here)
+ *            flags   - 0 + space #
+ *            width   number or *
+ *            prec    .number or .*
+ *            length  h, hh, l, z, t (32-bit), ll, j (64-bit)
  *
- * NOT supported: %f %e %g (no FPU), %lld / %llu (no 64-bit paths).
- *
- * You must supply uart_putc():
- *
- *     void uart_putc(char c) {
- *         while (get_uart_fifo_full());
- *         write_reg(UART_BASE, (int)c);
- *     }
+ * Supply uart_putc():
+ *     void uart_putc(char c);
  */
 
 #include "printf.h"
@@ -31,35 +19,12 @@
 extern void uart_putc(char c);
 
 /* ---------------------------------------------------------------------- */
-/* divide by 10 with shifts and adds only                                  */
-/* ---------------------------------------------------------------------- */
-static unsigned int udiv10(unsigned int n)
-{
-    unsigned int q, r;
-
-    q = (n >> 1) + (n >> 2);       /* q ~= n * 0.75            */
-    q = q + (q >> 4);              /*      * 1.0625            */
-    q = q + (q >> 8);
-    q = q + (q >> 16);
-    q = q >> 3;                    /* q ~= n / 10              */
-
-    r = n - ((q << 3) + (q << 1)); /* r = n - q*10             */
-    return q + (r > 9);            /* correct the estimate     */
-}
-
-static unsigned int umod10(unsigned int n)
-{
-    unsigned int q = udiv10(n);
-    return n - ((q << 3) + (q << 1));
-}
-
-/* ---------------------------------------------------------------------- */
-/* output sinks                                                            */
+/* output sinks                                                           */
 /* ---------------------------------------------------------------------- */
 typedef struct {
-    char* buf;      /* 0 for the UART sink */
+    char* buf;      /* 0 for UART sink */
     unsigned int cap;
-    unsigned int len;      /* characters that would have been written */
+    unsigned int len;
 } sink_t;
 
 static void emit(sink_t* s, char c)
@@ -76,9 +41,9 @@ static void emit(sink_t* s, char c)
 }
 
 /* ---------------------------------------------------------------------- */
-/* integer to digits, written backwards into tmp                           */
+/* integer to digits (uses RV32IM hardware division / bit shifts)         */
 /* ---------------------------------------------------------------------- */
-static int digits(char* tmp, unsigned int v, unsigned int base, int upper)
+static int digits(char* tmp, unsigned long long v, unsigned int base, int upper)
 {
     const char* lo = "0123456789abcdef";
     const char* up = "0123456789ABCDEF";
@@ -93,28 +58,28 @@ static int digits(char* tmp, unsigned int v, unsigned int base, int upper)
     switch (base) {
     case 10: {
         while (v) {
-            tmp[n++] = (char)('0' + umod10(v));
-            v = udiv10(v);
+            tmp[n++] = (char)('0' + (v % 10ULL));
+            v /= 10ULL;
         }
         break;
     }
     case 16: {
         while (v) {
-            tmp[n++] = d[v & 15u];
+            tmp[n++] = d[v & 15ULL];
             v >>= 4;
         }
         break;
     }
     case 8: {
         while (v) {
-            tmp[n++] = (char)('0' + (v & 7u));
+            tmp[n++] = (char)('0' + (v & 7ULL));
             v >>= 3;
         }
         break;
     }
     case 2: {
         while (v) {
-            tmp[n++] = (char)('0' + (v & 1u));
+            tmp[n++] = (char)('0' + (v & 1ULL));
             v >>= 1;
         }
         break;
@@ -129,7 +94,7 @@ static int digits(char* tmp, unsigned int v, unsigned int base, int upper)
 }
 
 /* ---------------------------------------------------------------------- */
-/* core formatter                                                          */
+/* core formatter                                                         */
 /* ---------------------------------------------------------------------- */
 #define FL_LEFT  0x01
 #define FL_ZERO  0x02
@@ -146,15 +111,15 @@ static void pad(sink_t* s, char c, int n)
 
 static int vfmt(sink_t* s, const char* fmt, va_list ap)
 {
-    char tmp[34];
+    char tmp[66]; /* fits 64 binary digits + null/sign */
 
     while (*fmt) {
         int flags = 0, width = 0, prec = -1;
         unsigned int base = 10;
-        int upper = 0, isneg = 0, n, padlen, signlen;
+        int upper = 0, isneg = 0, is64 = 0, n, padlen, signlen;
         char sign = 0;
         const char* pre = "";
-        unsigned int uv = 0;
+        unsigned long long uv = 0;
         const char* str = 0;
         int slen = 0;
 
@@ -208,7 +173,7 @@ static int vfmt(sink_t* s, const char* fmt, va_list ap)
         }
         else {
             while (*fmt >= '0' && *fmt <= '9') {
-                width = (width << 3) + (width << 1) + (*fmt - '0');
+                width = width * 10 + (*fmt - '0');
                 fmt++;
             }
         }
@@ -226,38 +191,70 @@ static int vfmt(sink_t* s, const char* fmt, va_list ap)
             }
             else {
                 while (*fmt >= '0' && *fmt <= '9') {
-                    prec = (prec << 3) + (prec << 1) + (*fmt - '0');
+                    prec = prec * 10 + (*fmt - '0');
                     fmt++;
                 }
             }
         }
 
-        /* length modifiers: everything is 32-bit here, so just skip them */
+        /* length modifiers */
         while (*fmt == 'h' || *fmt == 'l' || *fmt == 'z' || *fmt == 'j' || *fmt == 't') {
+            if (*fmt == 'l') {
+                if (*(fmt + 1) == 'l') {
+                    is64 = 1;
+                    fmt += 2;
+                    continue;
+                }
+            }
+            else if (*fmt == 'j') {
+                is64 = 1; /* intmax_t */
+            }
             fmt++;
         }
 
         switch (*fmt) {
         case 'd':
         case 'i': {
-            int sv = va_arg(ap, int);
-            if (sv < 0) {
-                isneg = 1;
-                uv = (unsigned int)(-(sv + 1)) + 1u;
+            if (is64) {
+                long long sv = va_arg(ap, long long);
+                if (sv < 0) {
+                    isneg = 1;
+                    uv = (unsigned long long)(-(sv + 1)) + 1ULL;
+                }
+                else {
+                    uv = (unsigned long long)sv;
+                }
             }
             else {
-                uv = (unsigned int)sv;
+                int sv = va_arg(ap, int);
+                if (sv < 0) {
+                    isneg = 1;
+                    uv = (unsigned long long)(unsigned int)(-(sv + 1)) + 1ULL;
+                }
+                else {
+                    uv = (unsigned long long)(unsigned int)sv;
+                }
             }
             base = 10;
             break;
         }
         case 'u': {
-            uv = va_arg(ap, unsigned int);
+            if (is64) {
+                uv = va_arg(ap, unsigned long long);
+            }
+            else {
+                uv = va_arg(ap, unsigned int);
+            }
             base = 10;
             break;
         }
         case 'x': {
-            uv = va_arg(ap, unsigned int);
+            if (is64) {
+                uv = va_arg(ap, unsigned long long);
+            }
+            else {
+                uv = va_arg(ap, unsigned int);
+            }
             base = 16;
             if (flags & FL_HASH) {
                 pre = "0x";
@@ -265,7 +262,12 @@ static int vfmt(sink_t* s, const char* fmt, va_list ap)
             break;
         }
         case 'X': {
-            uv = va_arg(ap, unsigned int);
+            if (is64) {
+                uv = va_arg(ap, unsigned long long);
+            }
+            else {
+                uv = va_arg(ap, unsigned int);
+            }
             base = 16;
             upper = 1;
             if (flags & FL_HASH) {
@@ -274,7 +276,12 @@ static int vfmt(sink_t* s, const char* fmt, va_list ap)
             break;
         }
         case 'o': {
-            uv = va_arg(ap, unsigned int);
+            if (is64) {
+                uv = va_arg(ap, unsigned long long);
+            }
+            else {
+                uv = va_arg(ap, unsigned int);
+            }
             base = 8;
             if (flags & FL_HASH) {
                 pre = "0";
@@ -282,7 +289,12 @@ static int vfmt(sink_t* s, const char* fmt, va_list ap)
             break;
         }
         case 'b': {
-            uv = va_arg(ap, unsigned int);
+            if (is64) {
+                uv = va_arg(ap, unsigned long long);
+            }
+            else {
+                uv = va_arg(ap, unsigned int);
+            }
             base = 2;
             if (flags & FL_HASH) {
                 pre = "0b";
@@ -290,11 +302,11 @@ static int vfmt(sink_t* s, const char* fmt, va_list ap)
             break;
         }
         case 'p': {
-            uv = va_arg(ap, unsigned int);
+            uv = (unsigned long long)(unsigned long)va_arg(ap, void*);
             base = 16;
             pre = "0x";
             if (prec < 0) {
-                prec = 8;
+                prec = (int)(sizeof(void*) * 2);
             }
             break;
         }
@@ -403,7 +415,7 @@ static int vfmt(sink_t* s, const char* fmt, va_list ap)
 }
 
 /* ---------------------------------------------------------------------- */
-/* public entry points                                                     */
+/* public entry points                                                    */
 /* ---------------------------------------------------------------------- */
 int printf(const char* fmt, ...)
 {
