@@ -13,10 +13,10 @@ if %errorlevel% neq 0 (
     echo startup.s compilation failed!  
     exit /b 1
 )
-echo Compiling Fibonacci.c...
-riscv-none-elf-gcc.exe -march=rv32im -mabi=ilp32 -ffreestanding -Wall -Wextra -g -ffunction-sections -fdata-sections -O2 -ID:\delete_me\Arty-SoC\Listings\C\Libs -c D:\delete_me\Arty-SoC\Listings\C\Fibonacci.c -o D:\delete_me\Arty-SoC\Listings\Build\Fibonacci.o
+echo Compiling BenchMarks.c...
+riscv-none-elf-gcc.exe -march=rv32im -mabi=ilp32 -ffreestanding -Wall -Wextra -g -ffunction-sections -fdata-sections -O2 -ID:\delete_me\Arty-SoC\Listings\C\Libs -c D:\delete_me\Arty-SoC\Listings\C\BenchMarks.c -o D:\delete_me\Arty-SoC\Listings\Build\BenchMarks.o
 if %errorlevel% neq 0 (
-    echo Fibonacci.c compilation failed!  
+    echo BenchMarks.c compilation failed!  
     exit /b 1
 )
 echo Compiling bench.c...
@@ -56,14 +56,14 @@ if %errorlevel% neq 0 (
     exit /b 1
 )
 echo Linking...
-riscv-none-elf-gcc.exe -march=rv32im -mabi=ilp32 -nostdlib -Wl,--gc-sections -Wl,--no-warn-rwx-segments -Wl,-Map=D:\delete_me\Arty-SoC\Listings\Build\Fibonacci.map -T D:\delete_me\Arty-SoC\Listings\Build\linker.ld -o D:\delete_me\Arty-SoC\Listings\Build\Fibonacci.elf D:\delete_me\Arty-SoC\Listings\Build\startup.o D:\delete_me\Arty-SoC\Listings\Build\Fibonacci.o D:\delete_me\Arty-SoC\Listings\Build\bench.o D:\delete_me\Arty-SoC\Listings\Build\ddr_check.o D:\delete_me\Arty-SoC\Listings\Build\heap.o D:\delete_me\Arty-SoC\Listings\Build\Peripherals.o D:\delete_me\Arty-SoC\Listings\Build\printf.o D:\delete_me\Arty-SoC\Listings\Build\uart_glue.o -lgcc
+riscv-none-elf-gcc.exe -march=rv32im -mabi=ilp32 -nostdlib -Wl,--gc-sections -Wl,--no-warn-rwx-segments -Wl,-Map=D:\delete_me\Arty-SoC\Listings\Build\BenchMarks.map -T D:\delete_me\Arty-SoC\Listings\Build\linker.ld -o D:\delete_me\Arty-SoC\Listings\Build\BenchMarks.elf D:\delete_me\Arty-SoC\Listings\Build\startup.o D:\delete_me\Arty-SoC\Listings\Build\BenchMarks.o D:\delete_me\Arty-SoC\Listings\Build\bench.o D:\delete_me\Arty-SoC\Listings\Build\ddr_check.o D:\delete_me\Arty-SoC\Listings\Build\heap.o D:\delete_me\Arty-SoC\Listings\Build\Peripherals.o D:\delete_me\Arty-SoC\Listings\Build\printf.o D:\delete_me\Arty-SoC\Listings\Build\uart_glue.o -lgcc
 if %errorlevel% neq 0 (
     echo Linking failed!
     exit /b 1
 )
-riscv-none-elf-objcopy.exe -O binary D:\delete_me\Arty-SoC\Listings\Build\Fibonacci.elf D:\delete_me\Arty-SoC\Listings\Build\Fibonacci.bin
+riscv-none-elf-objcopy.exe -O binary D:\delete_me\Arty-SoC\Listings\Build\BenchMarks.elf D:\delete_me\Arty-SoC\Listings\Build\BenchMarks.bin
 echo ========================================
 echo Build complete!
 echo ========================================
-riscv-none-elf-objdump.exe -d -S D:\delete_me\Arty-SoC\Listings\Build\Fibonacci.elf > D:\delete_me\Arty-SoC\Listings\Build\Fibonacci.dis
-riscv-none-elf-size.exe D:\delete_me\Arty-SoC\Listings\Build\Fibonacci.elf
+riscv-none-elf-objdump.exe -d -S D:\delete_me\Arty-SoC\Listings\Build\BenchMarks.elf > D:\delete_me\Arty-SoC\Listings\Build\BenchMarks.dis
+riscv-none-elf-size.exe D:\delete_me\Arty-SoC\Listings\Build\BenchMarks.elf

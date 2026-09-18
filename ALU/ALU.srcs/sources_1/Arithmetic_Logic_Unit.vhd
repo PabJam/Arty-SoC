@@ -343,7 +343,7 @@ begin
 			elsif predict_jump = '1' then
 				-- only the fetch buffer is stale. Instructions already decoded sit
 				-- before the branch in program order and stay valid, so the decoded
-				-- queue is NOT flushed here.
+				-- queue is not flushed here.
 				ifq_rd <= (others => '0');
 				ifq_idx <= predict_addr(2 downto 2);
 
@@ -391,7 +391,7 @@ begin
 							v_decoded.imm := unsigned(resize(v_immediate_i, 32));
 					end case;
 					
-					-- STATIC BRANCH PREDICTION
+					-- static branch prediction
 					-- A backward conditional branch is essentially always a loop, so
 					-- branch predicted. A forward one usually skips an if body, so prediction: branch
 					-- not taken, which is what plain sequential fetch already does.
@@ -448,7 +448,7 @@ begin
 						-- anything further cannot be in an 8 word buffer anyway.
 						v_ok := false;
 						v_back := 0;
-						if v_backward and v_decoded.imm(31 downto 7) = C_IMM_FAR then -- backwards and <= 128byte offset? is v_backward even needed here since its signed
+						if v_decoded.imm(31 downto 7) = C_IMM_FAR then -- if the higher bits are all 1 it means the offset is backwards and <= 128byte
 							v_s := to_signed(4 * to_integer(ifq_idx), 10) + resize(signed(v_decoded.imm(7 downto 0)), 10);
 							-- floor division by 8, so an arithmetic shift
 							v_back := to_integer(-shift_right(v_s, 3));
@@ -591,8 +591,8 @@ begin
 								if v_execute.rd = 1 then
 									ras_sp_commit <= ras_sp_commit + 1;
 								end if;
-								-- decode always predicts jal taken and has already
-								-- redirected fetch, so there is nothing to correct
+								
+								-- should never be '0' since jal always predicts but to be safe
 								if v_execute.predicted_taken = '0' then
 									jmp_addr         <= v_execute.pc + v_execute.imm;
 									instruction_jump <= '1';

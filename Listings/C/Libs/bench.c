@@ -258,10 +258,30 @@ static void bench_copy(void)
 /* higher level workloads                                                    */
 /* ------------------------------------------------------------------------ */
 
-static unsigned int fib(unsigned int n)
+__attribute__((naked, noinline)) static unsigned int fib(unsigned int n)
 {
-    if (n < 2u) { return n; }
-    return fib(n - 1u) + fib(n - 2u);
+    __asm__ volatile (
+        "li      a5, 1\n\t"
+        "bgtu    a0, a5, 1f\n\t"
+        "ret\n"
+        "1:\n\t"
+        "addi    sp, sp, -16\n\t"
+        "sw      ra, 12(sp)\n\t"
+        "sw      s0, 8(sp)\n\t"
+        "sw      s1, 4(sp)\n\t"
+        "mv      s0, a0\n\t"
+        "addi    a0, s0, -1\n\t"
+        "jal     ra, fib\n\t"
+        "mv      s1, a0\n\t"
+        "addi    a0, s0, -2\n\t"
+        "jal     ra, fib\n\t"
+        "add     a0, s1, a0\n\t"
+        "lw      ra, 12(sp)\n\t"
+        "lw      s0, 8(sp)\n\t"
+        "lw      s1, 4(sp)\n\t"
+        "addi    sp, sp, 16\n\t"
+        "ret\n"
+        );
 }
 
 static void bench_workloads(void)
